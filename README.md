@@ -98,6 +98,6 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
 * Remove your local feature branch if you are done.
 
   ```sh
-  git branch -d <subteam-feature>
+  git branch -d <feature>
   ```
 
