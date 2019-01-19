@@ -1,6 +1,6 @@
 # SDP4
 
-[![Build](https://travis-ci.com/jackhorse1000/SDP4.svg?token=si3xyar1F3kfFc4FdfaY&branch=develop)]()
+[![Build Status](https://travis-ci.com/jackhorse1000/SDP4.svg?token=UM9Cz1ccfUozpwDkW8ip&branch=develop)](https://travis-ci.com/jackhorse1000/SDP4)
 
 We are designing a robot that can climb-stairs while carrying objects.
 
@@ -9,7 +9,7 @@ We are designing a robot that can climb-stairs while carrying objects.
 For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-git-branching-model/) workflow. Instead of a single master branch, this workflow uses two branches to record the history of the project. The master branch stores the official release history, and the develop branch serves as an integration branch for features. Each new feature should reside in its own branch, which can be pushed to the central repository for backup/collaboration. But, instead of branching off of master, feature branches use develop as their parent branch. When a feature is complete, it gets merged back into develop. Features should never interact directly with master.
 
 <p align="center">
-  <img width="600"  src="./gitflow.png" />
+  <img width="600" src="images/gitflow.png" />
 </p>
 
 ### Rules
