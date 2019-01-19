@@ -1,5 +1,7 @@
 # SDP4
 
+[![Build](https://travis-ci.com/jackhorse1000/SDP4.svg?token=si3xyar1F3kfFc4FdfaY&branch=develop)]()
+
 We are designing a robot that can climb-stairs while carrying objects.
 
 ## Git Workflow
