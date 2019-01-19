@@ -1,0 +1,11 @@
+language: python
+python: "3.7-dev"
+
+install:
+  - pip install pipenv
+  - PIPENV_VERBOSITY=-1 pipenv install
+  - pip install -e .
+
+script:
+  - pylint src
+  - pytest
