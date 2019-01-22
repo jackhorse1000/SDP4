@@ -1,0 +1,25 @@
+{
+  "name": "sdp4",
+  "version": "1.0.0",
+  "description": "[![Build Status](https://travis-ci.com/jackhorse1000/SDP4.svg?token=UM9Cz1ccfUozpwDkW8ip&branch=develop)](https://travis-ci.com/jackhorse1000/SDP4)",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jackhorse1000/SDP4.git"
+  },
+  "author": "Team Arva",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/jackhorse1000/SDP4/issues"
+  },
+  "homepage": "https://github.com/jackhorse1000/SDP4#readme",
+  "dependencies": {
+    "ws": "^6.1.2"
+  }
+}

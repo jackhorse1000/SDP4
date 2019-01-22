@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>Team Arva</title>
+        <link rel="stylesheet" href="/assets/main.css?v=CSS_VERSION" />
+    </head>
+    <body>
+        <h1>Team Arva</h1>
+        <input type="checkbox" id="checkbox" value="1" />
+
+        <script type="text/javascript">
+            const cb = document.getElementById("checkbox");
+            const socket = new WebSocket(`ws://${window.location.host}/sdp4-ws`);
+
+            cb.addEventListener("input", () => {
+                console.log(cb.value, cb.checked);
+                socket.send(cb.checked ? "1" : "0");
+            });
+        </script>
+    </body>
+</html>
