@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "07afd9b1164d3c6d59ac6144b9ae81bba1bdecfe758a99d7801defad4606201f"
+            "sha256": "141199c4cbbf58c635b5ddc26bd4ceddd18d6193e53b7ac9cdd5120dd9fa283b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -93,6 +93,14 @@
                 "sha256:fe7a7cae1ccb57d33952113ff4fa1bc5f879963600ed74918f1236e212ee50b9"
             ],
             "version": "==5.0.0"
+        },
+        "phidget22": {
+            "hashes": [
+                "sha256:130d15b6897b97259771f44359a7fcf4afb44bf0b29b0d64b8da6ee9af0a396f",
+                "sha256:c340eafdc91bade9001571b072ed4624b6de7b7e054d83f0e9d05f737e1a6447"
+            ],
+            "index": "pypi",
+            "version": "==1.0.0"
         },
         "pluggy": {
             "hashes": [
