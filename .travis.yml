@@ -7,5 +7,5 @@ install:
   - pip install -e .
 
 script:
-  - find src -type f -name '*.py' | xargs pipenv run pylint
+  - pylint src
   - pytest
