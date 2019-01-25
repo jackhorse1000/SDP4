@@ -9,6 +9,7 @@ verify_ssl = true
 pylint = "*"
 pytest = "*"
 phidget22 = "*"
+smbus2 = "*"
 
 [requires]
 python_version = "3.7"
