@@ -8,10 +8,16 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/connect_btn"
+        android:id="@+id/connect_bluetooth_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Connect a new robot" />
+        android:text="Bluetooth Connect a new robot" />
+
+    <Button
+        android:id="@+id/connect_wifi_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Wifi Connect a new robot" />
 
     <Button
         android:id="@+id/technical_btn"
