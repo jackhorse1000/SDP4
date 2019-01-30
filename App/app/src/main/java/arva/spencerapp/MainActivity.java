@@ -20,6 +20,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        createListeners();
+
+    }
+
+    public void createListeners(){
+
         connectBluetoothRobotBtn = (Button) findViewById(R.id.connect_bluetooth_btn);
 
         connectBluetoothRobotBtn.setOnClickListener(new View.OnClickListener() {
@@ -51,12 +57,15 @@ public class MainActivity extends AppCompatActivity {
                 goToDemoActivity();
             }
         });
-    }
 
+
+    }
     private void goToNavigationActivity() {
         Intent navigationIntent = new Intent(MainActivity.this, NavigationActivity.class);
         startActivity(navigationIntent);
     }
+
+
 
     private void goToDemoActivity() {
         Intent demoIntent = new Intent(MainActivity.this, DemoActivity.class);
