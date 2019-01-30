@@ -1,5 +1,6 @@
 package arva.spencerapp;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -20,9 +21,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        connectBluetoothRobotBtn = (Button) findViewById(R.id.connect_bluetooth_btn);
+        connectBluetoothRobotBtn = findViewById(R.id.connect_bluetooth_btn);
 
         connectBluetoothRobotBtn.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("ShowToast")
             @Override
             public void onClick(View v) {
                 // Try and connect to robot, then go to Navigation Activity
@@ -39,6 +41,16 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                 }
 
+//                goToNavigationActivity();
+            }
+        });
+
+        connectWifiRobotBtn = findViewById(R.id.connect_wifi_btn);
+
+        connectWifiRobotBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Try and connect to robot, then go to Navigation Activity
                 goToNavigationActivity();
             }
         });
@@ -62,4 +74,5 @@ public class MainActivity extends AppCompatActivity {
         Intent demoIntent = new Intent(MainActivity.this, DemoActivity.class);
         startActivity(demoIntent);
     }
+
 }
