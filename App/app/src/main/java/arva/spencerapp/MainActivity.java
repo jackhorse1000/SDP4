@@ -33,39 +33,32 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Try and connect to robot, then go to Navigation Activity
                 BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
                 if (mBluetoothAdapter == null) {
                     // Device doesn't support Bluetooth
                     Toast.makeText(getApplicationContext(), "Phone does not support bluetooth", Toast.LENGTH_LONG);
                     return;
                 }
-
                 if (!mBluetoothAdapter.isEnabled()) {
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                 }
-
                 goToNavigationActivity();
             }
         });
 
         demoBtn = (Button) findViewById(R.id.demo_btn);
-
         demoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 goToDemoActivity();
             }
         });
-
-
     }
+
     private void goToNavigationActivity() {
         Intent navigationIntent = new Intent(MainActivity.this, NavigationActivity.class);
         startActivity(navigationIntent);
     }
-
-
 
     private void goToDemoActivity() {
         Intent demoIntent = new Intent(MainActivity.this, DemoActivity.class);
