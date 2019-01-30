@@ -1,20 +1,19 @@
 package arva.spencerapp;
 
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 public class MainActivity extends AppCompatActivity {
 
+    private final static int REQUEST_ENABLE_BT = 1;
     private Button connectBluetoothRobotBtn;
     private Button connectWifiRobotBtn;
     private Button demoBtn;
-    private final static int REQUEST_ENABLE_BT = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,52 +22,38 @@ public class MainActivity extends AppCompatActivity {
 
         connectBluetoothRobotBtn = findViewById(R.id.connect_bluetooth_btn);
         createListeners();
-
     }
 
-    public void createListeners(){
+    public void createListeners() {
 
         connectBluetoothRobotBtn = findViewById(R.id.connect_bluetooth_btn);
 
-        connectBluetoothRobotBtn.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("ShowToast")
-            @Override
-            public void onClick(View v) {
-                // Try and connect to robot, then go to Navigation Activity
-                BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                if (mBluetoothAdapter == null) {
-                    // Device doesn't support Bluetooth
-                    Toast.makeText(getApplicationContext(), "Phone does not support bluetooth", Toast.LENGTH_LONG);
-                    return;
-                }
-                if (!mBluetoothAdapter.isEnabled()) {
-                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-                }
+        connectBluetoothRobotBtn.setOnClickListener(v -> {
+            // Try and connect to robot, then go to Navigation Activity
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-//                goToNavigationActivity();
+            if (mBluetoothAdapter == null) {
+                // Device doesn't support Bluetooth
+                Toast.makeText(getApplicationContext(), "Phone does not support bluetooth", Toast.LENGTH_LONG).show();
+                return;
             }
+
+            if (!mBluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            }
+
+            goToNavigationActivity();
         });
 
         connectWifiRobotBtn = findViewById(R.id.connect_wifi_btn);
-
-        connectWifiRobotBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Try and connect to robot, then go to Navigation Activity
-                goToNavigationActivity();
-            }
+        connectWifiRobotBtn.setOnClickListener(v -> {
+            // Try and connect to robot, then go to Navigation Activity
+            goToNavigationActivity();
         });
 
-        demoBtn = (Button) findViewById(R.id.demo_btn);
-        demoBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToDemoActivity();
-            }
-        });
-    }
-
+        demoBtn = findViewById(R.id.demo_btn);
+        demoBtn.setOnClickListener(v -> goToDemoActivity());
     }
 
     private void goToNavigationActivity() {
