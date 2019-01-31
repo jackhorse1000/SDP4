@@ -1,14 +1,18 @@
 package arva.spencerapp;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button connectRobotBtn;
+    private final static int REQUEST_ENABLE_BT = 1;
+    private Button connectBluetoothRobotBtn;
+    private Button connectWifiRobotBtn;
     private Button demoBtn;
 
     @Override
@@ -16,24 +20,51 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        connectRobotBtn = (Button) findViewById(R.id.connect_btn);
+        connectBluetoothRobotBtn = findViewById(R.id.connect_bluetooth_btn);
+        createListeners();
+    }
 
-        connectRobotBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Try and connect to robot, then go to Navigation Activity
-                goToNavigationActivity();
+    public void createListeners() {
+
+        connectBluetoothRobotBtn = findViewById(R.id.connect_bluetooth_btn);
+        connectBluetoothRobotBtn.setOnClickListener(v -> {
+            // Try and connect to robot, then go to Navigation Activity
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+            if (mBluetoothAdapter == null) {
+                // Device doesn't support Bluetooth
+                Toast.makeText(getApplicationContext(), "Phone does not support bluetooth", Toast.LENGTH_LONG).show();
+                return;
             }
+
+            if (!mBluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            }
+
+            goToNavigationActivity();
         });
 
-        demoBtn = (Button) findViewById(R.id.demo_btn);
+        connectWifiRobotBtn = findViewById(R.id.connect_wifi_btn);
+        connectWifiRobotBtn.setOnClickListener(v -> {
+            // Try and connect to robot, then go to Navigation Activity
+            TCPClient.EXECUTOR.submit(() -> {
+                new TCPClient(new TCPClient.MessageCallback() {
+                    @Override
+                    public void connectionStateChanged(TCPClient.ConnectionState state) {
+                    }
 
-        demoBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToDemoActivity();
-            }
+                    @Override
+                    public void messageReceived(String message) {
+                    }
+                }).run();
+            });
+
+            goToNavigationActivity();
         });
+
+        demoBtn = findViewById(R.id.demo_btn);
+        demoBtn.setOnClickListener(v -> goToDemoActivity());
     }
 
     private void goToNavigationActivity() {
@@ -45,4 +76,5 @@ public class MainActivity extends AppCompatActivity {
         Intent demoIntent = new Intent(MainActivity.this, DemoActivity.class);
         startActivity(demoIntent);
     }
+
 }
