@@ -50,55 +50,55 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Forward"/>
+        android:text="forward"/>
 
     <Button
         android:id="@+id/backward_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Backward"/>
+        android:text="backward"/>
 
     <Button
         android:id="@+id/left_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Turn Left"/>
+        android:text="turn left"/>
 
     <Button
         android:id="@+id/right_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Turn Right  "/>
+        android:text="turn right"/>
 
     <Button
         android:id="@+id/lift_back_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Lift Back"/>
+        android:text="lift back"/>
 
     <Button
         android:id="@+id/lift_front_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Lift Front"/>
+        android:text="lift front"/>
 
     <Button
         android:id="@+id/lower_back_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Lower Back"/>
+        android:text="lower back"/>
 
     <Button
         android:id="@+id/lower_front_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Lower Front"/>
+        android:text="lower front"/>
 
 </LinearLayout>

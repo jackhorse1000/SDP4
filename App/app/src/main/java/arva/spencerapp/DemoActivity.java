@@ -61,6 +61,10 @@ public class DemoActivity extends AppCompatActivity {
         liftFrontBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(liftFrontBtn.getText().equals("lift front"))
+                    liftFrontBtn.setText("Stop lift front");
+                else
+                    liftFrontBtn.setText("lift front");
                 TCPClient.EXECUTOR.submit(()->{
                     tcpClient.sendMessage("lift front");
                 });
@@ -71,6 +75,10 @@ public class DemoActivity extends AppCompatActivity {
         liftBackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(liftBackBtn.getText().equals("lift back"))
+                    liftBackBtn.setText("Stop lift back");
+                else
+                    liftBackBtn.setText("lift back");
                 TCPClient.EXECUTOR.submit(()->{
                     tcpClient.sendMessage("lift back");
                 });
@@ -81,6 +89,10 @@ public class DemoActivity extends AppCompatActivity {
         lowerFrontBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(lowerFrontBtn.getText().equals("lower front"))
+                    lowerFrontBtn.setText("Stop lower front");
+                else
+                    lowerFrontBtn.setText("lower front");
                 TCPClient.EXECUTOR.submit(()->{
                     tcpClient.sendMessage("lower front");
                 });
@@ -91,6 +103,10 @@ public class DemoActivity extends AppCompatActivity {
         lowerBackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(lowerBackBtn.getText().equals("lower back"))
+                    lowerBackBtn.setText("Stop lower back");
+                else
+                    lowerBackBtn.setText("lower back");
                 TCPClient.EXECUTOR.submit(()->{
                     tcpClient.sendMessage("lower back");
                 });
@@ -101,6 +117,10 @@ public class DemoActivity extends AppCompatActivity {
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(backBtn.getText().equals("backward"))
+                    backBtn.setText("Stop backward");
+                else
+                    backBtn.setText("backward");
                 TCPClient.EXECUTOR.submit(()->{
                     tcpClient.sendMessage("back");
                 });
@@ -111,6 +131,10 @@ public class DemoActivity extends AppCompatActivity {
         forwardBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(forwardBtn.getText().equals("forward"))
+                    forwardBtn.setText("stop forward");
+                else
+                    forwardBtn.setText("forward");
                 TCPClient.EXECUTOR.submit(()->{
                     tcpClient.sendMessage("forward");
                 });
@@ -121,6 +145,10 @@ public class DemoActivity extends AppCompatActivity {
         leftBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(leftBtn.getText().equals("turn left"))
+                    leftBtn.setText("stop turn left");
+                else
+                    leftBtn.setText("turn left");
                 TCPClient.EXECUTOR.submit(()->{
                     tcpClient.sendMessage("left");
                 });
@@ -131,6 +159,10 @@ public class DemoActivity extends AppCompatActivity {
         rightBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(rightBtn.getText().equals("turn right"))
+                    rightBtn.setText("stop turn right");
+                else
+                    rightBtn.setText("turn right");
                 TCPClient.EXECUTOR.submit(()->{
                     tcpClient.sendMessage("right");
                 });
