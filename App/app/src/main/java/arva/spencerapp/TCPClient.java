@@ -4,25 +4,29 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class TCPClient {
-    public static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
     private static final String TAG = TCPClient.class.getName();
+
+    public static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+
     private static final String IP = "palmon";
     private static final int PORT = 1050;
+
+    private BufferedWriter out;
     private final MessageCallback listener;
-    private String incomingMessage;
-    private BufferedReader in;
-    private PrintWriter out;
-    private boolean mRun = false;
+    private boolean running = false;
 
     public TCPClient(MessageCallback listener) {
+        Objects.requireNonNull(listener, "listener cannot be null");
         this.listener = listener;
     }
 
@@ -32,9 +36,14 @@ public class TCPClient {
      * @param message Message passed as an argument and sent via OutputStream object.
      */
     public void sendMessage(String message) {
-        if (out != null && !out.checkError()) {
-            out.println(message);
-            out.flush();
+        if (out != null) {
+            try {
+                out.write(message + "\n");
+                out.flush();
+            } catch (IOException e) {
+                Log.e(TAG, "Unable to send message", e);
+            }
+
             Log.d(TAG, "Sent Message: " + message);
         }
     }
@@ -43,82 +52,40 @@ public class TCPClient {
      * Public method for stopping the TCPClient object ( and finalizing it after that ) from AsyncTask
      */
     public void stopClient() {
-        Log.d(TAG, "Client stopped!");
-        mRun = false;
+        Log.d(TAG, "Stopping client");
+        running = false;
     }
 
     void run() {
+        running = true;
+        Log.d(TAG, "Connecting");
+        listener.connectionStateChanged(ConnectionState.CONNECTING);
 
-        mRun = true;
+        // Connect the socket, and input/output streams
+        try (Socket socket = new Socket(IP, PORT);
+             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8))
+        ) {
+            this.out = out;
 
-        try {
-            Log.d(TAG, "Connecting...");
+            Log.d(TAG, "Connected");
+            listener.connectionStateChanged(ConnectionState.CONNECTED);
 
-
-            // todo update UI showing connecting
-
-//            InetAddress serverAddress = InetAddress.getByName(IP);
-
-            /**
-             * Here the socket is created with hardcoded port.
-             * Also the port is given in IpGetter class.
-             */
-            Socket socket = new Socket(IP, PORT);
-
-            try {
-
-                // Create PrintWriter object for sending messages to server.
-                out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-
-                //Create BufferedReader object for receiving messages from server.
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-                Log.d(TAG, "In/Out created");
-
-                //Sending message with command specified by AsyncTask
-//                this.sendMessage(command); // todo send a test command
-
-                // todo update UI
-//                mHandler.sendEmptyMessageDelayed(MainActivity.SENDING,2000);
-
-                //Listen for the incoming messages while mRun = true
-                while (mRun) {
-                    incomingMessage = in.readLine();
-                    Log.d(TAG, "Waiting to receive a message");
-                    break;
-//                    if (incomingMessage != null && listener != null) {
-//
-//                        /**
-//                         * Incoming message is passed to MessageCallback object.
-//                         * Next it is retrieved by AsyncTask and passed to onPublishProgress method.
-//                         *
-//                         */
-//                        listener.callbackMessageReceiver(incomingMessage);
-//                    }
-//                    incomingMessage = null;
-                }
-
-                Log.d(TAG, "Received Message: " + incomingMessage);
-
-            } catch (Exception e) {
-
-                Log.d(TAG, "Error ", e);
-                // todo update UI there has been an error
-            } finally {
-                out.flush();
-                out.close();
-                in.close();
-                socket.close();
-                // todo update UI socket has been closed
-                Log.d(TAG, "Socket Closed");
+            //Listen for the incoming messages while mRun = true
+            while (running) {
+                Log.d(TAG, "Waiting to receive a message");
+                String message = in.readLine();
+                Log.d(TAG, "Received " + message);
+                listener.messageReceived(message);
             }
-
         } catch (Exception e) {
-
             Log.d(TAG, "Error", e);
-            // todo update UI there has been an error
-        }
+        } finally {
+            Log.d(TAG, "Closed");
+            listener.connectionStateChanged(ConnectionState.CLOSED);
 
+            this.out = null;
+        }
     }
 
     /**
@@ -127,7 +94,13 @@ public class TCPClient {
      * @return true if is running, false if is not running
      */
     public boolean isRunning() {
-        return mRun;
+        return running;
+    }
+
+    public enum ConnectionState {
+        CONNECTING,
+        CONNECTED,
+        CLOSED
     }
 
     /**
@@ -135,10 +108,17 @@ public class TCPClient {
      */
     public interface MessageCallback {
         /**
+         * Fired when the connection state is changed
+         *
+         * @param state The current connection state.
+         */
+        void connectionStateChanged(ConnectionState state);
+
+        /**
          * Method overriden in AsyncTask 'doInBackground' method while creating the TCPClient object.
          *
          * @param message Received message from server app.
          */
-        void callbackMessageReceiver(String message);
+        void messageReceived(String message);
     }
 }

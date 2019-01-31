@@ -10,7 +10,6 @@ public class TcpAsyncTask extends AsyncTask<String, String, TCPClient> {
     private Handler mHandler;
     private TCPClient tcpClient;
 
-
     public TcpAsyncTask(Handler mHandler) {
         this.mHandler = mHandler;
     }
@@ -20,8 +19,15 @@ public class TcpAsyncTask extends AsyncTask<String, String, TCPClient> {
         Log.d(TAG, "In do in background");
 
         try {
-            tcpClient = new TCPClient(message -> {
-                publishProgress(message); // todo callback for message recieved
+            tcpClient = new TCPClient(new TCPClient.MessageCallback() {
+                @Override
+                public void connectionStateChanged(TCPClient.ConnectionState state) {
+                }
+
+                @Override
+                public void messageReceived(String message) {
+                    publishProgress(message);
+                }
             });
 
         } catch (NullPointerException e) {

@@ -49,7 +49,15 @@ public class MainActivity extends AppCompatActivity {
         connectWifiRobotBtn.setOnClickListener(v -> {
             // Try and connect to robot, then go to Navigation Activity
             TCPClient.EXECUTOR.submit(() -> {
-                new TCPClient(null).run();
+                new TCPClient(new TCPClient.MessageCallback() {
+                    @Override
+                    public void connectionStateChanged(TCPClient.ConnectionState state) {
+                    }
+
+                    @Override
+                    public void messageReceived(String message) {
+                    }
+                }).run();
             });
 
             goToNavigationActivity();
