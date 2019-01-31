@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -16,9 +17,9 @@ import java.util.concurrent.Executors;
 public class TCPClient {
     private static final String TAG = TCPClient.class.getName();
 
-    public static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    public static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
-    private static final String IP = "palmon";
+    private static final String IP = "192.168.105.133";
     private static final int PORT = 1050;
 
     private BufferedWriter out;
@@ -45,6 +46,8 @@ public class TCPClient {
             }
 
             Log.d(TAG, "Sent Message: " + message);
+        } else {
+            Log.e(TAG, "Not connected. Unable to send message");
         }
     }
 
@@ -60,6 +63,7 @@ public class TCPClient {
         running = true;
         Log.d(TAG, "Connecting");
         listener.connectionStateChanged(ConnectionState.CONNECTING);
+//        InetAddress serverAddress = InetAddress.getByName(IP);
 
         // Connect the socket, and input/output streams
         try (Socket socket = new Socket(IP, PORT);
@@ -79,7 +83,7 @@ public class TCPClient {
                 listener.messageReceived(message);
             }
         } catch (Exception e) {
-            Log.d(TAG, "Error", e);
+            Log.e(TAG, "Error", e);
         } finally {
             Log.d(TAG, "Closed");
             listener.connectionStateChanged(ConnectionState.CLOSED);
