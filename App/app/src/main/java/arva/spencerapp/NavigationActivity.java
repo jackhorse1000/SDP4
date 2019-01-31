@@ -15,7 +15,7 @@ public class NavigationActivity extends AppCompatActivity implements Handler.Cal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
 
-        new TcpAsyncTask(new Handler(this)).execute("");
+        // new TcpAsyncTask(new Handler(this)).execute("");
     }
 
 

@@ -1,52 +1,48 @@
 package arva.spencerapp;
 
-import android.os.Handler;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TCPClient {
-    private final String IP = "palmon";
-    private final int PORT = 1050;
-
-    private static final String TAG = "TCPClient";
-    private final Handler mHandler;
+    public static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final String TAG = TCPClient.class.getName();
+    private static final String IP = "palmon";
+    private static final int PORT = 1050;
+    private final MessageCallback listener;
     private String incomingMessage;
-    BufferedReader in;
-    PrintWriter out;
-    private MessageCallback listener = null ; // todo need to create this
+    private BufferedReader in;
+    private PrintWriter out;
     private boolean mRun = false;
 
-    public TCPClient(Handler mHandler, MessageCallback listener) {
-        this.listener         = listener;
-        this.mHandler         = mHandler;
+    public TCPClient(MessageCallback listener) {
+        this.listener = listener;
     }
 
     /**
      * Public method for sending the message via OutputStream object.
+     *
      * @param message Message passed as an argument and sent via OutputStream object.
      */
-    public void sendMessage(String message){
+    public void sendMessage(String message) {
         if (out != null && !out.checkError()) {
             out.println(message);
             out.flush();
             Log.d(TAG, "Sent Message: " + message);
-
         }
     }
 
     /**
      * Public method for stopping the TCPClient object ( and finalizing it after that ) from AsyncTask
      */
-    public void stopClient(){
+    public void stopClient() {
         Log.d(TAG, "Client stopped!");
         mRun = false;
     }
@@ -88,7 +84,7 @@ public class TCPClient {
                 //Listen for the incoming messages while mRun = true
                 while (mRun) {
                     incomingMessage = in.readLine();
-                    Log.d(TAG, "Waiting to recieve a message");
+                    Log.d(TAG, "Waiting to receive a message");
                     break;
 //                    if (incomingMessage != null && listener != null) {
 //
@@ -102,14 +98,13 @@ public class TCPClient {
 //                    incomingMessage = null;
                 }
 
-                Log.d(TAG, "Received Message: " +incomingMessage);
+                Log.d(TAG, "Received Message: " + incomingMessage);
 
             } catch (Exception e) {
 
                 Log.d(TAG, "Error ", e);
                 // todo update UI there has been an error
             } finally {
-
                 out.flush();
                 out.close();
                 in.close();
@@ -128,6 +123,7 @@ public class TCPClient {
 
     /**
      * Method for checking if TCPClient is running.
+     *
      * @return true if is running, false if is not running
      */
     public boolean isRunning() {
@@ -136,13 +132,13 @@ public class TCPClient {
 
     /**
      * Callback Interface for sending received messages to 'onPublishProgress' method in AsyncTask.
-     *
      */
     public interface MessageCallback {
         /**
          * Method overriden in AsyncTask 'doInBackground' method while creating the TCPClient object.
+         *
          * @param message Received message from server app.
          */
-        public void callbackMessageReceiver(String message);
+        void callbackMessageReceiver(String message);
     }
 }

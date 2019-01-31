@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
     public void createListeners() {
 
         connectBluetoothRobotBtn = findViewById(R.id.connect_bluetooth_btn);
-
         connectBluetoothRobotBtn.setOnClickListener(v -> {
             // Try and connect to robot, then go to Navigation Activity
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -49,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
         connectWifiRobotBtn = findViewById(R.id.connect_wifi_btn);
         connectWifiRobotBtn.setOnClickListener(v -> {
             // Try and connect to robot, then go to Navigation Activity
+            TCPClient.EXECUTOR.submit(() -> {
+                new TCPClient(null).run();
+            });
+
             goToNavigationActivity();
         });
 

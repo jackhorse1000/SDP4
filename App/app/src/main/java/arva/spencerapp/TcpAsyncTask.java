@@ -6,12 +6,12 @@ import android.util.Log;
 
 public class TcpAsyncTask extends AsyncTask<String, String, TCPClient> {
 
-    private Handler mHandler;
     private static final String TAG = "TcpAsyncTask";
+    private Handler mHandler;
     private TCPClient tcpClient;
 
 
-    public TcpAsyncTask(Handler mHandler){
+    public TcpAsyncTask(Handler mHandler) {
         this.mHandler = mHandler;
     }
 
@@ -19,16 +19,12 @@ public class TcpAsyncTask extends AsyncTask<String, String, TCPClient> {
     protected TCPClient doInBackground(String... strings) {
         Log.d(TAG, "In do in background");
 
-        try{
-            tcpClient = new TCPClient(mHandler,
-                    new TCPClient.MessageCallback() {
-                        @Override
-                        public void callbackMessageReceiver(String message) {
-                            publishProgress(message); // todo callback for message recieved
-                        }
-                    });
+        try {
+            tcpClient = new TCPClient(message -> {
+                publishProgress(message); // todo callback for message recieved
+            });
 
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             Log.d(TAG, "Caught null pointer exception");
             e.printStackTrace();
         }
@@ -38,6 +34,7 @@ public class TcpAsyncTask extends AsyncTask<String, String, TCPClient> {
 
     /**
      * Overriden method from AsyncTask class. Here we're checking if server answered properly.
+     *
      * @param values If "restart" message came, the client is stopped and computer should be restarted.
      *               Otherwise "wrong" message is sent and 'Error' message is shown in UI.
      */
@@ -60,10 +57,10 @@ public class TcpAsyncTask extends AsyncTask<String, String, TCPClient> {
     }
 
     @Override
-    protected void onPostExecute(TCPClient result){
+    protected void onPostExecute(TCPClient result) {
         super.onPostExecute(result);
         Log.d(TAG, "In on post execute");
-        if(result != null && result.isRunning()){
+        if (result != null && result.isRunning()) {
             result.stopClient();
         }
         // todo Update UI client has been stopped
