@@ -13,15 +13,14 @@ class SpencerServerProtocol(asyncio.Protocol):
         self.count = 0
 
     def connection_made(self, transport):
-        peername = transport.get_extra_info('peername')
-        print('Connection from {}'.format(peername))
+        self.peername = transport.get_extra_info('peername')
+        print('Connection from {}'.format(self.peername))
         self.transport = transport
 
         self.send('Doing nothing')
 
     def connection_lost(self, error):
-        peername = transport.get_extra_info('peername')
-        print('Lost connection from {} ({})'.format(peername, error))
+        print('Lost connection from {} ({})'.format(self.peername, error))
 
     def data_received(self, data):
         print('Data received')
@@ -32,7 +31,7 @@ class SpencerServerProtocol(asyncio.Protocol):
         for message in messages:
             self.count += 1
             print('Message received: {}'.format(message))
-            self.send("Received {} messages" + self.count)
+            self.send("Received {} messages".format(self.count))
 
     def send(self, message):
         self.transport.write((message + "\n").encode())
