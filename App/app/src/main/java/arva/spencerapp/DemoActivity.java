@@ -2,9 +2,7 @@ package arva.spencerapp;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -21,11 +19,10 @@ public class DemoActivity extends AppCompatActivity {
 
     private TCPClient tcpClient;
     private int sensorInputCount = 0;
-    private String[] sensorDataArray = {"1", "2", "1", "2", "1", "2", "1", "2", "1", "2"};;
+    private String[] sensorDataArray = {"1", "2", "1", "2", "1", "2", "1", "2", "1", "2"};
     private ArrayAdapter arrayAdapter;
 
     private final String TAG = "DemoActivity";
-
 
 
     @Override
@@ -35,10 +32,9 @@ public class DemoActivity extends AppCompatActivity {
 
         setListeners();
 
-        arrayAdapter= new ArrayAdapter<String>(this, R.layout.sensor_list_item, sensorDataArray);
+        arrayAdapter = new ArrayAdapter<>(this, R.layout.sensor_list_item, sensorDataArray);
 
-
-        ListView listView = (ListView) findViewById(R.id.sensor_list_view);
+        ListView listView = findViewById(R.id.sensor_list_view);
         listView.setAdapter(arrayAdapter);
 
         Handler mainHandler = new Handler(getMainLooper());
@@ -46,16 +42,14 @@ public class DemoActivity extends AppCompatActivity {
         tcpClient = new TCPClient(new TCPClient.MessageCallback() {
             @Override
             public void connectionStateChanged(TCPClient.ConnectionState state) {
-                mainHandler.post(() -> {
-                    connectionTxt.setText(state.toString());
-                });
+                mainHandler.post(() -> connectionTxt.setText(state.toString()));
                 Log.d(TAG, "Connection state change: " + state);
             }
 
             @Override
             public void messageReceived(String message) {
                 mainHandler.post(() -> {
-                    if (message.substring(0, 6).equals("sensor")) {
+                    if (message.startsWith("sensor")) {
                         updateArray(message);
                     } else {
                         statusTxt.setText(message);
@@ -68,13 +62,9 @@ public class DemoActivity extends AppCompatActivity {
         TCPClient.EXECUTOR.submit(tcpClient::run);
     }
 
-    private void updateArray(String str){
-        if(sensorInputCount >= 10)
-        {
-            sensorInputCount = 0;
-        }
+    private void updateArray(String str) {
         sensorDataArray[sensorInputCount] = str;
-        sensorInputCount++;
+        sensorInputCount = (sensorInputCount + 1) % sensorDataArray.length;
         arrayAdapter.notifyDataSetChanged();
     }
 
@@ -83,115 +73,51 @@ public class DemoActivity extends AppCompatActivity {
         connectionTxt = findViewById(R.id.connection_status_txt);
 
         liftFrontBtn = findViewById(R.id.lift_front_btn);
-        liftFrontBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(liftFrontBtn.getText().equals("lift front"))
-                    liftFrontBtn.setText("Stop lift front");
-                else
-                    liftFrontBtn.setText("lift front");
-                TCPClient.EXECUTOR.submit(()->{
-                    tcpClient.sendMessage("lift front");
-                });
-            }
+        liftFrontBtn.setOnClickListener(v -> {
+            liftFrontBtn.setText(liftFrontBtn.getText().equals("lift front") ? "Stop lift front" : "lift front");
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("lift front"));
         });
 
         liftBackBtn = findViewById(R.id.lift_back_btn);
-        liftBackBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(liftBackBtn.getText().equals("lift back"))
-                    liftBackBtn.setText("Stop lift back");
-                else
-                    liftBackBtn.setText("lift back");
-                TCPClient.EXECUTOR.submit(()->{
-                    tcpClient.sendMessage("lift back");
-                });
-            }
+        liftBackBtn.setOnClickListener(v -> {
+            liftBackBtn.setText(liftBackBtn.getText().equals("lift back") ? "Stop lift back" : "lift back");
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("lift back"));
         });
 
         lowerFrontBtn = findViewById(R.id.lower_front_btn);
-        lowerFrontBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(lowerFrontBtn.getText().equals("lower front"))
-                    lowerFrontBtn.setText("Stop lower front");
-                else
-                    lowerFrontBtn.setText("lower front");
-                TCPClient.EXECUTOR.submit(()->{
-                    tcpClient.sendMessage("lower front");
-                });
-            }
+        lowerFrontBtn.setOnClickListener(v -> {
+            lowerFrontBtn.setText(lowerFrontBtn.getText().equals("lower front") ? "Stop lower front" : "lower front");
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("lower front"));
         });
 
         lowerBackBtn = findViewById(R.id.lower_back_btn);
-        lowerBackBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(lowerBackBtn.getText().equals("lower back"))
-                    lowerBackBtn.setText("Stop lower back");
-                else
-                    lowerBackBtn.setText("lower back");
-                TCPClient.EXECUTOR.submit(()->{
-                    tcpClient.sendMessage("lower back");
-                });
-            }
+        lowerBackBtn.setOnClickListener(v -> {
+            lowerBackBtn.setText(lowerBackBtn.getText().equals("lower back") ? "Stop lower back" : "lower back");
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("lower back"));
         });
 
         backBtn = findViewById(R.id.backward_btn);
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(backBtn.getText().equals("backward"))
-                    backBtn.setText("Stop backward");
-                else
-                    backBtn.setText("backward");
-                TCPClient.EXECUTOR.submit(()->{
-                    tcpClient.sendMessage("back");
-                });
-            }
+        backBtn.setOnClickListener(v -> {
+            backBtn.setText(backBtn.getText().equals("backward") ? "Stop backward" : "backward");
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("back"));
         });
 
         forwardBtn = findViewById(R.id.forward_btn);
-        forwardBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(forwardBtn.getText().equals("forward"))
-                    forwardBtn.setText("stop forward");
-                else
-                    forwardBtn.setText("forward");
-                TCPClient.EXECUTOR.submit(()->{
-                    tcpClient.sendMessage("forward");
-                });
-            }
+        forwardBtn.setOnClickListener(v -> {
+            forwardBtn.setText(forwardBtn.getText().equals("forward") ? "stop forward" : "forward");
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("forward"));
         });
 
         leftBtn = findViewById(R.id.left_btn);
-        leftBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(leftBtn.getText().equals("turn left"))
-                    leftBtn.setText("stop turn left");
-                else
-                    leftBtn.setText("turn left");
-                TCPClient.EXECUTOR.submit(()->{
-                    tcpClient.sendMessage("left");
-                });
-            }
+        leftBtn.setOnClickListener(v -> {
+            leftBtn.setText(leftBtn.getText().equals("turn left") ? "stop turn left" : "turn left");
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("left"));
         });
 
         rightBtn = findViewById(R.id.right_btn);
-        rightBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(rightBtn.getText().equals("turn right"))
-                    rightBtn.setText("stop turn right");
-                else
-                    rightBtn.setText("turn right");
-                TCPClient.EXECUTOR.submit(()->{
-                    tcpClient.sendMessage("right");
-                });
-            }
+        rightBtn.setOnClickListener(v -> {
+            rightBtn.setText(rightBtn.getText().equals("turn right") ? "stop turn right" : "turn right");
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("right"));
         });
     }
 
