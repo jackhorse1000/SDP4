@@ -1,6 +1,7 @@
 """A basic server for the demo days."""
 
 import asyncio
+import motor
 
 class ConnectionManager:
     """Manages a set of connections, with the ability to send messages to all
@@ -47,6 +48,12 @@ class SingleValueQueue:
         self.value = value
         self.event.set()
 
+def exception_handler(loop, context):
+    print("\33[1;31mTerminating loop due to error\33[0m")
+    if loop.is_running():
+        loop.stop()
+    loop.default_exception_handler(context)
+
 async def wakeup():
     """A really ugly hack to ensure interrupts are thrown within the event loop.
 
@@ -56,19 +63,25 @@ async def wakeup():
 
 async def motor_control(queue, manager):
     """Pulls events from `queue` and executes them on the motors"""
-    # motor.stop_motors()
+    motor.stop_motors()
 
     while True:
         action = await queue.pull()
-        # motor.stop_motors()
+        motor.stop_motors()
 
         print("Doing " + action)
-        if action[0:3] == "Hey":
-            manager.send("Hey, Hey\n"
-                         "You, You\n"
-                         "I don't like your girlfriend\n"
-                         "No way, no way\n"
-                         "Think you need a new one\n")
+        if action == "stop":
+            manager.send("Idle")
+        elif action == "forward":
+            manager.send("Going forward")
+            motor.set_motor(4, 100)
+            motor.set_motor(5, 100)
+        elif action == "back":
+            manager.send("Going backwards")
+            motor.set_motor(4, -100)
+            motor.set_motor(5, -100)
+        else:
+            manager.send("Doing goodness knows what.")
 
 class SpencerServerConnection(asyncio.Protocol):
     """Represents a socket connection to a "spencer client". Namely, a phone running
@@ -109,6 +122,12 @@ class SpencerServerConnection(asyncio.Protocol):
 
         for message in messages:
             self.count += 1
+
+            # Delete trailing \r if we're commanding it via telnet (goodness, I
+            # hope not)
+            if message.endswith("\r"):
+                message = message[:-1]
+
             print('Message received: {}'.format(message))
             self.queue.push(message)
 
@@ -122,6 +141,7 @@ def _main():
     # Create an event loop. This effectively allows us to run multiple functions
     # at once (namely, the motor controller and server).
     loop = asyncio.get_event_loop()
+    loop.set_exception_handler(exception_handler)
     # Motor control statements are pushed into this queue
     motor_queue = SingleValueQueue()
     # And we hold all currently connected computers here
@@ -143,6 +163,7 @@ def _main():
         server.close()
         loop.run_until_complete(server.wait_closed())
         loop.close()
+        motor.stop_motors()
 
 if __name__ == "__main__":
     _main()
