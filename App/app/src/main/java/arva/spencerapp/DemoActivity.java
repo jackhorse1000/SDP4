@@ -19,7 +19,7 @@ public class DemoActivity extends AppCompatActivity {
 
     private TCPClient tcpClient;
     private int sensorInputCount = 0;
-    private String[] sensorDataArray = {"1", "2", "1", "2", "1", "2", "1", "2", "1", "2"};
+    private String[] sensorDataArray = {"", "", "", "", "", "", "", "", "", ""};
     private ArrayAdapter arrayAdapter;
 
     private final String TAG = "DemoActivity";
@@ -63,8 +63,21 @@ public class DemoActivity extends AppCompatActivity {
     }
 
     private void updateArray(String str) {
-        sensorDataArray[sensorInputCount] = str;
-        sensorInputCount = (sensorInputCount + 1) % sensorDataArray.length;
+
+        if (sensorInputCount + 1 <= sensorDataArray.length) {
+            sensorDataArray[sensorInputCount] = str;
+            sensorInputCount++;
+        } else {
+            String temp = sensorDataArray[sensorDataArray.length-1];
+            sensorDataArray[sensorDataArray.length-1] = str;
+            for (int i = sensorDataArray.length-2; i >= 1  ; i--) {
+                String temp_ = sensorDataArray[i];
+                sensorDataArray[i] = temp;
+                temp = temp_;
+
+            }
+            sensorDataArray[0] = temp;
+        }
         arrayAdapter.notifyDataSetChanged();
     }
 
