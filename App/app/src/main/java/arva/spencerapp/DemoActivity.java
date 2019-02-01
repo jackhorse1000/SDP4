@@ -5,7 +5,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +20,9 @@ public class DemoActivity extends AppCompatActivity {
     private TextView statusTxt, connectionTxt;
 
     private TCPClient tcpClient;
+    private int sensorInputCount = 0;
+    private String[] sensorDataArray = {"1", "2", "1", "2", "1", "2", "1", "2", "1", "2"};;
+    private ArrayAdapter arrayAdapter;
 
     private final String TAG = "DemoActivity";
 
@@ -29,6 +34,12 @@ public class DemoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_demo);
 
         setListeners();
+
+        arrayAdapter= new ArrayAdapter<String>(this, R.layout.sensor_list_item, sensorDataArray);
+
+
+        ListView listView = (ListView) findViewById(R.id.sensor_list_view);
+        listView.setAdapter(arrayAdapter);
 
         Handler mainHandler = new Handler(getMainLooper());
 
@@ -44,13 +55,27 @@ public class DemoActivity extends AppCompatActivity {
             @Override
             public void messageReceived(String message) {
                 mainHandler.post(() -> {
-                    statusTxt.setText(message);
+                    if (message.substring(0, 6).equals("sensor")) {
+                        updateArray(message);
+                    } else {
+                        statusTxt.setText(message);
+                    }
                 });
                 Log.d(TAG, "messaged received: " + message);
             }
         });
 
         TCPClient.EXECUTOR.submit(tcpClient::run);
+    }
+
+    private void updateArray(String str){
+        if(sensorInputCount >= 10)
+        {
+            sensorInputCount = 0;
+        }
+        sensorDataArray[sensorInputCount] = str;
+        sensorInputCount++;
+        arrayAdapter.notifyDataSetChanged();
     }
 
     private void setListeners() {
