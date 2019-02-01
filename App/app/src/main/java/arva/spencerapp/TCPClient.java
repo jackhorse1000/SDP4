@@ -7,7 +7,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
@@ -63,7 +62,6 @@ public class TCPClient {
         running = true;
         Log.d(TAG, "Connecting");
         listener.connectionStateChanged(ConnectionState.CONNECTING);
-//        InetAddress serverAddress = InetAddress.getByName(IP);
 
         // Connect the socket, and input/output streams
         try (Socket socket = new Socket(IP, PORT);
@@ -79,6 +77,7 @@ public class TCPClient {
             while (running) {
                 Log.d(TAG, "Waiting to receive a message");
                 String message = in.readLine();
+                if (message == null) break;
                 Log.d(TAG, "Received " + message);
                 listener.messageReceived(message);
             }
@@ -88,6 +87,7 @@ public class TCPClient {
             Log.d(TAG, "Closed");
             listener.connectionStateChanged(ConnectionState.CLOSED);
 
+            this.running = false;
             this.out = null;
         }
     }
