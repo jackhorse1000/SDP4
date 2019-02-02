@@ -1,6 +1,7 @@
 """A basic server for the demo days."""
 
 import asyncio
+
 import motor
 
 class ConnectionManager:
@@ -49,6 +50,10 @@ class SingleValueQueue:
         self.event.set()
 
 def exception_handler(loop, context):
+    """A custom error handler for the loop, which stops the loop before continuing to
+       the default handler
+
+    """
     print("\33[1;31mTerminating loop due to error\33[0m")
     if loop.is_running():
         loop.stop()

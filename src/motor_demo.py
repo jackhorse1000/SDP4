@@ -2,8 +2,9 @@
 A basic example of controlling a motor via smbus
 """
 
-import motor
 import time
+
+import motor
 
 try:
     # motor.set_motor(4, -100)
