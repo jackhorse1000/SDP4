@@ -133,7 +133,7 @@ public class DemoActivity extends AppCompatActivity {
 
         backBtn = findViewById(R.id.backward_btn);
         backBtn.setOnClickListener(v -> {
-            String sendText = backBtn.getText().toString()
+            String sendText = backBtn.getText().toString();
             backBtn.setText(backBtn.getText().equals("backward") ? "stop backward" : "backward");
             TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
