@@ -18,7 +18,7 @@ public class TCPClient {
 
     public static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
-    private static final String IP = "192.168.105.95";
+    private static final String IP = "192.168.105.153";
     private static final int PORT = 1050;
 
     private BufferedWriter out;

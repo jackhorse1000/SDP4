@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="10dp">
+        android:layout_margin="5dp">
 
         <Button
             android:layout_weight="1"
@@ -70,7 +70,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="10dp">
+        android:layout_margin="5dp">
 
         <Button
             android:layout_weight="1"
@@ -93,7 +93,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="10dp">
+        android:layout_margin="5dp">
 
         <Button
             android:layout_weight="1"
@@ -115,7 +115,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="10dp">
+        android:layout_margin="5dp">
 
         <Button
             android:layout_weight="1"
@@ -133,9 +133,31 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="5dp">
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/lower_both_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lower both"/>
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/lift_both_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lift both"/>
+
+    </LinearLayout>
+
     <Button
         android:id="@+id/stop_all_btn"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="stop all"/>
