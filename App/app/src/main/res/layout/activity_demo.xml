@@ -44,62 +44,123 @@
             android:text="Stationary"/>
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="5dp">
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/forward_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="forward"/>
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/backward_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="backward"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="5dp">
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/left_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="turn left"/>
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/right_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="turn right"/>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="5dp">
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/lift_back_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lift back"/>
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/lift_front_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lift front"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="5dp">
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/lower_back_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lower back"/>
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/lower_front_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lower front"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="5dp">
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/lower_both_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lower both"/>
+
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/lift_both_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="lift both"/>
+
+    </LinearLayout>
 
     <Button
-        android:id="@+id/forward_btn"
-        android:layout_width="wrap_content"
+        android:id="@+id/stop_all_btn"
+        android:layout_margin="5dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="forward"/>
-
-    <Button
-        android:id="@+id/backward_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="backward"/>
-
-    <Button
-        android:id="@+id/left_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="turn left"/>
-
-    <Button
-        android:id="@+id/right_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="turn right"/>
-
-    <Button
-        android:id="@+id/lift_back_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="lift back"/>
-
-    <Button
-        android:id="@+id/lift_front_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="lift front"/>
-
-    <Button
-        android:id="@+id/lower_back_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="lower back"/>
-
-    <Button
-        android:id="@+id/lower_front_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="lower front"/>
+        android:text="stop all"/>
 
     <TextView
         android:layout_width="wrap_content"
