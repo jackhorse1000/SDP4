@@ -88,14 +88,16 @@ public class DemoActivity extends AppCompatActivity {
 
         lowerBothBtn = findViewById(R.id.lower_both_btn);
         lowerBothBtn.setOnClickListener(v -> {
+            String sendText = lowerBothBtn.getText().toString();
             lowerBothBtn.setText(lowerBothBtn.getText().equals("lower both") ? "stop lower both" : "lower both");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(lowerBothBtn.getText().toString()));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
 
         liftBothBtn = findViewById(R.id.lift_both_btn);
         liftBothBtn.setOnClickListener(v -> {
+            String sendText = liftBothBtn.getText().toString();
             liftBothBtn.setText(liftBothBtn.getText().equals("lift both") ? "stop lift both" : "lift both");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(liftBothBtn.getText().toString()));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
 
         stopAllBtn = findViewById(R.id.stop_all_btn);
@@ -103,50 +105,58 @@ public class DemoActivity extends AppCompatActivity {
 
         liftFrontBtn = findViewById(R.id.lift_front_btn);
         liftFrontBtn.setOnClickListener(v -> {
+            String sendText = liftFrontBtn.getText().toString();
             liftFrontBtn.setText(liftFrontBtn.getText().equals("lift front") ? "stop lift front" : "lift front");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(liftFrontBtn.getText().toString()));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
 
         liftBackBtn = findViewById(R.id.lift_back_btn);
         liftBackBtn.setOnClickListener(v -> {
+            String sendText = liftBackBtn.getText().toString();
             liftBackBtn.setText(liftBackBtn.getText().equals("lift back") ? "stop lift back" : "lift back");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(liftBackBtn.getText().toString()));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
 
         lowerFrontBtn = findViewById(R.id.lower_front_btn);
         lowerFrontBtn.setOnClickListener(v -> {
+            String sendText = lowerFrontBtn.getText().toString();
             lowerFrontBtn.setText(lowerFrontBtn.getText().equals("lower front") ? "stop lower front" : "lower front");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("lower front"));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
 
         lowerBackBtn = findViewById(R.id.lower_back_btn);
         lowerBackBtn.setOnClickListener(v -> {
+            String sendText = lowerBackBtn.getText().toString();
             lowerBackBtn.setText(lowerBackBtn.getText().equals("lower back") ? "stop lower back" : "lower back");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(lowerBackBtn.getText().toString()));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
 
         backBtn = findViewById(R.id.backward_btn);
         backBtn.setOnClickListener(v -> {
+            String sendText = backBtn.getText().toString()
             backBtn.setText(backBtn.getText().equals("backward") ? "stop backward" : "backward");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(backBtn.getText().toString()));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
 
         forwardBtn = findViewById(R.id.forward_btn);
         forwardBtn.setOnClickListener(v -> {
+            String sendText = forwardBtn.getText().toString();
             forwardBtn.setText(forwardBtn.getText().equals("forward") ? "stop forward" : "forward");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(forwardBtn.getText().toString()));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
 
         leftBtn = findViewById(R.id.left_btn);
         leftBtn.setOnClickListener(v -> {
+            String sendText = leftBtn.getText().toString();
             leftBtn.setText(leftBtn.getText().equals("turn left") ? "stop turn left" : "turn left");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(leftBtn.getText().toString()));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
         });
 
         rightBtn = findViewById(R.id.right_btn);
         rightBtn.setOnClickListener(v -> {
+            String sendText = rightBtn.getText().toString();
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
             rightBtn.setText(rightBtn.getText().equals("turn right") ? "stop turn right" : "turn right");
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(rightBtn.getText().toString()));
         });
     }
 
