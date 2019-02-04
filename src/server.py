@@ -2,7 +2,7 @@
 
 import asyncio
 
-import motor
+import motor, control
 
 class ConnectionManager:
     """Manages a set of connections, with the ability to send messages to all
@@ -41,6 +41,7 @@ class SingleValueQueue:
         self.event.clear()
         return self.value
 
+
     def push(self, value):
         """Push an event to the queue. This will either overwrite the existing event or
            notify the listening client with it.
@@ -70,21 +71,22 @@ async def motor_control(queue, manager):
     """Pulls events from `queue` and executes them on the motors"""
     motor.stop_motors()
 
+    commands = control.__dict__
     while True:
-        action = await queue.pull()
+        """ Actions are stop,
+                        forward, backward,
+                        turnleft, trunright,
+                        liftback, liftfront,
+                        lowerback and lowerfront """
+        action = (await queue.pull()).lower().replace(' ', '_')
         motor.stop_motors()
 
-        print("Doing " + action)
-        if action == "stop":
+        if 'stop' in action:
             manager.send("Idle")
-        elif action == "forward":
-            manager.send("Going forward")
-            motor.set_motor(4, 100)
-            motor.set_motor(5, 100)
-        elif action == "back":
-            manager.send("Going backwards")
-            motor.set_motor(4, -100)
-            motor.set_motor(5, -100)
+            control.stop()
+        elif action in commands:
+            manager.send("Running " + action)
+            commands[action]()
         else:
             manager.send("Doing goodness knows what.")
 
@@ -116,6 +118,7 @@ class SpencerServerConnection(asyncio.Protocol):
     def connection_lost(self, exc):
         print('Lost connection from {} ({})'.format(self.peername, exc))
         self.manager.remove(self)
+        self.queue.push("stop")
 
     def data_received(self, data):
         # Messages are terminated by a new line, so add to our existing buffer
