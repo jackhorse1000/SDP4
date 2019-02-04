@@ -80,6 +80,7 @@ async def motor_control(queue, manager):
     while True:
         action = (await queue.pull()).lower().replace(' ', '_')
         motor.stop_motors()
+        await asyncio.sleep(0.005)
 
         if 'stop' in action:
             # Stop commands are executed as-is
