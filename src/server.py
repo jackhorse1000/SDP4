@@ -1,6 +1,10 @@
 """A basic server for the demo days."""
 
 import asyncio
+import sys
+
+from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
+from Phidget22.Phidget import ChannelSubclass
 
 import control
 import motor
@@ -88,6 +92,28 @@ async def motor_control(queue, manager):
         else:
             manager.send("Doing goodness knows what.")
 
+
+def sensor_setup(ph):
+    """When a sensor is attached, we configure it with various properties (interval between receiving inputs,
+       minimum change required before we get an input, etc...)
+
+    """
+    ph.setDataInterval(100)
+    ph.setVoltageRatioChangeTrigger(0.005)
+    if ph.getChannelSubclass() == ChannelSubclass.PHIDCHSUBCLASS_VOLTAGERATIOINPUT_SENSOR_PORT:
+        ph.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_VOLTAGERATIO)
+
+def sensor_error(_ph, code, string):
+    """We get error messages if the sensor receives values outside its operating parameters."""
+    sys.stderr.write("[Phidget Error Event] -> " + string + " (" + str(code) + ")\n")
+
+def sensor_change(manager):
+    """The above event is processed by the Phidget API and converted into a distance."""
+    def handler(_ph, value, unit):
+        print("Sensor %s%s" % (value, unit.symbol))
+        manager.send("sensor %s%s" % (value, unit.symbol))
+    return handler
+
 class SpencerServerConnection(asyncio.Protocol):
     """Represents a socket connection to a "spencer client". Namely, a phone running
        the spencer app.
@@ -153,22 +179,44 @@ def _main():
     # And we hold all currently connected computers here
     manager = ConnectionManager()
 
+    # Create our voltage channel
+    channel = VoltageRatioInput()
+    channel.setChannel(0)
+    channel.setOnAttachHandler(sensor_setup)
+    channel.setOnErrorHandler(sensor_error)
+    channel.setOnSensorChangeHandler(sensor_change(manager))
+
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
     loop.create_task(motor_control(motor_queue, manager))
 
     # Construct the server and run it forever
-    server = loop.run_until_complete(loop.create_server(
-        lambda: SpencerServerConnection(motor_queue, manager),
-        '0.0.0.0', 1050
-    ))
-    print('Serving on {}'.format(server.sockets[0].getsockname()))
+    server = None
     try:
+        # Wait for attachement and set the sensor type to the 10-80cm distance one
+        if "-P" not in sys.argv:
+            channel.openWaitForAttachment(1000)
+            channel.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2Y0A21)
+
+        server = loop.run_until_complete(loop.create_server(
+            lambda: SpencerServerConnection(motor_queue, manager),
+            '0.0.0.0', 1050
+        ))
+
+        print('Serving on {}'.format(server.sockets[0].getsockname()))
+
         loop.run_forever()
     finally:
-        server.close()
-        loop.run_until_complete(server.wait_closed())
+        if server is not None:
+            server.close()
+            loop.run_until_complete(server.wait_closed())
+
         loop.close()
+
+        channel.setOnVoltageRatioChangeHandler(None)
+        channel.setOnSensorChangeHandler(None)
+        channel.close()
+
         motor.stop_motors()
 
 if __name__ == "__main__":
