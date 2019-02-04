@@ -11,16 +11,25 @@ def _write_bus(value):
     BUS.write_byte_data(ADDRESS, 0x00, value)
 
 def set_motor(motor_id, speed):
+    """Sets a motor to spin. Any positive value is forwards, any negative one is
+       backwards.
+    """
+    byte1 = motor_id << 5 | 28
+    byte2 = 4 + motor_id * 32 + (2 if speed < 0 else 0)
+    _write_bus(byte1)
+    _write_bus(byte2)
+
+def set_motor_(motor_id, speed):
     """Sets a motor at a specific speed"""
 
     # Mode 2 is Forward.
     # Mode 3 is Backwards.
     direction = 2 if speed >= 0 else 3
-    speed = max(0, min(100, abs(speed)))
+    speed = max(0, min(255, abs(speed)))
     byte1 = motor_id << 5 | 24 | direction << 1
-    byte2 = int(speed * 2.55)
     _write_bus(byte1)
-    _write_bus(byte2)
+    _write_bus(speed)
+
 
 def stop_motor(motor_id):
     """Stops the given motor"""
