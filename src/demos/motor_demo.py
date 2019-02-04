@@ -7,15 +7,17 @@ import time
 import motor
 
 def forward():
+    """Move motors forwards."""
     motor.set_motor(4, 50)
     motor.set_motor(5, 50)
 
 def lift_front_part():
+    """Lift the front part"""
     motor.set_motor(3, 100)
 
 def stop():
+    """Stop all motors"""
     motor.stop_motors()
-
 
 def _main():
     print("Caesar")
@@ -28,9 +30,8 @@ def _main():
     stop()
     exit()
 
-if __name__ =="__main__":
+if __name__ == "__main__":
     _main()
-
 
 try:
     while True:

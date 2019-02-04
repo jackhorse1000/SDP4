@@ -2,7 +2,8 @@
 
 import asyncio
 
-import motor, control
+import control
+import motor
 
 class ConnectionManager:
     """Manages a set of connections, with the ability to send messages to all
@@ -73,18 +74,15 @@ async def motor_control(queue, manager):
 
     commands = control.__dict__
     while True:
-        """ Actions are stop,
-                        forward, backward,
-                        turnleft, trunright,
-                        liftback, liftfront,
-                        lowerback and lowerfront """
         action = (await queue.pull()).lower().replace(' ', '_')
         motor.stop_motors()
 
         if 'stop' in action:
+            # Stop commands are executed as-is
             manager.send("Idle")
             control.stop()
         elif action in commands:
+            # If we're a function defined in the control module, execute it.
             manager.send("Running " + action)
             commands[action]()
         else:
