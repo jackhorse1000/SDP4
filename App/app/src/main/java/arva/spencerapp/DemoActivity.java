@@ -3,6 +3,7 @@ package arva.spencerapp;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -13,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class DemoActivity extends AppCompatActivity {
 
     private Button liftFrontBtn, liftBackBtn, lowerBackBtn, lowerFrontBtn,
-        forwardBtn, backBtn, leftBtn, rightBtn;
+        forwardBtn, backBtn, leftBtn, rightBtn, stopAllBtn;
 
     private TextView statusTxt, connectionTxt;
 
@@ -84,6 +85,9 @@ public class DemoActivity extends AppCompatActivity {
     private void setListeners() {
         statusTxt = findViewById(R.id.status_txt);
         connectionTxt = findViewById(R.id.connection_status_txt);
+
+        stopAllBtn = findViewById(R.id.stop_all_btn);
+        stopAllBtn.setOnClickListener(v -> TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("stop all")));
 
         liftFrontBtn = findViewById(R.id.lift_front_btn);
         liftFrontBtn.setOnClickListener(v -> {
