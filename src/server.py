@@ -4,6 +4,7 @@ import asyncio
 import sys
 
 from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
+from Phidget22.Devices.DigitalInput import DigitalInput
 from Phidget22.Phidget import ChannelSubclass
 
 import control
@@ -100,8 +101,9 @@ def sensor_setup(ph):
 
     """
     ph.setDataInterval(100)
-    ph.setVoltageRatioChangeTrigger(0.005)
+    ph.setVoltageRatioChangeTrigger(0.0)
     if ph.getChannelSubclass() == ChannelSubclass.PHIDCHSUBCLASS_VOLTAGERATIOINPUT_SENSOR_PORT:
+        ph.setVoltageRatioChangeTrigger(0.005)
         ph.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_VOLTAGERATIO)
 
 def sensor_error(_ph, code, string):
@@ -113,6 +115,13 @@ def sensor_change(manager):
     def handler(_ph, value, unit):
         print("Sensor %s%s" % (value, unit.symbol))
         manager.send("sensor %s%s" % (value, unit.symbol))
+    return handler
+
+def digital_change(manager):
+    """The above event is processed by the Phidget API."""
+    def handler(_ph, value):
+        print("Sensor %s" % (value))
+        manager.send("sensor %s" % (value))
     return handler
 
 class SpencerServerConnection(asyncio.Protocol):
@@ -187,6 +196,21 @@ def _main():
     channel.setOnErrorHandler(sensor_error)
     channel.setOnSensorChangeHandler(sensor_change(manager))
 
+    # Create our sensor channel
+    sensor_channel_0 = DigitalInput()
+    sensor_channel_0.setChannel(0)
+    # sensor_channel_0.setOnAttachHandler(sensor_setup)
+    sensor_channel_0.setOnErrorHandler(sensor_error)
+    sensor_channel_0.setOnStateChangeHandler(digital_change(manager))
+
+    # Create our sensor channel
+    sensor_channel_1 = DigitalInput()
+    sensor_channel_1.setChannel(1)
+    # sensor_channel_1.setOnAttachHandler(sensor_setup)
+    sensor_channel_1.setOnErrorHandler(sensor_error)
+    sensor_channel_1.setOnStateChangeHandler(digital_change(manager))
+
+
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
     loop.create_task(motor_control(motor_queue, manager))
@@ -197,6 +221,8 @@ def _main():
         # Wait for attachement and set the sensor type to the 10-80cm distance one
         if "-P" not in sys.argv:
             channel.openWaitForAttachment(1000)
+            sensor_channel_0.openWaitForAttachment(1000)
+            sensor_channel_1.openWaitForAttachment(1000)
             channel.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2Y0A21)
 
         server = loop.run_until_complete(loop.create_server(
@@ -216,6 +242,8 @@ def _main():
 
         channel.setOnVoltageRatioChangeHandler(None)
         channel.setOnSensorChangeHandler(None)
+        sensor_channel_0.setOnStateChangeHandler(None)
+        sensor_channel_1.setOnStateChangeHandler(None)
         channel.close()
 
         motor.stop_motors()
