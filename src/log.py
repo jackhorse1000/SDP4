@@ -1,5 +1,6 @@
 """Helper methods to configure the system logger."""
 import logging
+import warnings
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
 
@@ -28,8 +29,13 @@ def configure():
        initialised.
 
     """
+    # Be more aggressive in capturing warnings
+    logging.captureWarnings(True)
+    warnings.simplefilter('default')
+
     logger = logging.getLogger()
 
+    # Register a custom formatter, which prints things coloured with the time, level and coponent name.
     formatter = ColourFormatter("[%(asctime)s] [%(levelname)s/%(name)s] %(message)s", None, '%')
     formatter.default_msec_format = "%s.%03d"
 
