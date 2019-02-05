@@ -95,8 +95,8 @@ async def motor_control(queue, manager):
             manager.send("Doing goodness knows what.")
 
 
-def sensor_setup(ph):
-    """When a sensor is attached, we configure it with various properties (interval between receiving inputs,
+def voltage_setup(ph):
+    """When a voltage is attached, we configure it with various properties (interval between receiving inputs,
        minimum change required before we get an input, etc...)
 
     """
@@ -108,20 +108,20 @@ def sensor_setup(ph):
 
 def sensor_error(_ph, code, string):
     """We get error messages if the sensor receives values outside its operating parameters."""
-    sys.stderr.write("[Phidget Error Event] -> " + string + " (" + str(code) + ")\n")
+    sys.stderr.write("[Phidget Error] " + string + " (" + str(code) + ")\n")
 
-def sensor_change(manager):
+def voltage_change(manager, name):
     """The above event is processed by the Phidget API and converted into a distance."""
     def handler(_ph, value, unit):
-        print("Sensor %s%s" % (value, unit.symbol))
-        manager.send("sensor %s%s" % (value, unit.symbol))
+        print("Sensor %s = %s%s" % (name, value, unit.symbol))
+        manager.send("sensor %s = %s%s" % (name, value, unit.symbol))
     return handler
 
-def digital_change(manager):
+def digital_change(manager, name):
     """The above event is processed by the Phidget API."""
     def handler(_ph, value):
-        print("Sensor %s" % (value))
-        manager.send("sensor %s" % (value))
+        print("Sensor %s = %s" % (name, value))
+        manager.send("sensor %s = %s" % (name, value))
     return handler
 
 class SpencerServerConnection(asyncio.Protocol):
@@ -192,23 +192,21 @@ def _main():
     # Create our voltage channel
     channel = VoltageRatioInput()
     channel.setChannel(0)
-    channel.setOnAttachHandler(sensor_setup)
+    channel.setOnAttachHandler(voltage_setup)
     channel.setOnErrorHandler(sensor_error)
-    channel.setOnSensorChangeHandler(sensor_change(manager))
+    channel.setOnSensorChangeHandler(voltage_change(manager, "Front distance"))
 
     # Create our sensor channel
     sensor_channel_0 = DigitalInput()
     sensor_channel_0.setChannel(0)
-    # sensor_channel_0.setOnAttachHandler(sensor_setup)
     sensor_channel_0.setOnErrorHandler(sensor_error)
-    sensor_channel_0.setOnStateChangeHandler(digital_change(manager))
+    sensor_channel_0.setOnStateChangeHandler(digital_change(manager, "Front touch"))
 
     # Create our sensor channel
     sensor_channel_1 = DigitalInput()
     sensor_channel_1.setChannel(1)
-    # sensor_channel_1.setOnAttachHandler(sensor_setup)
     sensor_channel_1.setOnErrorHandler(sensor_error)
-    sensor_channel_1.setOnStateChangeHandler(digital_change(manager))
+    sensor_channel_1.setOnStateChangeHandler(digital_change(manager, "Back touch"))
 
 
     # Register our tasks which run along side the server
