@@ -5,6 +5,7 @@ import logging
 
 from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
 from Phidget22.Devices.DigitalInput import DigitalInput
+from Phidget22.Devices.Log import Log, LogLevel
 
 
 LOG = logging.getLogger("Sensors")
@@ -33,33 +34,36 @@ class Distance:
         self.name = name
         self.event = asyncio.Event()
         self.value = 0
-        self.valid = False
+        self.valid = None
         self.loop = asyncio.get_event_loop()
 
         self.phidget = VoltageRatioInput()
         self.phidget.setChannel(channel)
-        self.phidget.setOnSensorChangeHandler(self.on_change)
-        self.phidget.setOnErrorHandler(self.on_error)
+        self.phidget.setOnSensorChangeHandler(self._on_change)
+        self.phidget.setOnErrorHandler(self._on_error)
 
     def attach(self):
         """Attach this sensor and configure it with various properties.
 
-           For now, we update the input when we receive a change <= 0.005, which
-           translates to a pretty small distance change (~.02cm).
+           For now, we subscribe to updatees every 50ms (20Hz). However,
+           we only fire off the event listeners if this results in a
+           change of 5mm, to avoid too much noise.
 
         """
         self.phidget.openWaitForAttachment(ATTACHEMENT_TIMEOUT)
-        self.phidget.setVoltageRatioChangeTrigger(0.005)
+        self.phidget.setDataInterval(50)
         self.phidget.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
+        LOG.debug("Attached %s", self.name)
 
     def _on_change(self, _, value, unit):
         "Callback for when the sensor's input is changed."""
-        LOG.debug("%s = %s%s", self.name, value, unit.symbol)
+        if not self.valid or abs(self.value - value) > 0.05:
+            # Update properties and notify observers
+            LOG.debug("%s = %s%s", self.name, value, unit.symbol)
 
-        # Update properties and notify observers
-        self.value = value
-        self.valid = True
-        self.loop.call_soon_threadsafe(self.event.set)
+            self.value = value
+            self.valid = True
+            self.loop.call_soon_threadsafe(self.event.set)
 
     def _on_error(self, ph, code, msg):
         """Callback for when the sensor detects receives an error.
@@ -70,7 +74,7 @@ class Distance:
         """
         if code == 4103:
             # Mark as malfrormed and notify observers
-            if self.valid:
+            if self.valid != True:
                 LOG.warning("%s is out of bounds", self.name)
                 self.valid = False
                 self.loop.call_soon_threadsafe(self.event.set)
@@ -92,16 +96,16 @@ class Distance:
 
 async def wait_input(*sensors, timeout=None):
     """Wait for input from one or more of the given sensors."""
-    tasks = { asyncio.get_event_loop().create_task(sensor.get()) for sensor in sensors }
+    tasks = { asyncio.get_event_loop().create_task(sensor.wait()) for sensor in sensors }
     done, pending = await asyncio.wait(tasks, timeout=timeout, return_when=asyncio.FIRST_COMPLETED)
     for pend in pending:
         pend.cancel()
-    return
-
+    return len(done) > 0
 
 if __name__ == '__main__':
-    import log, time, math
+    import log, time, math, control
     log.configure()
+    Log.enable(LogLevel.PHIDGET_LOG_VERBOSE, "phidget.log")
 
     loop = asyncio.get_event_loop()
     try:
@@ -111,15 +115,27 @@ if __name__ == '__main__':
 
             async def main():
                 while True:
-                    await wait_input(left, right)
+                    ok = await wait_input(left, right , timeout=3)
 
-                    if left.valid and right.valid:
+                    if ok and left.valid and right.valid:
+                        distance = min(left.value, right.value)
                         delta = left.value - right.value
-                        if abs(delta) <= 0.05:
-                            logging.info("Roughly level (%f)", delta)
+                        logging.debug("Distance=%f, delta of %f", distance, delta)
+
+                        if distance >= 10:
+                            control.forward()
+                        elif distance < 6:
+                            control.backward()
+                        elif delta > 0.5:
+                            control.turn_right()
+                        elif delta < -0.5:
+                            control.turn_left()
                         else:
-                            logging.info("Angle = %f (%fcm, %fcm)", 90 - math.degrees(math.atan2(6.5, delta)), left.value, right.value)
+                            control.stop()
+                    else:
+                        control.stop()
 
             loop.run_until_complete(main())
     finally:
         loop.close()
+        control.stop()
