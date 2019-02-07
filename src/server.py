@@ -1,6 +1,7 @@
 """A basic server for the demo days."""
 
 import asyncio
+import logging
 import sys
 
 from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
@@ -8,7 +9,11 @@ from Phidget22.Devices.DigitalInput import DigitalInput
 from Phidget22.Phidget import ChannelSubclass
 
 import control
+import log
 import motor
+import sensor
+
+NETWORK_LOG = logging.getLogger("Network")
 
 class ConnectionManager:
     """Manages a set of connections, with the ability to send messages to all
@@ -61,7 +66,7 @@ def exception_handler(loop, context):
        the default handler
 
     """
-    print("\33[1;31mTerminating loop due to error\33[0m")
+    logging.error("Terminating loop due to error")
     if loop.is_running():
         loop.stop()
     loop.default_exception_handler(context)
@@ -78,6 +83,7 @@ async def motor_control(queue, manager):
     motor.stop_motors()
 
     commands = control.__dict__
+    motor_log = logging.getLogger("Motor")
     while True:
         action = (await queue.pull()).lower().replace(' ', '_')
         motor.stop_motors()
@@ -85,18 +91,20 @@ async def motor_control(queue, manager):
 
         if 'stop' in action:
             # Stop commands are executed as-is
+            motor_log.info("Stopping")
             manager.send("Idle")
             control.stop()
         elif action in commands:
             # If we're a function defined in the control module, execute it.
+            motor_log.info("Running %s", action)
             manager.send("Running " + action)
             commands[action]()
         else:
             manager.send("Doing goodness knows what.")
 
 
-def sensor_setup(ph):
-    """When a sensor is attached, we configure it with various properties (interval between receiving inputs,
+def voltage_setup(ph):
+    """When a voltage is attached, we configure it with various properties (interval between receiving inputs,
        minimum change required before we get an input, etc...)
 
     """
@@ -106,22 +114,18 @@ def sensor_setup(ph):
         ph.setVoltageRatioChangeTrigger(0.005)
         ph.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_VOLTAGERATIO)
 
-def sensor_error(_ph, code, string):
-    """We get error messages if the sensor receives values outside its operating parameters."""
-    sys.stderr.write("[Phidget Error Event] -> " + string + " (" + str(code) + ")\n")
-
-def sensor_change(manager):
+def voltage_change(manager, name):
     """The above event is processed by the Phidget API and converted into a distance."""
     def handler(_ph, value, unit):
-        print("Sensor %s%s" % (value, unit.symbol))
-        manager.send("sensor %s%s" % (value, unit.symbol))
+        sensor.LOG.debug("Sensor %s = %s%s", name, value, unit.symbol)
+        manager.send("sensor %s = %s%s" % (name, value, unit.symbol))
     return handler
 
-def digital_change(manager):
+def digital_change(manager, name):
     """The above event is processed by the Phidget API."""
     def handler(_ph, value):
-        print("Sensor %s" % (value))
-        manager.send("sensor %s" % (value))
+        sensor.LOG.debug("Sensor %s = %s", name, value)
+        manager.send("sensor %s = %s" % (name, value))
     return handler
 
 class SpencerServerConnection(asyncio.Protocol):
@@ -146,11 +150,11 @@ class SpencerServerConnection(asyncio.Protocol):
         self.peername = transport.get_extra_info('peername')
         self.transport = transport
 
-        print('Connection from {}'.format(self.peername))
+        NETWORK_LOG.info('Connection from %s', self.peername)
         self.manager.add(self)
 
     def connection_lost(self, exc):
-        print('Lost connection from {} ({})'.format(self.peername, exc))
+        NETWORK_LOG.info('Lost connection from %s (%s)', self.peername, exc)
         self.manager.remove(self)
         self.queue.push("stop")
 
@@ -170,7 +174,7 @@ class SpencerServerConnection(asyncio.Protocol):
             if message.endswith("\r"):
                 message = message[:-1]
 
-            print('Message received: {}'.format(message))
+            NETWORK_LOG.debug('Message received: %s', message)
             self.queue.push(message)
 
     def send(self, message):
@@ -179,6 +183,8 @@ class SpencerServerConnection(asyncio.Protocol):
 
 def _main():
     """The main entry point of the server"""
+
+    log.configure()
 
     # Create an event loop. This effectively allows us to run multiple functions
     # at once (namely, the motor controller and server).
@@ -190,26 +196,20 @@ def _main():
     manager = ConnectionManager()
 
     # Create our voltage channel
-    channel = VoltageRatioInput()
-    channel.setChannel(0)
-    channel.setOnAttachHandler(sensor_setup)
-    channel.setOnErrorHandler(sensor_error)
-    channel.setOnSensorChangeHandler(sensor_change(manager))
+    channel = sensor.setup(VoltageRatioInput, 0)
+    channel.setOnAttachHandler(voltage_setup)
+    channel.setOnSensorChangeHandler(voltage_change(manager, "Front distance"))
 
     # Create our sensor channel
-    sensor_channel_0 = DigitalInput()
-    sensor_channel_0.setChannel(0)
-    # sensor_channel_0.setOnAttachHandler(sensor_setup)
-    sensor_channel_0.setOnErrorHandler(sensor_error)
-    sensor_channel_0.setOnStateChangeHandler(digital_change(manager))
+    sensor_channel_0 = sensor.setup(DigitalInput, 0)
+    sensor_channel_0.setOnStateChangeHandler(digital_change(manager, "Front touch"))
 
     # Create our sensor channel
-    sensor_channel_1 = DigitalInput()
-    sensor_channel_1.setChannel(1)
-    # sensor_channel_1.setOnAttachHandler(sensor_setup)
-    sensor_channel_1.setOnErrorHandler(sensor_error)
-    sensor_channel_1.setOnStateChangeHandler(digital_change(manager))
+    sensor_channel_1 = sensor.setup(DigitalInput, 1)
+    sensor_channel_1.setOnStateChangeHandler(digital_change(manager, "Back touch"))
 
+    sensor_channel_2 = sensor.setup(DigitalInput, 2)
+    sensor_channel_2.setOnStateChangeHandler(digital_change(manager, "Front lifting"))
 
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
@@ -221,16 +221,18 @@ def _main():
         # Wait for attachement and set the sensor type to the 10-80cm distance one
         if "-P" not in sys.argv:
             channel.openWaitForAttachment(1000)
+            channel.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2Y0A21)
+
             sensor_channel_0.openWaitForAttachment(1000)
             sensor_channel_1.openWaitForAttachment(1000)
-            channel.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2Y0A21)
+            sensor_channel_2.openWaitForAttachment(1000)
 
         server = loop.run_until_complete(loop.create_server(
             lambda: SpencerServerConnection(motor_queue, manager),
             '0.0.0.0', 1050
         ))
 
-        print('Serving on {}'.format(server.sockets[0].getsockname()))
+        NETWORK_LOG.info('Serving on %s', server.sockets[0].getsockname())
 
         loop.run_forever()
     finally:
@@ -241,10 +243,11 @@ def _main():
         loop.close()
 
         channel.setOnVoltageRatioChangeHandler(None)
-        channel.setOnSensorChangeHandler(None)
+        channel.close()
+
         sensor_channel_0.setOnStateChangeHandler(None)
         sensor_channel_1.setOnStateChangeHandler(None)
-        channel.close()
+        sensor_channel_2.setOnStateChangeHandler(None)
 
         motor.stop_motors()
 
