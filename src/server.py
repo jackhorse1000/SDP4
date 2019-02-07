@@ -195,25 +195,29 @@ def _main():
     # And we hold all currently connected computers here
     manager = ConnectionManager()
 
-    # Create our voltage channel
-    channel = sensor.setup(VoltageRatioInput, 0)
-    channel.setOnAttachHandler(voltage_setup)
-    channel.setOnSensorChangeHandler(voltage_change(manager, "Front distance"))
+    if "-P" not in sys.argv:
+        # Create our voltage channel
+        channel = sensor.setup(VoltageRatioInput, 0)
+        channel.setOnAttachHandler(voltage_setup)
+        channel.setOnSensorChangeHandler(voltage_change(manager, "Front distance"))
 
-    # Create our sensor channel
-    sensor_channel_0 = sensor.setup(DigitalInput, 0)
-    sensor_channel_0.setOnStateChangeHandler(digital_change(manager, "Front touch"))
+        # Create our sensor channel
+        sensor_channel_0 = sensor.setup(DigitalInput, 0)
+        sensor_channel_0.setOnStateChangeHandler(digital_change(manager, "Front touch"))
 
-    # Create our sensor channel
-    sensor_channel_1 = sensor.setup(DigitalInput, 1)
-    sensor_channel_1.setOnStateChangeHandler(digital_change(manager, "Back touch"))
+        # Create our sensor channel
+        sensor_channel_1 = sensor.setup(DigitalInput, 1)
+        sensor_channel_1.setOnStateChangeHandler(digital_change(manager, "Back touch"))
 
-    sensor_channel_2 = sensor.setup(DigitalInput, 2)
-    sensor_channel_2.setOnStateChangeHandler(digital_change(manager, "Front lifting"))
+        sensor_channel_2 = sensor.setup(DigitalInput, 2)
+        sensor_channel_2.setOnStateChangeHandler(digital_change(manager, "Front lifting"))
+
+    if "-M" not in sys.argv:
+        loop.create_task(motor_control(motor_queue, manager))
 
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
-    loop.create_task(motor_control(motor_queue, manager))
+
 
     # Construct the server and run it forever
     server = None
@@ -241,15 +245,16 @@ def _main():
             loop.run_until_complete(server.wait_closed())
 
         loop.close()
+        if "-P" not in sys.argv:
+            channel.setOnVoltageRatioChangeHandler(None)
+            channel.close()
 
-        channel.setOnVoltageRatioChangeHandler(None)
-        channel.close()
+            sensor_channel_0.setOnStateChangeHandler(None)
+            sensor_channel_1.setOnStateChangeHandler(None)
+            sensor_channel_2.setOnStateChangeHandler(None)
 
-        sensor_channel_0.setOnStateChangeHandler(None)
-        sensor_channel_1.setOnStateChangeHandler(None)
-        sensor_channel_2.setOnStateChangeHandler(None)
-
-        motor.stop_motors()
+        if "-M" not in sys.argv:
+            motor.stop_motors()
 
 if __name__ == "__main__":
     _main()
