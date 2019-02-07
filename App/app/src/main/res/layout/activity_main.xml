@@ -7,28 +7,39 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/connect_bluetooth_btn"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bluetooth Connect a new robot" />
+        android:layout_gravity="center_horizontal"
+        android:text="Spencer"
+        android:layout_margin="10dp"
+        android:textSize="40sp"/>
 
     <Button
         android:id="@+id/connect_wifi_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Wifi Connect a new robot" />
+        android:layout_gravity="center_horizontal"
+        android:padding="20dp"
+        android:text="Connect"
+        android:textSize="15sp"/>
 
     <Button
         android:id="@+id/technical_btn"
         android:layout_width="wrap_content"
-        android:layout_height="69dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="10dp"
+        android:textSize="15sp"
         android:text="Technical Manual" />
 
     <Button
         android:id="@+id/demo_btn"
         android:layout_width="wrap_content"
-        android:layout_height="74dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="10dp"
+        android:textSize="15sp"
         android:text="Demo" />
 
 </LinearLayout>

@@ -20,7 +20,8 @@ public class DemoActivity extends AppCompatActivity {
 
     private TCPClient tcpClient;
     private int sensorInputCount = 0;
-    private String[] sensorDataArray = {"", "", "", "", "", "", "", "", "", ""};
+    private String[] sensorDataArray = {"sensor Front distance = 13cm", "sensor Front touch = 1", "sensor Front touch = 0", "sensor Front distance = 10cm", "sensor Front distance = 12.5cm",
+            "sensor Back touch = 1", "sensor Back touch = 0", "sensor Front lifting = 1", "sensor Front lifting = 0", "sensor Front lifting = 1"};
     private ArrayAdapter arrayAdapter;
 
     private final String TAG = "DemoActivity";
