@@ -212,9 +212,12 @@ def _main():
         sensor_channel_2 = sensor.setup(DigitalInput, 2)
         sensor_channel_2.setOnStateChangeHandler(digital_change(manager, "Front lifting"))
 
-        # Register our tasks which run along side the server
-        loop.create_task(wakeup())
+    if "-M" not in sys.argv:
         loop.create_task(motor_control(motor_queue, manager))
+
+    # Register our tasks which run along side the server
+    loop.create_task(wakeup())
+
 
     # Construct the server and run it forever
     server = None
@@ -250,6 +253,7 @@ def _main():
             sensor_channel_1.setOnStateChangeHandler(None)
             sensor_channel_2.setOnStateChangeHandler(None)
 
+        if "-M" not in sys.argv:
             motor.stop_motors()
 
 if __name__ == "__main__":
