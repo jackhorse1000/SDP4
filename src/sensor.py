@@ -4,9 +4,6 @@ import asyncio
 import logging
 
 from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
-from Phidget22.Devices.DigitalInput import DigitalInput
-from Phidget22.Devices.Log import Log, LogLevel
-
 
 LOG = logging.getLogger("Sensors")
 
@@ -74,7 +71,7 @@ class Distance:
         """
         if code == 4103:
             # Mark as malfrormed and notify observers
-            if self.valid != True:
+            if self.valid or self.valid is None:
                 LOG.warning("%s is out of bounds", self.name)
                 self.valid = False
                 self.loop.call_soon_threadsafe(self.event.set)
@@ -95,15 +92,38 @@ class Distance:
         self.event.clear()
 
 async def wait_input(*sensors, timeout=None):
-    """Wait for input from one or more of the given sensors."""
-    tasks = { asyncio.get_event_loop().create_task(sensor.wait()) for sensor in sensors }
+    """Wait for input from one or more of the given sensors.
+
+       You can also specify a timeout argument. In this case, we will return if
+       any events were received during the period, as well as how much time we
+       have "remaining".
+
+    """
+    start = time.time()
+
+    # Await for a specific task
+    tasks = {asyncio.get_event_loop().create_task(sensor.wait()) for sensor in sensors}
     done, pending = await asyncio.wait(tasks, timeout=timeout, return_when=asyncio.FIRST_COMPLETED)
+    # Cancel any pending tasks
     for pend in pending:
         pend.cancel()
-    return len(done) > 0
+
+    return len(done) > 0, start + timeout - time.time() if timeout else None
+
+def get_valid(*sensors, aggregate=lambda x: x[0]):
+    """Filter a list of sensors for valid values, passing through any matching ones
+       through the aggregate function."""
+    values = [x.value for x in sensors if x.valid]
+    return aggregate(values) if values else None
 
 if __name__ == '__main__':
-    import log, time, math, control
+    import time
+
+    from Phidget22.Devices.Log import Log, LogLevel
+
+    import control
+    import log
+
     log.configure()
     Log.enable(LogLevel.PHIDGET_LOG_VERBOSE, "phidget.log")
 
@@ -113,9 +133,11 @@ if __name__ == '__main__':
             left.attach()
             right.attach()
 
-            async def main():
+            async def _main():
+                # Orient outselves against a wall
+                logging.info("Orienting Spencer")
                 while True:
-                    ok = await wait_input(left, right , timeout=3)
+                    ok, _ = await wait_input(left, right, timeout=3)
 
                     if ok and left.valid and right.valid:
                         distance = min(left.value, right.value)
@@ -124,18 +146,44 @@ if __name__ == '__main__':
 
                         if distance >= 10:
                             control.forward()
-                        elif distance < 6:
-                            control.backward()
+                        elif distance <= 5:
+                            break
                         elif delta > 0.5:
                             control.turn_right()
                         elif delta < -0.5:
                             control.turn_left()
+                        elif distance <= 5:
+                            break
                         else:
                             control.stop()
                     else:
                         control.stop()
 
-            loop.run_until_complete(main())
+                control.stop()
+
+                # We're nominally flush against a stair. Let's lift the front
+                # mechanism.
+                logging.info("Hopefully facing a stair. Going up!")
+                await asyncio.sleep(0.05)
+                control.lift_front()
+
+                # We continue to lift until there's a surface > 6cm away. At
+                # this point, it's probably fair to say we've reached the top of
+                # the step.
+                #
+                # We also stop if we've lifted for more than three seconds - at
+                # that point something has gone seriously wrong!
+                remaining = 3
+                while remaining > 0:
+                    ok, remaining = await wait_input(left, right, timeout=remaining)
+                    if ok and (left.valid or right.valid):
+                        distance = get_valid(left, right, aggregate=max)
+                        if distance and distance > 6:
+                            break
+
+                control.stop()
+
+            loop.run_until_complete(_main())
     finally:
         loop.close()
         control.stop()
