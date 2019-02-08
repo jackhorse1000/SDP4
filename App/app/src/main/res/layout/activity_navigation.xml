@@ -7,6 +7,7 @@
     tools:context=".NavigationActivity">
 
     <LinearLayout
+        android:id="@+id/communication_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -56,6 +57,61 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/forward_btn"
+        android:layout_marginTop="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="forward"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/communication_layout"/>
+
+    <Button
+        android:id="@+id/backward_btn"
+        android:layout_below="@+id/forward_btn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="200dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="backward"/>
+
+    <Button
+        android:id="@+id/turn_left_btn"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="75dp"
+        android:layout_below="@+id/forward_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="turn left"/>
+
+    <Button
+        android:id="@+id/turn_right_btn"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="75dp"
+        android:layout_below="@+id/forward_btn"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="turn right" />
+
+    <Button
+        android:id="@+id/upstairs_btn"
+        android:layout_marginTop="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/backward_btn"
+        android:layout_centerHorizontal="true"
+        android:text="upstaris"/>
+
+    <Button
+        android:id="@+id/downstairs_btn"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/upstairs_btn"
+        android:layout_centerHorizontal="true"
+        android:text="downstairs"/>
 
 
     <Button
