@@ -10,12 +10,13 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class NavigationActivity extends AppCompatActivity implements Handler.Callback {
+public class NavigationActivity extends AppCompatActivity {
     private final String TAG = "NavActivity";
 
     private TCPClient tcpClient;
 
-    private Button connectSpencerBtn;
+    private Button connectSpencerBtn, forwardBtn, backwardBtn, leftBtn, rightBtn,
+        upstairsBtn, downStairsBtn;
 
     private TextView statusTxt, connectionTxt;
 
@@ -67,12 +68,41 @@ public class NavigationActivity extends AppCompatActivity implements Handler.Cal
 
         connectSpencerBtn = findViewById(R.id.connect_spencer_btn);
         connectSpencerBtn.setOnClickListener(v -> connectToSpencer());
-    }
 
-    @Override
-    public boolean handleMessage(Message msg) {
-        // TODO: handle message here
-        Log.d(TAG, "Message received");
-        return false;
+        forwardBtn = findViewById(R.id.forward_btn);
+        forwardBtn.setOnClickListener(v -> {
+            String sendText = forwardBtn.getText().toString();
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+        });
+
+        backwardBtn = findViewById(R.id.backward_btn);
+        backwardBtn.setOnClickListener(v -> {
+            String sendText = backwardBtn.getText().toString();
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+        });
+
+        leftBtn = findViewById(R.id.turn_left_btn);
+        leftBtn.setOnClickListener(v -> {
+            String sendText = leftBtn.getText().toString();
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+        });
+
+        rightBtn = findViewById(R.id.turn_right_btn);
+        rightBtn.setOnClickListener(v -> {
+            String sendText = rightBtn.getText().toString();
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+        });
+
+        upstairsBtn = findViewById(R.id.upstairs_btn);
+        upstairsBtn.setOnClickListener(v -> {
+            String sendText = upstairsBtn.getText().toString();
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+        });
+
+        downStairsBtn = findViewById(R.id.downstairs_btn);
+        downStairsBtn.setOnClickListener(v -> {
+            String sendText = downStairsBtn.getText().toString();
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+        });
     }
 }
