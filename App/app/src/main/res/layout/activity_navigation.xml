@@ -102,7 +102,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/backward_btn"
         android:layout_centerHorizontal="true"
-        android:text="upstaris"/>
+        android:text="upstairs"/>
 
     <Button
         android:id="@+id/downstairs_btn"
