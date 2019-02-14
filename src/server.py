@@ -12,6 +12,8 @@ import control
 import log
 import motor
 import sensor
+from data import SensorData
+from data import Sensors
 
 NETWORK_LOG = logging.getLogger("Network")
 
@@ -119,6 +121,8 @@ def voltage_change(manager, name):
     def handler(_ph, value, unit):
         sensor.LOG.debug("Sensor %s = %s%s", name, value, unit.symbol)
         manager.send("sensor %s = %s%s" % (name, value, unit.symbol))
+        # Add sensor data to the data structure
+        SensorData.add_to_sensor_data(name, value)
     return handler
 
 def digital_change(manager, name):
@@ -126,6 +130,8 @@ def digital_change(manager, name):
     def handler(_ph, value):
         sensor.LOG.debug("Sensor %s = %s", name, value)
         manager.send("sensor %s = %s" % (name, value))
+        # Add sensor data to the data structure
+        SensorData.add_to_sensor_data(name, value)
     return handler
 
 class SpencerServerConnection(asyncio.Protocol):
@@ -199,18 +205,22 @@ def _main():
         # Create our voltage channel
         channel = sensor.setup(VoltageRatioInput, 0)
         channel.setOnAttachHandler(voltage_setup)
-        channel.setOnSensorChangeHandler(voltage_change(manager, "Front distance"))
+        channel.setOnSensorChangeHandler(voltage_change(manager, Sensors.front_dist_0.name))
 
         # Create our sensor channel
         sensor_channel_0 = sensor.setup(DigitalInput, 0)
-        sensor_channel_0.setOnStateChangeHandler(digital_change(manager, "Front touch"))
+        sensor_channel_0.setOnStateChangeHandler(digital_change(manager,
+                                                                Sensors.front_stair_touch.name))
 
         # Create our sensor channel
         sensor_channel_1 = sensor.setup(DigitalInput, 1)
-        sensor_channel_1.setOnStateChangeHandler(digital_change(manager, "Back touch"))
+        sensor_channel_1.setOnStateChangeHandler(digital_change(manager,
+                                                                Sensors.back_ground_touch.name))
 
         sensor_channel_2 = sensor.setup(DigitalInput, 2)
-        sensor_channel_2.setOnStateChangeHandler(digital_change(manager, "Front lifting"))
+        sensor_channel_2.setOnStateChangeHandler(digital_change(manager,
+                                                                Sensors.front_lifting_normal_touch
+                                                                .name))
 
     if "-M" not in sys.argv:
         loop.create_task(motor_control(motor_queue, manager))

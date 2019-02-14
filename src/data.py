@@ -1,4 +1,9 @@
 import threading
+import enum
+import logging
+
+
+SENSOR_DATA_LOG = logging.getLogger("SensorData")
 
 class SensorData():
     """
@@ -8,23 +13,25 @@ class SensorData():
     # TODO(anyone) Comment beside the sensors the channel they are using
 
     # Distance sensors
-    front_dist = 0.0
+    front_dist_0 = 0.0
+    front_dist_1 = 0.0
     back_ground_dist = 0.0
 
     # Touch sensors
-    is_back_ground_touch = False
-    is_back_lifting_normal = False
-    is_back_lifting_extended_max = False
+    is_back_ground_touch = 0
+    is_back_lifting_normal = 0
+    is_back_lifting_extended_max = 0
 
-    is_front_ground_touch = False
-    is_front_stair_touch = False
-    is_front_lifting_normal = False
-    is_front_lifting_extended_max = False # Fully extended is true when touch sensor reads 0
+    is_front_ground_touch = 0
+    is_front_stair_touch = 0
+    is_front_lifting_normal = 0
+    is_front_lifting_extended_max = 0 # Fully extended is true when touch sensor reads 0
 
-    is_front_middle_stair_touch = False
+    is_front_middle_stair_touch = 0
 
     # Distance sensors locks
-    lock_front_dist = threading.Lock()
+    lock_front_dist_0 = threading.Lock()
+    lock_front_dist_1 = threading.Lock()
     lock_back_ground_dist = threading.Lock()
 
     # Locks for each touch sensor
@@ -142,17 +149,30 @@ class SensorData():
             SensorData.is_back_ground_touch = is_touch
 
     @staticmethod
-    def get_front_dist():
+    def get_front_dist_0():
         """ Return the distance of the front distance sensor """
-        with SensorData.lock_front_dist:
-            data = SensorData.front_dist
+        with SensorData.lock_front_dist_0:
+            data = SensorData.front_dist_0
         return data
 
     @staticmethod
-    def set_front_dist(dist):
+    def set_front_dist_0(dist):
         """ Set the distance of the front distance sensor """
-        with SensorData.lock_front_dist:
-            SensorData.front_dist = dist
+        with SensorData.lock_front_dist_0:
+            SensorData.front_dist_0 = dist
+
+    @staticmethod
+    def get_front_dist_1():
+        """ Return the distance of the front distance sensor """
+        with SensorData.lock_front_dist_1:
+            data = SensorData.front_dist_1
+        return data
+
+    @staticmethod
+    def set_front_dist_1(dist):
+        """ Set the distance of the front distance sensor """
+        with SensorData.lock_front_dist_1:
+            SensorData.front_dist_1 = dist
 
     @staticmethod
     def get_back_ground_dist():
@@ -166,3 +186,59 @@ class SensorData():
         """ Set the distance of the back ground distance sensor """
         with SensorData.lock_back_ground_dist:
             SensorData.back_ground_dist = dist
+
+    @staticmethod
+    def add_to_sensor_data(name, value):
+        """ Adds sensors data to the data structure """
+        if name == Sensors.front_dist_0.name:
+            SensorData.set_front_dist_0(value)
+
+        elif name == Sensors.front_dist_1.name:
+            SensorData.set_front_dist_1(value)
+
+        elif name == Sensors.back_dist.name:
+            SensorData.set_back_ground_dist(value)
+
+        elif name == Sensors.back_ground_touch.name:
+            SensorData.set_back_ground_touch(value)
+
+        elif name == Sensors.back_lifting_normal_touch.name:
+            SensorData.set_back_lifting_normal_touch(value)
+
+        elif name == Sensors.back_lifting_extended_max_touch.name:
+            SensorData.set_back_lifting_extended_max(value)
+
+        elif name == Sensors.front_ground_touch.name:
+            SensorData.set_front_ground_touch(value)
+
+        elif name == Sensors.front_stair_touch.name:
+            SensorData.set_front_stair_touch(value)
+
+        elif name == Sensors.front_lifting_normal_touch.name:
+            SensorData.set_front_lifting_normal(value)
+
+        elif name == Sensors.front_lifting_extended_max_touch.name:
+            SensorData.set_front_lifting_extended_max(value)
+
+        elif name == Sensors.front_middle_stair_touch.name:
+            SensorData.set_front_middle_stair_touch(value)
+
+        else:
+            #TODO(anyone): PANIC I don't know what to do here
+            SENSOR_DATA_LOG.debug("Adding to data structure invalid name: %s", name)
+
+
+class Sensors(enum.Enum):
+    """ Enum for all the senors to make using them easier"""
+    front_dist_0 = 0
+    front_dist_1 = 1
+    back_dist = 2
+    back_ground_touch = 3
+    back_lifting_normal_touch = 4
+    back_lifting_extended_max_touch = 5
+    front_ground_touch = 6
+    front_stair_touch = 7
+    front_lifting_normal_touch = 8
+    front_lifting_extended_max_touch = 9
+    front_middle_stair_touch = 10
+
