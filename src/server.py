@@ -235,7 +235,7 @@ def _main():
         # Wait for attachement and set the sensor type to the 10-80cm distance one
         if "-P" not in sys.argv:
             channel.openWaitForAttachment(1000)
-            channel.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2Y0A21)
+            channel.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
 
             sensor_channel_0.openWaitForAttachment(1000)
             sensor_channel_1.openWaitForAttachment(1000)
