@@ -42,8 +42,9 @@ class Touch:
         self.phidget.setOnStateChangeHandler(self._on_change)
         self.phidget.setOnErrorHandler(self._on_error)
 
-    def _on_change(self, state):
+    def _on_change(self, _, state):
         "Callback for when the sensor's input is changed."""
+        LOG.debug("%s = %s", self.name, state)
         with self.lock:
             self.value = state
         self.loop.call_soon_threadsafe(self.event.set)
@@ -63,6 +64,22 @@ class Touch:
         """
         # TODO(anyone): Look into this
         on_error(ph, code, msg)
+    
+    def attach(self):
+        """Attach this sensor and configure it with various properties.
+
+           For now, we subscribe to updatees every 50ms (20Hz). However,
+           we only fire off the event listeners if this results in a
+           change of 5mm, to avoid too much noise.
+
+        """
+        self.phidget.openWaitForAttachment(ATTACHEMENT_TIMEOUT)
+        LOG.debug("Attached %s", self.name)
+
+    def __exit__(self, _a, _b, _c):
+        self.phidget.setOnErrorHandler(None)
+        self.phidget.setOnStateChangeHandler(None)
+        self.phidget.close()
 
 
 class Distance:
@@ -80,7 +97,6 @@ class Distance:
         self.phidget.setChannel(channel)
         self.phidget.setOnSensorChangeHandler(self._on_change)
         self.phidget.setOnErrorHandler(self._on_error)
-        self.phidget.setSensorType(self)
 
     def attach(self):
         """Attach this sensor and configure it with various properties.
@@ -94,10 +110,6 @@ class Distance:
         self.phidget.setDataInterval(50)
         self.phidget.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
         LOG.debug("Attached %s", self.name)
-
-    def set_sensor_type(self, type):
-        """ To set the type of sensor """
-        self.phidget.setSensorType(type)
 
     def _on_change(self, _, value, unit):
         "Callback for when the sensor's input is changed."""
