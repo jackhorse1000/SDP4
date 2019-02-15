@@ -100,6 +100,8 @@ async def motor_control(queue, manager):
             motor_log.info("Running %s", action)
             manager.send("Running " + action)
             commands[action]()
+            manager.send("sensor %s = %s" % (SensorData.front_dist_0.name,
+                                            SensorData.front_dist_0.get_value()))
         else:
             manager.send("Doing goodness knows what.")
 
