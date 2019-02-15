@@ -2,8 +2,10 @@
 
 import asyncio
 import logging
+import threading
 
 from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
+from Phidget22.Devices.DigitalInput import DigitalInput
 
 LOG = logging.getLogger("Sensors")
 
@@ -25,6 +27,44 @@ def setup(factory, channel):
     ph.setOnErrorHandler(on_error)
     return ph
 
+class Touch:
+    """A glorified wrapper over the touch sensor."""
+    def __init__(self, name, channel):
+        self.name = name
+        self.event = asyncio.Event()
+        self.value = 0
+        self.loop = asyncio.get_event_loop()
+
+        self.lock = threading.Lock()
+
+        self.phidget = DigitalInput()
+        self.phidget.setChannel(channel)
+        self.phidget.setOnStateChangeHandler(self._on_change)
+        self.phidget.setOnErrorHandler(self._on_error)
+
+    def _on_change(self, state):
+        "Callback for when the sensor's input is changed."""
+        with self.lock:
+            self.value = state
+        self.loop.call_soon_threadsafe(self.event.set)
+
+    def get_value(self):
+        """ Returns the value of the sensors data """
+        with self.lock:
+            data = self.value
+        return data
+
+    def _on_error(self, ph, code, msg):
+        """Callback for when the sensor detects receives an error.
+
+           We have a special implementation, as we want to handle the case where
+           the input is out of range.
+
+        """
+        # TODO(anyone): Look into this
+        on_error(ph, code, msg)
+
+
 class Distance:
     """A glorified wrapper over the distance sensor."""
     def __init__(self, name, channel):
@@ -33,6 +73,8 @@ class Distance:
         self.value = 0
         self.valid = None
         self.loop = asyncio.get_event_loop()
+
+        self.lock = threading.Lock()
 
         self.phidget = VoltageRatioInput()
         self.phidget.setChannel(channel)
@@ -58,9 +100,16 @@ class Distance:
             # Update properties and notify observers
             LOG.debug("%s = %s%s", self.name, value, unit.symbol)
 
-            self.value = value
+            with self.lock:
+                self.value = value
             self.valid = True
             self.loop.call_soon_threadsafe(self.event.set)
+
+    def get_value(self):
+        """ Returns the value of the sensors data """
+        with self.lock:
+            data = self.value
+        return data
 
     def _on_error(self, ph, code, msg):
         """Callback for when the sensor detects receives an error.
