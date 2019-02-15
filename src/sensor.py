@@ -80,6 +80,7 @@ class Distance:
         self.phidget.setChannel(channel)
         self.phidget.setOnSensorChangeHandler(self._on_change)
         self.phidget.setOnErrorHandler(self._on_error)
+        self.phidget.setSensorType(self)
 
     def attach(self):
         """Attach this sensor and configure it with various properties.
@@ -93,6 +94,10 @@ class Distance:
         self.phidget.setDataInterval(50)
         self.phidget.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
         LOG.debug("Attached %s", self.name)
+
+    def set_sensor_type(self, type):
+        """ To set the type of sensor """
+        self.phidget.setSensorType(type)
 
     def _on_change(self, _, value, unit):
         "Callback for when the sensor's input is changed."""

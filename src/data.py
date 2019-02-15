@@ -12,7 +12,7 @@ class SensorData():
     front_dist_0 = Distance("front_distance_0", 0)
     front_dist_1 = Distance("front_distance_1", 1)
     back_ground_dist = Distance("back_ground_dist", 2)
-    _ground_dist = Distance("back_ground_dist", 3)
+    middle_ground_dist = Distance("back_ground_dist", 3)
 
     # Touch sensors TODO(anyone): Need to check these channels
     back_ground_touch = Touch("back_ground_touch", 0)

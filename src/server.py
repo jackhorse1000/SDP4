@@ -13,7 +13,6 @@ import log
 import motor
 import sensor
 from data import SensorData
-from data import Sensors
 
 NETWORK_LOG = logging.getLogger("Network")
 
@@ -121,8 +120,6 @@ def voltage_change(manager, name):
     def handler(_ph, value, unit):
         sensor.LOG.debug("Sensor %s = %s%s", name, value, unit.symbol)
         manager.send("sensor %s = %s%s" % (name, value, unit.symbol))
-        # Add sensor data to the data structure
-        SensorData.add_to_sensor_data(name, value)
     return handler
 
 def digital_change(manager, name):
@@ -130,8 +127,6 @@ def digital_change(manager, name):
     def handler(_ph, value):
         sensor.LOG.debug("Sensor %s = %s", name, value)
         manager.send("sensor %s = %s" % (name, value))
-        # Add sensor data to the data structure
-        SensorData.add_to_sensor_data(name, value)
     return handler
 
 class SpencerServerConnection(asyncio.Protocol):
@@ -201,26 +196,27 @@ def _main():
     # And we hold all currently connected computers here
     manager = ConnectionManager()
 
-    if "-P" not in sys.argv:
+    # if "-P" not in sys.argv:
         # Create our voltage channel
-        channel = sensor.setup(VoltageRatioInput, 0)
-        channel.setOnAttachHandler(voltage_setup)
-        channel.setOnSensorChangeHandler(voltage_change(manager, Sensors.front_dist_0.name))
+        # channel = sensor.setup(VoltageRatioInput, 0)
+        # channel.setOnAttachHandler(voltage_setup)
+        # channel.setOnSensorChangeHandler(voltage_change(manager, Sensors.front_dist_0.name))
+        # SensorData.front_dist_0
 
-        # Create our sensor channel
-        sensor_channel_0 = sensor.setup(DigitalInput, 0)
-        sensor_channel_0.setOnStateChangeHandler(digital_change(manager,
-                                                                Sensors.front_stair_touch.name))
+        # # Create our sensor channel
+        # sensor_channel_0 = sensor.setup(DigitalInput, 0)
+        # sensor_channel_0.setOnStateChangeHandler(digital_change(manager,
+        #                                                         Sensors.front_stair_touch.name))
 
-        # Create our sensor channel
-        sensor_channel_1 = sensor.setup(DigitalInput, 1)
-        sensor_channel_1.setOnStateChangeHandler(digital_change(manager,
-                                                                Sensors.back_ground_touch.name))
+        # # Create our sensor channel
+        # sensor_channel_1 = sensor.setup(DigitalInput, 1)
+        # sensor_channel_1.setOnStateChangeHandler(digital_change(manager,
+        #                                                         Sensors.back_ground_touch.name))
 
-        sensor_channel_2 = sensor.setup(DigitalInput, 2)
-        sensor_channel_2.setOnStateChangeHandler(digital_change(manager,
-                                                                Sensors.front_lifting_normal_touch
-                                                                .name))
+        # sensor_channel_2 = sensor.setup(DigitalInput, 2)
+        # sensor_channel_2.setOnStateChangeHandler(digital_change(manager,
+        #                                                         Sensors.front_lifting_normal_touch
+        #                                                         .name))
 
     if "-M" not in sys.argv:
         loop.create_task(motor_control(motor_queue, manager))
@@ -234,12 +230,13 @@ def _main():
     try:
         # Wait for attachement and set the sensor type to the 10-80cm distance one
         if "-P" not in sys.argv:
-            channel.openWaitForAttachment(1000)
-            channel.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
-
-            sensor_channel_0.openWaitForAttachment(1000)
-            sensor_channel_1.openWaitForAttachment(1000)
-            sensor_channel_2.openWaitForAttachment(1000)
+            # channel.openWaitForAttachment(1000)
+            # channel.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
+            SensorData.front_dist_0.attach()
+            SensorData.front_dist_0.set_sensor_type(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
+            # sensor_channel_0.openWaitForAttachment(1000)
+            # sensor_channel_1.openWaitForAttachment(1000)
+            # sensor_channel_2.openWaitForAttachment(1000)
 
         server = loop.run_until_complete(loop.create_server(
             lambda: SpencerServerConnection(motor_queue, manager),
@@ -256,12 +253,12 @@ def _main():
 
         loop.close()
         if "-P" not in sys.argv:
-            channel.setOnVoltageRatioChangeHandler(None)
-            channel.close()
-
-            sensor_channel_0.setOnStateChangeHandler(None)
-            sensor_channel_1.setOnStateChangeHandler(None)
-            sensor_channel_2.setOnStateChangeHandler(None)
+            # channel.setOnVoltageRatioChangeHandler(None)
+            # channel.close()
+            SensorData.front_dist_0.__exit__(1, 2, 3)
+            # sensor_channel_0.setOnStateChangeHandler(None)
+            # sensor_channel_1.setOnStateChangeHandler(None)
+            # sensor_channel_2.setOnStateChangeHandler(None)
 
         if "-M" not in sys.argv:
             motor.stop_motors()
