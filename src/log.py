@@ -14,17 +14,17 @@ COLOURS = {
 
 class ColourFormatter(logging.Formatter):
     """Formats log messages using ANSI escape codes."""
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs): # type: ignore
         super().__init__(*args, **kwargs)
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         msg = super().format(record)
         if record.levelname in COLOURS:
             msg = "\033[1;3%dm%s\033[0m" % (COLOURS[record.levelname], msg)
         return msg
 
 
-def configure():
+def configure() -> None:
     """Configure the root logger. This should be called once when the program is
        initialised.
 

@@ -4,15 +4,14 @@ import asyncio
 import logging
 import sys
 
-from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
-from Phidget22.Devices.DigitalInput import DigitalInput
+from Phidget22.Devices.VoltageRatioInput import VoltageRatioSensorType
 from Phidget22.Phidget import ChannelSubclass
 
 import control
 import log
 import motor
 import sensor
-from data import SensorData
+from data import FakeSensorData, SensorData
 
 NETWORK_LOG = logging.getLogger("Network")
 
@@ -190,17 +189,19 @@ def _main():
     # at once (namely, the motor controller and server).
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(exception_handler)
-    if "-M" not in sys.argv:
-        # Motor control statements are pushed into this queue
-        motor_queue = SingleValueQueue()
+
+    # Motor control statements are pushed into this queue
+    motor_queue = SingleValueQueue()
+
     # And we hold all currently connected computers here
     manager = ConnectionManager()
 
-    if "-F" not in sys.argv:
-        SensorData(False)
 
     if "-M" not in sys.argv:
         loop.create_task(motor_control(motor_queue, manager))
+
+    # Grab our sensor data, or fake data if passing the -P flag.
+    data = FakeSensorData() if "-P" in sys.argv else SensorData()
 
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
@@ -209,31 +210,21 @@ def _main():
     # Construct the server and run it forever
     server = None
     try:
-        # Wait for attachement and set the sensor type to the 10-80cm distance one
-        if "-P" not in sys.argv:
-            # Distance sensor attach
-            SensorData.front_dist_0.attach()
+        with data.front_dist_0, data.back_ground_touch:
+            server = loop.run_until_complete(loop.create_server(
+                lambda: SpencerServerConnection(motor_queue, manager),
+                '0.0.0.0', 1050
+            ))
 
-            # Touch sensor attach
-            SensorData.back_ground_touch.attach()
+            NETWORK_LOG.info('Serving on %s', server.sockets[0].getsockname())
 
-        server = loop.run_until_complete(loop.create_server(
-            lambda: SpencerServerConnection(motor_queue, manager),
-            '0.0.0.0', 1050
-        ))
-
-        NETWORK_LOG.info('Serving on %s', server.sockets[0].getsockname())
-
-        loop.run_forever()
+            loop.run_forever()
     finally:
         if server is not None:
             server.close()
             loop.run_until_complete(server.wait_closed())
 
         loop.close()
-        if "-P" not in sys.argv:
-            SensorData.back_ground_touch.__exit__(1, 2, 3)
-            SensorData.front_dist_0.__exit__(1, 2, 3)
 
         if "-M" not in sys.argv:
             motor.stop_motors()

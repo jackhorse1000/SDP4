@@ -2,3 +2,4 @@
 *.egg-info
 App/.idea
 *.log
+.mypy_cache
