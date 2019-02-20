@@ -1,14 +1,10 @@
-from sensor import Distance
-from sensor import Touch
+from sensor import *
 
-class SensorData():
+class SensorData:
     """
     Contains the sensor data from the robot
     """
 
-    # TODO(anyone) Comment beside the sensors the channel they are using
-
-    # Distance sensors TODO(anyone): Need to check these channels
     front_dist_0 = Distance("front_distance_0", 0)
     front_dist_1 = Distance("front_distance_1", 1)
     back_ground_dist = Distance("back_ground_dist", 2)
@@ -23,3 +19,39 @@ class SensorData():
     front_lifting_normal = Touch("front_lifting_normal", 5)
     front_lifting_extended_max = Touch("front_lifting_extended_max", 6)
     front_middle_stair_touch = Touch("front_middle_stair_touch", 7)
+
+    def __init__(self, is_real):
+        """ initialise the sensors """
+        if is_real == True:
+            # Distance sensors TODO(anyone): Need to check these channels
+            SensorData.front_dist_0 = Distance("front_distance_0", 0)
+            SensorData.front_dist_1 = Distance("front_distance_1", 1)
+            SensorData.back_ground_dist = Distance("back_ground_dist", 2)
+            SensorData.middle_ground_dist = Distance("back_ground_dist", 3)
+
+            # Touch sensors TODO(anyone): Need to check these channels
+            SensorData.back_ground_touch = Touch("back_ground_touch", 0)
+            SensorData.back_lifting_normal = Touch("back_lifting_normal", 1)
+            SensorData.back_lifting_extended_max = Touch("back_lifting_extended_max", 2)
+            SensorData.front_ground_touch = Touch("front_ground_touch", 3)
+            SensorData.front_stair_touch = Touch("front_stair_touch", 4)
+            SensorData.front_lifting_normal = Touch("front_lifting_normal", 5)
+            SensorData.front_lifting_extended_max = Touch("front_lifting_extended_max", 6)
+            SensorData.front_middle_stair_touch = Touch("front_middle_stair_touch", 7)
+        else:
+            # Distance sensors TODO(anyone): Need to check these channels
+            SensorData.front_dist_0 = FakeSensor("front_distance_0")
+            SensorData.front_dist_1 = FakeSensor("front_distance_1")
+            SensorData.back_ground_dist = FakeSensor("back_ground_dist")
+            SensorData.middle_ground_dist = FakeSensor("back_ground_dist")
+
+            # Touch sensors TODO(anyone): Need to check these channels
+            SensorData.back_ground_touch = FakeSensor("back_ground_touch")
+            SensorData.back_lifting_normal = FakeSensor("back_lifting_normal")
+            SensorData.back_lifting_extended_max = FakeSensor("back_lifting_extended_max")
+            SensorData.front_ground_touch = FakeSensor("front_ground_touch")
+            SensorData.front_stair_touch = FakeSensor("front_stair_touch")
+            SensorData.front_lifting_normal = FakeSensor("front_lifting_normal")
+            SensorData.front_lifting_extended_max = FakeSensor("front_lifting_extended_max")
+            SensorData.front_middle_stair_touch = FakeSensor("front_middle_stair_touch")
+

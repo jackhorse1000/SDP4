@@ -5,6 +5,7 @@ import functools
 import logging
 
 import motor
+from data import SensorData
 
 LOG = logging.getLogger("Control")
 
@@ -58,6 +59,7 @@ def stop():
 
     """
     motor.stop_motors()
+    # TODO(anyone): Stop threads here???
 
 @state("drive")
 def forward():
@@ -114,3 +116,18 @@ def lift_both():
     """Lift both the front and back motors."""
     lift_back()
     lift_front()
+
+def climb_upstairs():
+    """ Function to make Spencer start climbing up stairs"""
+    # TODO(anyone): Stop step climbing thread
+    return
+
+def climb_downstairs():
+    """ Function to make Spencer start climbing downstairs"""
+    # TODO(anyone): Stop step climbing thread
+    return
+
+def climb_a_stair():
+    """ Function to make Spencer climb a step """
+    # TODO(anyone): Stop step climbing thread
+    return

@@ -190,10 +190,14 @@ def _main():
     # at once (namely, the motor controller and server).
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(exception_handler)
-    # Motor control statements are pushed into this queue
-    motor_queue = SingleValueQueue()
+    if "-M" not in sys.argv:
+        # Motor control statements are pushed into this queue
+        motor_queue = SingleValueQueue()
     # And we hold all currently connected computers here
-    manager = ConnectionManager()                                                 .name))
+    manager = ConnectionManager()
+
+    if "-F" not in sys.argv:
+        SensorData(False)
 
     if "-M" not in sys.argv:
         loop.create_task(motor_control(motor_queue, manager))
@@ -228,7 +232,7 @@ def _main():
 
         loop.close()
         if "-P" not in sys.argv:
-            SensorData.back_ground_touch.__exit__(1,2,3)
+            SensorData.back_ground_touch.__exit__(1, 2, 3)
             SensorData.front_dist_0.__exit__(1, 2, 3)
 
         if "-M" not in sys.argv:

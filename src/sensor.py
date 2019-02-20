@@ -182,6 +182,36 @@ def get_valid(*sensors, aggregate=lambda x: x[0]):
     values = [x.value for x in sensors if x.valid]
     return aggregate(values) if values else None
 
+
+class FakeSensor:
+    """ Used to fake the sensors around the robot """
+
+    def __init__(self, name):
+        self.name = name
+        self.value = 0
+        self.lock = threading.Lock()
+
+    def attach(self):
+        """
+        Used to fake the attach function
+
+        """
+        LOG.debug("Attached %s", self.name)
+
+    def get_value(self):
+        """ Returns the value of the sensors data """
+        with self.lock:
+            data = self.value
+        return data
+  
+    def set_value(self, value):
+        """ Set the value of the sensors data """
+        with self.lock:
+            self.value = value
+
+    def __exit__(self, _a, _b, _c):
+        return
+
 if __name__ == '__main__':
     import time
 
