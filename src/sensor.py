@@ -203,7 +203,7 @@ class FakeSensor:
         with self.lock:
             data = self.value
         return data
-  
+
     def set_value(self, value):
         """ Set the value of the sensors data """
         with self.lock:

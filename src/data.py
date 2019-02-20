@@ -14,15 +14,17 @@ class SensorData:
     back_ground_touch = Touch("back_ground_touch", 0)
     back_lifting_normal = Touch("back_lifting_normal", 1)
     back_lifting_extended_max = Touch("back_lifting_extended_max", 2)
-    front_ground_touch = Touch("front_ground_touch", 3)
-    front_stair_touch = Touch("front_stair_touch", 4)
-    front_lifting_normal = Touch("front_lifting_normal", 5)
-    front_lifting_extended_max = Touch("front_lifting_extended_max", 6)
-    front_middle_stair_touch = Touch("front_middle_stair_touch", 7)
+    back_stair_touch = Touch("back_stair_touch", 3)
+    front_ground_touch = Touch("front_ground_touch", 4)
+    front_stair_touch = Touch("front_stair_touch", 5)
+    front_lifting_normal = Touch("front_lifting_normal", 6)
+    front_lifting_extended_max = Touch("front_lifting_extended_max", 7)
+    front_middle_stair_touch = Touch("front_middle_stair_touch", 8)
+    middle_ground_touch = Touch("middle_ground_touch", 9)
 
     def __init__(self, is_real):
         """ initialise the sensors """
-        if is_real == True:
+        if is_real:
             # Distance sensors TODO(anyone): Need to check these channels
             SensorData.front_dist_0 = Distance("front_distance_0", 0)
             SensorData.front_dist_1 = Distance("front_distance_1", 1)
@@ -54,4 +56,5 @@ class SensorData:
             SensorData.front_lifting_normal = FakeSensor("front_lifting_normal")
             SensorData.front_lifting_extended_max = FakeSensor("front_lifting_extended_max")
             SensorData.front_middle_stair_touch = FakeSensor("front_middle_stair_touch")
-
+            SensorData.middle_ground_touch = FakeSensor("middle_ground_touch")
+            SensorData.back_stair_touch = FakeSensor("back_stair_touch")
