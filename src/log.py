@@ -1,5 +1,6 @@
 """Helper methods to configure the system logger."""
 import logging
+import logging.config
 import warnings
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -11,6 +12,16 @@ COLOURS = {
     'CRITICAL': YELLOW,
     'ERROR': RED
 }
+
+def loop_exception_handler(loop, context):
+    """A custom error handler for the loop, which stops the loop before continuing to
+       the default handler
+
+    """
+    logging.error("Terminating loop due to error")
+    if loop.is_running():
+        loop.stop()
+    loop.default_exception_handler(context)
 
 class ColourFormatter(logging.Formatter):
     """Formats log messages using ANSI escape codes."""
@@ -44,3 +55,6 @@ def configure() -> None:
 
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
+
+    # Make a couple of logs less verbose
+    # logging.getLogger("Sensors").setLevel(logging.INFO)

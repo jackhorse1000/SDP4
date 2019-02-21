@@ -6,21 +6,21 @@ from sensor import Distance, Touch, FakeSensor
 
 class SensorData:
     """Contains the sensor data from the robot."""
-    front_dist_0: Distance
-    front_dist_1: Distance
-    back_ground_dist: Distance
-    middle_ground_dist: Distance
+    # front_dist_0: Distance
+    # front_dist_1: Distance
+    # back_ground_dist: Distance
+    # middle_ground_dist: Distance
 
-    back_ground_touch: Touch
-    back_lifting_normal: Touch
-    back_lifting_extended_max: Touch
-    back_stair_touch: Touch
-    front_ground_touch: Touch
-    front_stair_touch: Touch
-    front_lifting_normal: Touch
-    front_lifting_extended_max: Touch
-    front_middle_stair_touch: Touch
-    middle_ground_touch: Touch
+    # back_ground_touch: Touch
+    # back_lifting_normal: Touch
+    # back_lifting_extended_max: Touch
+    # back_stair_touch: Touch
+    # front_ground_touch: Touch
+    # front_stair_touch: Touch
+    # front_lifting_normal: Touch
+    # front_lifting_extended_max: Touch
+    # front_middle_stair_touch: Touch
+    # middle_ground_touch: Touch
 
     def __init__(self):
         # TODO(anyone): Need to check these channels

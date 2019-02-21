@@ -29,12 +29,14 @@ def setup(factory, channel):
 
 class Touch:
     """A glorified wrapper over the touch sensor."""
-    name: str
-    value: int
+    # name: str
+    # value: int
+    # valid: bool
 
     def __init__(self, name: str, channel: int):
         self.name = name
         self.value = 0
+        self.valid = False
 
         self.lock = threading.Lock()
 
@@ -57,8 +59,9 @@ class Touch:
             data = self.value
         return data == 1
 
-    def attach(self):
+    def __enter__(self):
         """Attach this sensor and configure it with various properties.
+
         """
         self.phidget.openWaitForAttachment(ATTACHMENT_TIMEOUT)
         LOG.debug("Attached %s", self.name)
@@ -71,9 +74,9 @@ class Touch:
 class Distance:
     """A glorified wrapper over the distance sensor."""
 
-    name: str
-    value: float
-    valid: Optional[bool]
+    # name: str
+    # value: float
+    # valid: Optional[bool]
 
     def __init__(self, name: str, channel: int):
         self.name = name
@@ -86,16 +89,6 @@ class Distance:
         self.phidget.setChannel(channel)
         self.phidget.setOnSensorChangeHandler(self._on_change)
         self.phidget.setOnErrorHandler(self._on_error)
-
-    def attach(self):
-        """Attach this sensor and configure it with various properties.
-
-           For now, we subscribe to updates every 50ms (20Hz).
-        """
-        self.phidget.openWaitForAttachment(ATTACHMENT_TIMEOUT)
-        self.phidget.setDataInterval(50)
-        self.phidget.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
-        LOG.debug("Attached %s", self.name)
 
     def _on_change(self, _, value, unit):
         "Callback for when the sensor's input is changed."""
@@ -129,6 +122,15 @@ class Distance:
             on_error(ph, code, msg)
 
     def __enter__(self):
+        """Attach this sensor and configure it with various properties.
+
+           For now, we subscribe to updates every 50ms (20Hz).
+        """
+        self.phidget.openWaitForAttachment(ATTACHMENT_TIMEOUT)
+        self.phidget.setDataInterval(50)
+        self.phidget.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
+        LOG.debug("Attached %s", self.name)
+
         return self
 
     def __exit__(self, _a, _b, _c):
@@ -143,13 +145,6 @@ class FakeSensor:
         self.name = name
         self.value = 0
         self.lock = threading.Lock()
-
-    def attach(self):
-        """
-        Used to fake the attach function
-
-        """
-        LOG.debug("Attached %s", self.name)
 
     def get(self):
         """ Returns the value of the sensors data """

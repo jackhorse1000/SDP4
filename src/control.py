@@ -19,7 +19,7 @@ DRIVE_SIDE_BCK = 100
 STEP_BACK = 3  # 1 up, -1 down
 STEP_FRONT = 2
 
-STATES: Dict[str, str] = {}
+STATES = {} # type: Dict[str, str]
 
 def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
     """A decorator, which only applies the underlying function if the given machines
@@ -41,8 +41,8 @@ def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
 
             # And call if any changes occurred.
             if changed:
-                LOG.debug("Running %s", new_state)
-                # func()
+                LOG.info("Running %s", new_state)
+                func()
 
         return worker
 
