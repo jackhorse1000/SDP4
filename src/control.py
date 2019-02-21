@@ -37,11 +37,11 @@ def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
             for machine in machines:
                 if machine not in STATES or STATES[machine] != new_state:
                     changed = True
+                    LOG.debug("%s: %s -> %s", machine, STATES[machine] if machine in STATES else "_", new_state)
                     STATES[machine] = new_state
 
             # And call if any changes occurred.
             if changed:
-                LOG.info("Running %s", new_state)
                 func()
 
         return worker

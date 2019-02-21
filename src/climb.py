@@ -122,7 +122,7 @@ class ClimbController:
                 failure = failure + 1
             elif touch.get():
                 control.stop()
-                return
+                return True
             else:
                 control.lower_front()
             await asyncio.sleep(SLEEP)
@@ -143,8 +143,8 @@ class ClimbController:
             #     return False
 
             # await asyncio.wait_for(self.front_forward(), timeout=3)
-            # if not await asyncio.wait_for(self.front_approach_down(), timeout=1.2):
-                # return False
+            if not await asyncio.wait_for(self.front_brace(), timeout=1.2):
+                return False
 
             await self.lift()
         finally:

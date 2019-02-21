@@ -51,6 +51,7 @@ class Touch:
         "Callback for when the sensor's input is changed."""
         LOG.debug("%s = %s", self.name, state)
         with self.lock:
+            self.valid = True
             self.value = state
 
     def get(self) -> bool:
@@ -124,8 +125,8 @@ class Distance:
                 if self.valid or self.valid is None:
                     LOG.warning("%s is out of bounds", self.name)
                     self.valid = False
-                else:
-                    on_error(ph, code, msg)
+        else:
+            on_error(ph, code, msg)
 
     def __enter__(self):
         """Attach this sensor and configure it with various properties.
