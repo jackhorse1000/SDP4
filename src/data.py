@@ -2,26 +2,27 @@
 
 # pylint: disable=R0902
 
-from sensor import Distance, Touch, FakeSensor
 import threading
+
+from sensor import Distance, Touch, FakeSensor
 
 class SensorData:
     """Contains the sensor data from the robot."""
-    # front_dist_0: Distance
-    # front_dist_1: Distance
-    # back_ground_dist: Distance
-    # middle_ground_dist: Distance
+    front_dist_0 = None # type: Distance
+    front_dist_1 = None # type: Distance
+    back_ground_dist = None # type: Distance
+    middle_ground_dist = None # type: Distance
 
-    # back_ground_touch: Touch
-    # back_lifting_normal: Touch
-    # back_lifting_extended_max: Touch
-    # back_stair_touch: Touch
-    # front_ground_touch: Touch
-    # front_stair_touch: Touch
-    # front_lifting_normal: Touch
-    # front_lifting_extended_max: Touch
-    # front_middle_stair_touch: Touch
-    # middle_ground_touch: Touch
+    back_ground_touch = None # type: Touch
+    back_lifting_normal = None # type: Touch
+    back_lifting_extended_max = None # type: Touch
+    back_stair_touch = None # type: Touch
+    front_ground_touch = None # type: Touch
+    front_stair_touch = None # type: Touch
+    front_lifting_normal = None # type: Touch
+    front_lifting_extended_max = None # type: Touch
+    front_middle_stair_touch = None # type: Touch
+    middle_ground_touch = None # type: Touch
 
     is_moving = False
     is_moving_lock = threading.Lock()

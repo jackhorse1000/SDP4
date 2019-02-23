@@ -29,9 +29,9 @@ def setup(factory, channel):
 
 class Touch:
     """A glorified wrapper over the touch sensor."""
-    # name: str
-    # value: int
-    # valid: bool
+    name = None # type: str
+    value = None # type: int
+    valid = None # type: bool
 
     def __init__(self, name: str, channel: int):
         self.name = name
@@ -75,9 +75,9 @@ class Touch:
 class Distance:
     """A glorified wrapper over the distance sensor."""
 
-    # name: str
-    # value: float
-    # valid: Optional[bool]
+    name = None # type: str
+    value = None # type: float
+    valid = None # type: Optional[bool]
 
     def __init__(self, name: str, channel: int):
         self.name = name
@@ -106,11 +106,10 @@ class Distance:
             data = self.value
         return data
 
-    def get_valid(self) -> bool:
+    def get_valid(self) -> Optional[bool]:
         """ Returns the true/false if the sensor reading is valid"""
         with self.lock:
-            is_valid = self.valid
-        return is_valid
+            return self.valid
 
     def _on_error(self, ph, code, msg):
         """Callback for when the sensor detects receives an error.

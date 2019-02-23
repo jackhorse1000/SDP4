@@ -1,6 +1,8 @@
 """Helper methods to configure the system logger."""
+import asyncio
 import logging
 import logging.config
+from typing import Any, Dict
 import warnings
 
 BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = range(8)
@@ -13,7 +15,7 @@ COLOURS = {
     'ERROR': RED
 }
 
-def loop_exception_handler(loop, context):
+def loop_exception_handler(loop: asyncio.AbstractEventLoop, context: Dict[str, Any]) -> None:
     """A custom error handler for the loop, which stops the loop before continuing to
        the default handler
 

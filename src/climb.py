@@ -18,9 +18,9 @@ class ClimbController:
     """The main controller for Spencer, reading from sensor input and
        executing work on the motors."""
 
-    # sensors: SensorData
+    sensors = None # type: SensorData
 
-    def __init__(self, sensors: SensorData):
+    def __init__(self, sensors: SensorData) -> None:
         self.sensors = sensors
 
     async def find_wall(self) -> bool:
@@ -37,7 +37,7 @@ class ClimbController:
                 failure = failure + 1
             else:
                 failure = 0
-                distance =  min(left.value, right.value)
+                distance = min(left.value, right.value)
                 delta = left.value - right.value
                 LOG.debug("Distance=%f, delta=%f", distance, delta)
 
@@ -78,7 +78,7 @@ class ClimbController:
             if not left.valid and not right.valid:
                 failure = failure + 1
             else:
-                distance =  max(left.value if left.valid else 0, right.value if right.valid else 0)
+                distance = max(left.value if left.valid else 0, right.value if right.valid else 0)
                 LOG.debug("Distance=%f", distance)
 
                 if distance > 12:
@@ -106,7 +106,7 @@ class ClimbController:
         await asyncio.sleep(1)
         control.stop()
 
-    async def front_brace(self) -> None:
+    async def front_brace(self) -> bool:
         """Lower the front mechanism down until it's hard up against the
            floor.
 
@@ -128,11 +128,16 @@ class ClimbController:
             await asyncio.sleep(SLEEP)
 
     async def lift(self) -> None:
+        """Lift both mechanisms until we're at the top."""
         control.lower_both()
         await asyncio.sleep(5)
         control.stop()
 
     async def work(self):
+        """The main "worker" method for lifting up a stair. We'll probably make
+           this more sane in the future.
+
+        """
         try:
             # if not await self.find_wall():
             #     return False
@@ -169,7 +174,6 @@ async def climb_upstairs(sensors: SensorData) -> None:
         else:
             # TODO(anyone) Align step
             control.forward()
-            pass
 
 
     # LIFT FRONT ABOVE STEP
@@ -259,19 +263,21 @@ def climb_a_stair():
 
 
 if __name__ == "__main__":
-    import log
-    log.configure()
+    def _main():
+        import log
+        log.configure()
 
-    loop = asyncio.get_event_loop()
-    loop.set_exception_handler(log.loop_exception_handler)
+        loop = asyncio.get_event_loop()
+        loop.set_exception_handler(log.loop_exception_handler)
 
-    data = SensorData()
+        data = SensorData()
 
-    try:
-        with data.front_dist_0, data.front_dist_1, data.front_ground_touch:
-            controller = ClimbController(data)
-            loop.create_task(controller.work())
-            loop.run_forever()
-    finally:
-        loop.close()
-        control.stop()
+        try:
+            with data.front_dist_0, data.front_dist_1, data.front_ground_touch:
+                controller = ClimbController(data)
+                loop.create_task(controller.work())
+                loop.run_forever()
+        finally:
+            loop.close()
+            control.stop()
+    _main()
