@@ -3,6 +3,7 @@
 # pylint: disable=R0902
 
 from sensor import Distance, Touch, FakeSensor
+import threading
 
 class SensorData:
     """Contains the sensor data from the robot."""
@@ -21,6 +22,9 @@ class SensorData:
     # front_lifting_extended_max: Touch
     # front_middle_stair_touch: Touch
     # middle_ground_touch: Touch
+
+    is_moving = False
+    is_moving_lock = threading.Lock()
 
     def __init__(self):
         # TODO(anyone): Need to check these channels
@@ -42,6 +46,19 @@ class SensorData:
         self.front_lifting_extended_max = Touch("front_lifting_extended_max", 7)
         self.front_middle_stair_touch = Touch("front_middle_stair_touch", 8)
         self.middle_ground_touch = Touch("middle_ground_touch", 9)
+
+    @staticmethod
+    def get_is_moving():
+        """ Returns if the robot is moving """
+        with SensorData.is_moving_lock:
+            data = SensorData.is_moving
+        return data
+
+    @staticmethod
+    def set_is_moving(data):
+        """ Sets if the robot is moving """
+        with SensorData.is_moving_lock:
+            SensorData.is_moving = data
 
 class FakeSensorData:
     """An mock version of SensorData, containing just fake sensors."""

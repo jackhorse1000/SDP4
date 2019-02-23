@@ -6,6 +6,7 @@ import asyncio
 import logging
 
 from data import SensorData
+# from autonomous_control import stop, forward
 import control
 
 LOG = logging.getLogger("climb")
@@ -142,8 +143,8 @@ class ClimbController:
             #     return False
 
             # await asyncio.wait_for(self.front_forward(), timeout=3)
-            if not await asyncio.wait_for(self.front_approach_down(), timeout=1.2):
-                return False
+            # if not await asyncio.wait_for(self.front_approach_down(), timeout=1.2):
+                # return False
 
             await self.lift()
         finally:
@@ -164,9 +165,10 @@ async def climb_upstairs(sensors: SensorData) -> None:
         if sensors.front_stair_touch.get():
             # We are touching the step we can continue
             touching_step = True
-            stop()
+            control.stop()
         else:
-            # TODO(anyone) Align step keep driving forward until we reach step
+            # TODO(anyone) Align step
+            control.forward()
             pass
 
 
@@ -178,7 +180,7 @@ async def climb_upstairs(sensors: SensorData) -> None:
                 sensors.front_dist_0.get() >= 20 and sensors.front_dist_1.get() >= 20):
             # The front is above the step
             front_above_step = True
-            stop()
+            control.stop()
         else:
             # The front is not above the step we need to continue
             # TODO(anyone): Lift the front more
@@ -197,7 +199,7 @@ async def climb_upstairs(sensors: SensorData) -> None:
             if sensors.front_middle_stair_touch == 1:
                 # Middle is touching the step
                 # TODO(anyone): Lower the front until touching the step
-                stop()
+                control.stop()
             else:
                 # TODO(anyone): Drive forward until Middle is touching the step
                 pass
@@ -208,7 +210,7 @@ async def climb_upstairs(sensors: SensorData) -> None:
         if sensors.front_lifting_normal == 1 and sensors.back_lifting_extended_max == 0:
             # The robot has moved the maximum it can for either lifting mechanism
             max_movement = True
-            stop()
+            control.stop()
         else:
             #TODO(anyone): Continue to lift the robot up
             pass
@@ -223,7 +225,7 @@ async def climb_upstairs(sensors: SensorData) -> None:
         if sensors.front_ground_touch.get() and sensors.middle_ground_touch.get() and sensors.back_stair_touch.get():
             # The robot is on the step
             on_step = True
-            stop()
+            control.stop()
         else:
             # The robot is not on the step
             # TODO(anyone): Drive forward and keep the lifting mechanisms at the limits of extension
@@ -235,7 +237,7 @@ async def climb_upstairs(sensors: SensorData) -> None:
         if sensors.back_lifting_normal == 1:
             # Back is normal
             is_back_normal = True
-            stop()
+            control.stop()
         else:
             # TODO(anyone): Continue lifting back until normal
             pass

@@ -92,19 +92,24 @@ class Distance:
 
     def _on_change(self, _, value, unit):
         "Callback for when the sensor's input is changed."""
-        if not self.valid or abs(self.value - value) > 0.05:
-            # Update properties and notify observers
-            LOG.debug("%s = %s%s", self.name, value, unit.symbol)
-
-            with self.lock:
+        with self.lock:
+            if not self.valid or abs(self.value - value) > 0.05:
+                # Update properties and notify observers
+                LOG.debug("%s = %s%s", self.name, value, unit.symbol)
                 self.value = value
-            self.valid = True
+                self.valid = True
 
     def get(self) -> float:
         """ Returns the value of the sensors data """
         with self.lock:
             data = self.value
         return data
+
+    def get_valid(self) -> bool:
+        """ Returns the true/false if the sensor reading is valid"""
+        with self.lock:
+            is_valid = self.valid
+        return is_valid
 
     def _on_error(self, ph, code, msg):
         """Callback for when the sensor detects receives an error.
@@ -114,12 +119,13 @@ class Distance:
 
         """
         if code == 4103:
-            # Mark as malfrormed and notify observers
-            if self.valid or self.valid is None:
-                LOG.warning("%s is out of bounds", self.name)
-                self.valid = False
-        else:
-            on_error(ph, code, msg)
+            # Mark as malformed and notify observers
+            with self.lock:
+                if self.valid or self.valid is None:
+                    LOG.warning("%s is out of bounds", self.name)
+                    self.valid = False
+                else:
+                    on_error(ph, code, msg)
 
     def __enter__(self):
         """Attach this sensor and configure it with various properties.
