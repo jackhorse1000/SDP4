@@ -21,7 +21,7 @@ DRIVE_SIDE_BCK = 100
 STEP_BACK = 3  # 1 up, -1 down
 STEP_FRONT = 2
 
-STATES: Dict[str, str] = {}
+STATES = {} # type: Dict[str, str]
 
 def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
     """A decorator, which only applies the underlying function if the given machines
@@ -60,8 +60,8 @@ def stop() -> None:
        after using this.
 
     """
+    LOG.info("Stopping motors")
     motor.stop_motors()
-    data.set_is_moving(False)
 
 # TODO(anyone): NEED TO ADD SAFETY TO EVERYTHING
 
@@ -70,27 +70,34 @@ async def poll_forward():
     while True:
         if "drive" in STATES and STATES["drive"] == "forward" and data.front_stair_touch.get():
             stop()
+        
+        if "drive" in STATES and STATES["drive"] == "forward" and data.front_middle_stair_touch.get() and (not data.front_lifting_extended_max.get() or data.front_lifting_normal.get()):
+            stop()
+
+        await asyncio.sleep(0.05)
+
+async def poll_lift_front():
+    """Stops moving forward if the front sensor is triggered."""
+    while True:
+        if "step_front" in STATES and STATES["step_front"] == "lift_front" and not data.front_lifting_extended_max.get():
+            stop()
+
+        await asyncio.sleep(0.05)
+
+async def poll_lower_front():
+    """Stops moving forward if the front sensor is triggered."""
+    while True:
+        if "step_front" in STATES and STATES["step_front"] == "lower_front" and (data.front_ground_touch.get() or data.front_lifting_normal.get()):
+            stop()
 
         await asyncio.sleep(0.05)
 
 @state("drive")
 def forward() -> None:
     """Move Spencer forwards."""
-    data.set_is_moving(True)
     motor.set_motor(DRIVE_LEFT, DRIVE_SIDE_FWD)
     motor.set_motor(DRIVE_RIGHT, DRIVE_SIDE_FWD)
     motor.set_motor(DRIVE_BACK, DRIVE_SIDE_FWD)
-    safety_forward()
-
-async def safety_forward():
-    """ Used to check if we are safe to drive forward """
-    # TODO (anyone): Review this, would like to include distance sensors here
-    # TODO (anyone): Test this
-    is_moving = data.get_is_moving()
-    while is_moving:
-        if data.front_stair_touch.get():
-            stop()
-        is_moving = data.get_is_moving()
 
 @state("drive")
 def backward() -> None:
@@ -98,7 +105,6 @@ def backward() -> None:
     motor.set_motor(DRIVE_LEFT, DRIVE_SIDE_BCK)
     motor.set_motor(DRIVE_RIGHT, DRIVE_SIDE_BCK)
     motor.set_motor(DRIVE_BACK, DRIVE_SIDE_BCK)
-
 
 @state("drive")
 def turn_left() -> None:

@@ -7,11 +7,11 @@ import sys
 from Phidget22.Devices.VoltageRatioInput import VoltageRatioSensorType
 from Phidget22.Phidget import ChannelSubclass
 
-import control
+import autonomous_control as control
 import log
 import motor
 import sensor
-from data import FakeSensorData, SensorData
+from data import SensorData as data
 
 NETWORK_LOG = logging.getLogger("Network")
 
@@ -201,17 +201,19 @@ def _main():
         loop.create_task(motor_control(motor_queue, manager))
 
     # Grab our sensor data, or fake data if passing the -P flag.
-    data = FakeSensorData() if "-P" in sys.argv else SensorData()
+    data.init()
 
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
-    # loop.create_task(autonomous_control.poll_forward())
+    loop.create_task(control.poll_forward())
+    loop.create_task(control.poll_lift_front())
+    loop.create_task(control.poll_lower_front())
 
 
     # Construct the server and run it forever
     server = None
     try:
-        with data.front_dist_0, data.back_ground_touch:
+        with data.front_dist_0, data.front_stair_touch, data.front_ground_touch, data.front_middle_stair_touch, data.front_lifting_extended_max, data.front_lifting_normal:
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050
