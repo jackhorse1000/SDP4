@@ -87,7 +87,7 @@ async def poll_lift_front():
 async def poll_lower_front():
     """Stops moving forward if the front sensor is triggered."""
     while True:
-        if "step_front" in STATES and STATES["step_front"] == "lower_front" and (data.front_ground_touch.get() or data.front_lifting_normal.get()):
+        if "step_front" in STATES and STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
             stop()
 
         await asyncio.sleep(0.05)
