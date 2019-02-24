@@ -1,6 +1,7 @@
 """Generic motor-control module. Provides helper methods for manipulating
    each motor and pairs of motors. Same as control.py but with added safety"""
 
+import asyncio
 import functools
 import logging
 from typing import Callable, Dict
@@ -43,7 +44,7 @@ def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
             # And call if any changes occurred.
             if changed:
                 LOG.debug("Running %s", new_state)
-                # func()
+                func()
 
         return worker
 
@@ -63,6 +64,14 @@ def stop() -> None:
     data.set_is_moving(False)
 
 # TODO(anyone): NEED TO ADD SAFETY TO EVERYTHING
+
+async def poll_forward():
+    """Stops moving forward if the front sensor is triggered."""
+    while True:
+        if "drive" in STATES and STATES["drive"] == "forward" and data.front_stair_touch.get():
+            stop()
+
+        await asyncio.sleep(0.05)
 
 @state("drive")
 def forward() -> None:

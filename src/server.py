@@ -205,6 +205,7 @@ def _main():
 
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
+    # loop.create_task(autonomous_control.poll_forward())
 
 
     # Construct the server and run it forever
