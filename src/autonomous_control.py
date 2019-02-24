@@ -11,8 +11,8 @@ from data import SensorData as data
 
 LOG = logging.getLogger("Control")
 
-DRIVE_RIGHT = 5
-DRIVE_LEFT = 4
+DRIVE_RIGHT = 4
+DRIVE_LEFT = 5
 DRIVE_BACK = 1
 
 DRIVE_SIDE_FWD = -100
@@ -29,6 +29,10 @@ def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
 
        This can be thought of as a way to emulate basic state-transitions.
     """
+    for machine in machines:
+        if machine not in STATES:
+            STATES[machine] = "_"
+
     def decorator(func: Callable[[], None]) -> Callable[[], None]:
         new_state = func.__name__
 
@@ -37,7 +41,7 @@ def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
             changed = False
             # Update the state machine
             for machine in machines:
-                if machine not in STATES or STATES[machine] != new_state:
+                if STATES[machine] != new_state:
                     changed = True
                     STATES[machine] = new_state
 
@@ -50,7 +54,7 @@ def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
 
     return decorator
 
-@state("step_front", "step_back", "drive")
+@state("step_front", "step_back", "drive", "climb")
 def stop() -> None:
 
     """Stop all motors.
@@ -63,31 +67,29 @@ def stop() -> None:
     LOG.info("Stopping motors")
     motor.stop_motors()
 
-# TODO(anyone): NEED TO ADD SAFETY TO EVERYTHING
-
-async def poll_forward():
-    """Stops moving forward if the front sensor is triggered."""
+async def state_limiter():
+    """Stops various sensors when we hit specific conditions"""
     while True:
-        if "drive" in STATES and STATES["drive"] == "forward" and data.front_stair_touch.get():
-            stop()
-        
-        if "drive" in STATES and STATES["drive"] == "forward" and data.front_middle_stair_touch.get() and (not data.front_lifting_extended_max.get() or data.front_lifting_normal.get()):
+        # TODO(anyone): NEED TO ADD SAFETY TO EVERYTHING
+
+        # Stop moving forward if we ever hit the front touch sensor
+        if STATES["drive"] == "forward" and data.front_stair_touch.get():
             stop()
 
-        await asyncio.sleep(0.05)
-
-async def poll_lift_front():
-    """Stops moving forward if the front sensor is triggered."""
-    while True:
-        if "step_front" in STATES and STATES["step_front"] == "lift_front" and not data.front_lifting_extended_max.get():
+        # Stop moving forward if the middle chassis button is touching and we're not extended
+        if STATES["drive"] == "forward" and data.front_middle_stair_touch.get() and not data.front_lifting_extended_max.get():
             stop()
 
-        await asyncio.sleep(0.05)
+        # Stop lifting the front when the maximum flag is set
+        if STATES["step_front"] == "lift_front" and not data.front_lifting_extended_max.get():
+            stop()
 
-async def poll_lower_front():
-    """Stops moving forward if the front sensor is triggered."""
-    while True:
-        if "step_front" in STATES and STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
+        # Stop lowering the front when it hits the ground
+        if STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
+            stop()
+
+        # Stop lowering both when the front has reached its default position
+        if STATES["climb"] == "lower_both" and not data.front_lifting_normal.get():
             stop()
 
         await asyncio.sleep(0.05)
@@ -118,7 +120,7 @@ def turn_right() -> None:
     motor.set_motor(DRIVE_LEFT, DRIVE_SIDE_FWD)
     motor.set_motor(DRIVE_RIGHT, DRIVE_SIDE_BCK)
 
-@state("step_front")
+@state("step_front") # TODO Merge this into the climb stage??
 def lower_front() -> None:
     """Moves the front stepper down, to the base position"""
     motor.set_motor(STEP_FRONT, -100)
@@ -138,12 +140,47 @@ def lift_back() -> None:
     """Moves the back stepper upwards, to the base position"""
     motor.set_motor(STEP_BACK, 100)
 
+@state("climb")
 def lower_both() -> None:
     """Lower both the front and back motors."""
-    lower_back()
-    lower_front()
+    motor.set_motor(STEP_BACK, -100)
+    motor.set_motor(STEP_FRONT, -100)
 
+@state("climb")
 def lift_both() -> None:
     """Lift both the front and back motors."""
-    lift_back()
-    lift_front()
+    motor.set_motor(STEP_BACK, 100)
+    motor.set_motor(STEP_FRONT, 100)
+
+def climb() -> None:
+    """Tries to climb automatically"""
+    async def run():
+        import climb
+        climb = climb.ClimbController(data)
+        await climb.find_wall()
+
+        forward()
+        while STATES["drive"] != "stop":
+            await asyncio.sleep(0.1)
+
+        lift_front()
+        while STATES["step_front"] != "stop":
+            await asyncio.sleep(0.1)
+
+        forward()
+        while STATES["drive"] != "stop":
+            await asyncio.sleep(0.1)
+
+        lower_front()
+        while STATES["step_front"] != "stop":
+            await asyncio.sleep(0.1)
+
+        lower_both()
+        while STATES["climb"] != "stop":
+            await asyncio.sleep(0.1)
+
+        forward()
+        await asyncio.sleep(2)
+
+
+    asyncio.get_event_loop().create_task(run())

@@ -205,15 +205,13 @@ def _main():
 
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
-    loop.create_task(control.poll_forward())
-    loop.create_task(control.poll_lift_front())
-    loop.create_task(control.poll_lower_front())
+    loop.create_task(control.state_limiter())
 
 
     # Construct the server and run it forever
     server = None
     try:
-        with data.front_dist_0, data.front_stair_touch, data.front_ground_touch, data.front_middle_stair_touch, data.front_lifting_extended_max, data.front_lifting_normal:
+        with data.front_dist_0, data.front_dist_1, data.front_stair_touch, data.front_ground_touch, data.front_middle_stair_touch, data.front_lifting_extended_max, data.front_lifting_normal:
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050

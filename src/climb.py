@@ -7,7 +7,7 @@ import logging
 
 from data import SensorData
 # from autonomous_control import stop, forward
-import control
+import autonomous_control as control
 
 LOG = logging.getLogger("climb")
 
