@@ -16,7 +16,7 @@ public class NavigationActivity extends AppCompatActivity {
     private TCPClient tcpClient;
 
     private Button connectSpencerBtn, forwardBtn, backwardBtn, leftBtn, rightBtn,
-        upstairsBtn, downStairsBtn;
+        upstairsBtn, downStairsBtn, stopAllBtn;
 
     private TextView statusTxt, connectionTxt;
 
@@ -68,6 +68,12 @@ public class NavigationActivity extends AppCompatActivity {
 
         connectSpencerBtn = findViewById(R.id.connect_spencer_btn);
         connectSpencerBtn.setOnClickListener(v -> connectToSpencer());
+
+        stopAllBtn = findViewById(R.id.stop_all_btn);
+        stopAllBtn.setOnClickListener(v -> {
+            String sendText = stopAllBtn.getText().toString();
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+        });
 
         forwardBtn = findViewById(R.id.forward_btn);
         forwardBtn.setOnClickListener(v -> {
