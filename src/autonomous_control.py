@@ -73,12 +73,12 @@ async def state_limiter():
         # TODO(anyone): NEED TO ADD SAFETY TO EVERYTHING
 
         # Stop moving forward if we ever hit the front touch sensor
-        # if STATES["drive"] == "forward" and data.front_stair_touch.get():
-        #     stop()
+        if STATES["drive"] == "forward" and data.front_stair_touch.get():
+            stop()
 
         # Stop moving forward if the middle chassis button is touching and we're not extended
-        # if STATES["drive"] == "forward" and data.front_middle_stair_touch.get() and not data.front_lifting_extended_max.get():
-        #     stop()
+        if STATES["drive"] == "forward" and data.front_middle_stair_touch.get() and not data.front_lifting_extended_max.get():
+            stop()
         
         # Stop moving forward if the back chassis button is touching and are extended
         if STATES["drive"] == "forward" and data.back_stair_touch.get():
@@ -86,12 +86,12 @@ async def state_limiter():
             stop()
 
         # Stop lifting the front when the maximum flag is set
-        # if STATES["step_front"] == "lift_front" and not data.front_lifting_extended_max.get():
-        #     stop()
+        if STATES["step_front"] == "lift_front" and not data.front_lifting_extended_max.get():
+            stop()
 
         # Stop lowering the front when it hits the ground
-        # if STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
-        #     stop()
+        if STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
+            stop()
 
         # Stop lowering both when the front has reached its default position
         if STATES["climb"] == "lower_both" and (not data.front_lifting_normal.get() or data.back_lifting_extended_max.get()):
@@ -104,7 +104,7 @@ async def state_limiter():
             if (data.back_lifting_extended_max.get() ):
                   # Continue to lift the back, so stop the front lifting
                   motor.stop_motor(STEP_BACK)
-            if (not data.front_lifting_normal.get() and data.back_lifting_extended_max.get() or data.middle_ground_touch.get()):
+            if (not data.front_lifting_normal.get() and data.back_lifting_extended_max.get() or data.middle_ground_touch.get() or data.back_stair_touch.get()):
                 stop()
         
         # Stop lifting both when the middle has touched the ground
@@ -178,25 +178,25 @@ def lift_both() -> None:
 def climb() -> None:
     """Tries to climb automatically"""
     async def run():
-        # import climb
-        # climb = climb.ClimbController(data)
-        # await climb.find_wall()
+        import climb
+        climb = climb.ClimbController(data)
+        await climb.find_wall()
 
-        # forward()
-        # while STATES["drive"] != "stop":
-        #     await asyncio.sleep(0.1)
+        forward()
+        while STATES["drive"] != "stop":
+            await asyncio.sleep(0.1)
 
-        # lift_front()
-        # while STATES["step_front"] != "stop":
-        #     await asyncio.sleep(0.1)
+        lift_front()
+        while STATES["step_front"] != "stop":
+            await asyncio.sleep(0.1)
 
-        # forward()
-        # while STATES["drive"] != "stop":
-        #     await asyncio.sleep(0.1)
+        forward()
+        while STATES["drive"] != "stop":
+            await asyncio.sleep(0.1)
 
-        # lower_front()
-        # while STATES["step_front"] != "stop":
-        #     await asyncio.sleep(0.1)
+        lower_front()
+        while STATES["step_front"] != "stop":
+            await asyncio.sleep(0.1)
 
         lower_both()
         while STATES["climb"] != "stop":

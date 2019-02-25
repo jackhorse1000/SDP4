@@ -215,7 +215,7 @@ def _main():
     # Construct the server and run it forever
     server = None
     try:
-        with data.front_lifting_normal:
+        with data.front_dist_0, data.front_dist_1, data.front_lifting_normal, data.front_stair_touch, data.front_ground_touch, data.front_middle_stair_touch, data.front_lifting_extended_max:
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050
