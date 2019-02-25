@@ -8,6 +8,7 @@ from Phidget22.Devices.VoltageRatioInput import VoltageRatioSensorType
 from Phidget22.Phidget import ChannelSubclass
 
 import autonomous_control as control
+from threading import Thread
 import log
 import motor
 import sensor
@@ -206,12 +207,13 @@ def _main():
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
     loop.create_task(control.state_limiter())
-
+    # Create the sensor thread
+    thread_i2c_sensors = Thread(target = data.i2c_touch_sensors(1, 0x27))
 
     # Construct the server and run it forever
     server = None
     try:
-        with data.front_dist_0, data.front_dist_1, data.front_stair_touch, data.front_ground_touch, data.front_middle_stair_touch, data.front_lifting_extended_max, data.front_lifting_normal:
+        with data.front_lifting_normal:
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050

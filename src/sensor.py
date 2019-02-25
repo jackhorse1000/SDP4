@@ -2,6 +2,7 @@
 
 import logging
 import threading
+import smbus2
 from typing import Optional
 
 from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
@@ -59,6 +60,14 @@ class Touch:
         with self.lock:
             data = self.value
         return data == 1
+    
+    def set(self, value):
+        """ Sets the value of the sensors data """
+        if self.value != value:
+            LOG.debug("%s = %s", self.name, value)
+        with self.lock:
+            self.valid = True
+            self.value = value
 
     def __enter__(self):
         """Attach this sensor and configure it with various properties.
@@ -72,6 +81,20 @@ class Touch:
         self.phidget.setOnStateChangeHandler(None)
         self.phidget.close()
 
+class i2cTouchSensors:
+    """ touch sensors connected to the i2c """ 
+    def __init__(self, i2c_bus_no, address):
+        """ init for i2c bus """
+        self.bus_no = i2c_bus_no
+        self.bus = smbus2.SMBus(i2c_bus_no)
+        self.address = address
+        self.bus.write_byte(self.address, 255)
+
+    def get_pins(self):
+        """ reads the pin states """
+        state = self.bus.read_byte(self.address)
+        return state
+ 
 class Distance:
     """A glorified wrapper over the distance sensor."""
 
