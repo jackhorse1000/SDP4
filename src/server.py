@@ -13,6 +13,7 @@ import log
 import motor
 import sensor
 from data import SensorData as data
+from i2c_sensor_thread import SensorsI2c
 
 NETWORK_LOG = logging.getLogger("Network")
 
@@ -208,7 +209,8 @@ def _main():
     loop.create_task(wakeup())
     loop.create_task(control.state_limiter())
     # Create the sensor thread
-    thread_i2c_sensors = Thread(target = data.i2c_touch_sensors(1, 0x27))
+    thread_i2c_sensors = SensorsI2c(1, 0x27)
+    thread_i2c_sensors.start()
 
     # Construct the server and run it forever
     server = None
@@ -228,6 +230,7 @@ def _main():
             loop.run_until_complete(server.wait_closed())
 
         loop.close()
+        thread_i2c_sensors.close()
 
         if "-M" not in sys.argv:
             motor.stop_motors()

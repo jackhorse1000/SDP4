@@ -3,8 +3,6 @@
 # pylint: disable=R0902
 
 import threading
-import time
-import smbus2
 
 from sensor import Distance, Touch, FakeSensor
 
@@ -64,21 +62,6 @@ class SensorData:
         SensorData.front_lifting_extended_max = Touch("front_lifting_extended_max", 2)
         SensorData.front_middle_stair_touch = Touch("front_middle_stair_touch", 3)
         SensorData.middle_ground_touch = Touch("middle_ground_touch", 9)
-
-    @staticmethod
-    def i2c_touch_sensors(i2c_bus_no, address):
-        """ Method should be run in a thread to get sensor data """
-        bus = smbus2.SMBus(i2c_bus_no)
-        bus.write_byte(address, 255)
-
-        while True:
-            state = bus.read_byte(address)
-            #TODO(anyone) Add touch sensors below call by using on change and passing the state
-            SensorData.middle_ground_touch.set(not bool(state & 0x1))
-            SensorData.back_stair_touch.set(not bool(state & 0x2))
-            SensorData.back_lifting_normal.set(not bool(state & 0x4))
-            SensorData.back_lifting_extended_max.set(not bool(state & 0x8))
-            time.sleep(0.01)
 
 class FakeSensorData:
     """An mock version of SensorData, containing just fake sensors."""

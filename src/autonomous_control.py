@@ -73,28 +73,39 @@ async def state_limiter():
         # TODO(anyone): NEED TO ADD SAFETY TO EVERYTHING
 
         # Stop moving forward if we ever hit the front touch sensor
-        if STATES["drive"] == "forward" and data.front_stair_touch.get():
-            stop()
+        # if STATES["drive"] == "forward" and data.front_stair_touch.get():
+        #     stop()
 
         # Stop moving forward if the middle chassis button is touching and we're not extended
-        if STATES["drive"] == "forward" and data.front_middle_stair_touch.get() and not data.front_lifting_extended_max.get():
-            stop()
+        # if STATES["drive"] == "forward" and data.front_middle_stair_touch.get() and not data.front_lifting_extended_max.get():
+        #     stop()
         
         # Stop moving forward if the back chassis button is touching and are extended
         if STATES["drive"] == "forward" and data.back_stair_touch.get():
+            LOG.info("back touch state: %d", data.back_stair_touch.get())
             stop()
 
         # Stop lifting the front when the maximum flag is set
-        if STATES["step_front"] == "lift_front" and not data.front_lifting_extended_max.get():
-            stop()
+        # if STATES["step_front"] == "lift_front" and not data.front_lifting_extended_max.get():
+        #     stop()
 
         # Stop lowering the front when it hits the ground
-        if STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
-            stop()
+        # if STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
+        #     stop()
 
         # Stop lowering both when the front has reached its default position
-        if STATES["climb"] == "lower_both" and (not data.front_lifting_normal.get() or data.back_lifting_extended_max):
-            stop()
+        if STATES["climb"] == "lower_both" and (not data.front_lifting_normal.get() or data.back_lifting_extended_max.get()):
+            LOG.info("%s state: %d", data.front_lifting_normal.name, data.front_lifting_normal.get())
+            LOG.info("%s state: %d", data.back_lifting_extended_max.name, data.back_lifting_extended_max.get())
+            if (not data.front_lifting_normal.get()):
+                  # Continue to lift the back, so stop the front lifting
+                  motor.stop_motor(STEP_FRONT)
+                  motor.set_motor(DRIVE_BACK, DRIVE_SIDE_FWD)
+            if (data.back_lifting_extended_max.get() ):
+                  # Continue to lift the back, so stop the front lifting
+                  motor.stop_motor(STEP_BACK)
+            if (not data.front_lifting_normal.get() and data.back_lifting_extended_max.get() or data.middle_ground_touch.get()):
+                stop()
         
         # Stop lifting both when the middle has touched the ground
         if STATES["climb"] == "lift_both" and data.middle_ground_touch.get():
