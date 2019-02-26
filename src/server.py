@@ -212,13 +212,13 @@ def _main():
     data.init()
 
     # Register our tasks which run along side the server
-    loop.create_task(wakeup())
-    loop.create_task(check_sensors())
+    # loop.create_task(wakeup())
+    # loop.create_task(check_sensors())
 
     # loop.create_task(control.state_limiter())
     # Create the sensor thread
-    thread_i2c_sensors = SensorsI2c(1, 0x27)
-    thread_i2c_sensors.start()
+    # thread_i2c_sensors = SensorsI2c(1, 0x27)
+    # thread_i2c_sensors.start()
 
     # Construct the server and run it forever
     server = None
@@ -229,8 +229,10 @@ def _main():
              data.front_stair_touch, \
              data.front_lifting_normal, \
              data.front_lifting_extended_max, \
-             data.front_middle_stair_touch:
-
+             data.front_middle_stair_touch, \
+             data.back_stair_touch, \
+             data.back_lifting_extended_max, \
+             data.back_lifting_normal:
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050

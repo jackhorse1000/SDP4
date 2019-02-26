@@ -10,6 +10,7 @@ class SensorData:
     """Contains the sensor data from the robot."""
     front_dist_0 = None # type: Distance
     front_dist_1 = None # type: Distance
+    back_stair_dist = None # type: Distance
     back_ground_dist = None # type: Distance
     middle_ground_dist = None # type: Distance
 
@@ -48,21 +49,22 @@ class SensorData:
         # Distance sensors
         SensorData.front_dist_0 = Distance("front_distance_0", 0)
         SensorData.front_dist_1 = Distance("front_distance_1", 1)
-        SensorData.back_ground_dist = Distance("back_ground_dist", 2)
-        SensorData.middle_ground_dist = Distance("back_ground_dist", 3)
+        SensorData.back_stair_dist = Distance("back_stair_touch", 2)
+        SensorData.back_ground_dist = Distance("back_ground_dist", 3)
+        SensorData.middle_ground_dist = Distance("back_ground_dist", 4)
 
         # Touch sensors
-        SensorData.back_ground_touch = Touch("back_ground_touch", 5)
-        SensorData.front_ground_touch = Touch("front_ground_touch", 1)
-        SensorData.front_stair_touch = Touch("front_stair_touch", 0)
-        SensorData.front_lifting_normal = Touch("front_lifting_normal", 4)
+        # SensorData.back_ground_touch = Touch("back_ground_touch", 5)
+        SensorData.front_ground_touch = Touch("front_ground_touch", 5)
+        SensorData.front_stair_touch = Touch("front_stair_touch", 4)
+        SensorData.front_lifting_normal = Touch("front_lifting_normal", 1)
         SensorData.front_lifting_extended_max = Touch("front_lifting_extended_max", 2)
         SensorData.front_middle_stair_touch = Touch("front_middle_stair_touch", 3)
 
         SensorData.middle_ground_touch = TouchSensorsI2c("middle_ground_touch")
-        SensorData.back_stair_touch = TouchSensorsI2c("back_stair_touch")
-        SensorData.back_lifting_normal = TouchSensorsI2c("back_lifting_normal")
-        SensorData.back_lifting_extended_max = TouchSensorsI2c("back_lifting_extended_max")
+        SensorData.back_stair_touch = Touch("back_stair_touch", 6)
+        SensorData.back_lifting_normal = Touch("back_lifting_normal", 7)
+        SensorData.back_lifting_extended_max = Touch("back_lifting_extended_max", 0)
 
 class FakeSensorData:
     """An mock version of SensorData, containing just fake sensors."""
