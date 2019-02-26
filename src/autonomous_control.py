@@ -166,7 +166,7 @@ def climb() -> None:
 
         # HACK HACK HACK
         lower_back()
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(2)
         stop()
 
         lower_both()
