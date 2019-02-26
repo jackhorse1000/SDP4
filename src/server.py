@@ -182,10 +182,11 @@ class SpencerServerConnection(asyncio.Protocol):
         """Send a `message` to the connected client."""
         self.transport.write((message + "\n").encode())
 
-def check_sensors():
+async def check_sensors():
     asyncio.sleep(2)
     if data.front_dist_0.value is None or data.front_dist_1.value is None:
         raise "Sensor data is still invalid after 2 seconds."
+    await asyncio.sleep(0.01)
 
 def _main():
     """The main entry point of the server"""
