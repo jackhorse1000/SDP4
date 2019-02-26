@@ -186,17 +186,17 @@ def climb() -> None:
 
         forward()
         while True:
-            if data.back_stair_touch.get() or data.middle_ground_touch.get():
+            if data.back_stair_touch.get():
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
-        lift_both()
-        while True:
-            if data.middle_ground_touch.get() or data.front_lifting_extended_max.get():
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
+        # lift_both()
+        # while True:
+        #     if data.front_lifting_extended_max.get():
+        #         stop()
+        #         break
+        #     await asyncio.sleep(SLEEP)
 
         lift_back()
         while True:
