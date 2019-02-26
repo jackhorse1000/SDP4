@@ -2,8 +2,9 @@
 
 import logging
 import threading
-import smbus2
 from typing import Optional
+import time
+current_milli_time = lambda: int(round(time.time() * 1000))
 
 from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
 from Phidget22.Devices.DigitalInput import DigitalInput
@@ -60,7 +61,7 @@ class Touch:
         with self.lock:
             data = self.value
         return data == 1
-    
+
     def set(self, value):
         """ Sets the value of the sensors data """
         if self.value != value:
@@ -81,20 +82,34 @@ class Touch:
         self.phidget.setOnStateChangeHandler(None)
         self.phidget.close()
 
-class i2cTouchSensors:
-    """ touch sensors connected to the i2c """ 
-    def __init__(self, i2c_bus_no, address):
+class TouchSensorsI2c:
+    """ touch sensors connected to the i2c """
+    def __init__(self, name):
         """ init for i2c bus """
-        self.bus_no = i2c_bus_no
-        self.bus = smbus2.SMBus(i2c_bus_no)
-        self.address = address
-        self.bus.write_byte(self.address, 255)
+        self.name = name
+        self.lock = threading.Lock()
+        self.value = False
+        self.prev_value = False
+        self.time = 0
 
-    def get_pins(self):
-        """ reads the pin states """
-        state = self.bus.read_byte(self.address)
-        return state
- 
+    def get(self)-> bool:
+        """ Returns the value of the pin """
+        with self.lock:
+            if current_milli_time - self.time > 100:
+                data = self.value
+            else:
+                data = self.prev_value
+        return data
+
+    def set(self, value):
+        """ Sets the value of the sensors data """
+        with self.lock:
+            if self.value != value:
+                self.time = current_milli_time
+                self.prev_value = self.value
+                self.value = value
+        LOG.debug("%s = %s", self.name, value)
+
 class Distance:
     """A glorified wrapper over the distance sensor."""
 

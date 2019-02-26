@@ -22,6 +22,7 @@ STEP_BACK = 3  # 1 up, -1 down
 STEP_FRONT = 2
 
 STATES = {} # type: Dict[str, str]
+SLEEP = 0.1
 
 def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
     """A decorator, which only applies the underlying function if the given machines
@@ -67,55 +68,55 @@ def stop() -> None:
     LOG.info("Stopping motors")
     motor.stop_motors()
 
-async def state_limiter():
-    """Stops various sensors when we hit specific conditions"""
-    while True:
-        # TODO(anyone): NEED TO ADD SAFETY TO EVERYTHING
+# async def state_limiter():
+#     """Stops various sensors when we hit specific conditions"""
+#     while True:
+#         # TODO(anyone): NEED TO ADD SAFETY TO EVERYTHING
 
-        # Stop moving forward if we ever hit the front touch sensor
-        if STATES["drive"] == "forward" and data.front_stair_touch.get():
-            stop()
+#         # Stop moving forward if we ever hit the front touch sensor
+#         if STATES["drive"] == "forward" and data.front_stair_touch.get():
+#             stop()
 
-        # Stop moving forward if the middle chassis button is touching and we're not extended
-        if STATES["drive"] == "forward" and data.front_middle_stair_touch.get() and not data.front_lifting_extended_max.get():
-            stop()
+#         # Stop moving forward if the middle chassis button is touching and we're not extended
+#         if STATES["drive"] == "forward" and data.front_middle_stair_touch.get() and not data.front_lifting_extended_max.get():
+#             stop()
         
-        # Stop moving forward if the back chassis button is touching and are extended
-        if STATES["drive"] == "forward" and data.back_stair_touch.get():
-            LOG.info("back touch state: %d", data.back_stair_touch.get())
-            stop()
+#         # Stop moving forward if the back chassis button is touching and are extended
+#         if STATES["drive"] == "forward" and data.back_stair_touch.get():
+#             LOG.info("back touch state: %d", data.back_stair_touch.get())
+#             stop()
 
-        # Stop lifting the front when the maximum flag is set
-        if STATES["step_front"] == "lift_front" and not data.front_lifting_extended_max.get():
-            stop()
+#         # Stop lifting the front when the maximum flag is set
+#         if STATES["step_front"] == "lift_front" and not data.front_lifting_extended_max.get():
+#             stop()
 
-        # Stop lowering the front when it hits the ground
-        if STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
-            stop()
+#         # Stop lowering the front when it hits the ground
+#         if STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
+#             stop()
 
-        # Stop lowering both when the front has reached its default position
-        if STATES["climb"] == "lower_both" and (not data.front_lifting_normal.get() or data.back_lifting_extended_max.get()):
-            LOG.info("%s state: %d", data.front_lifting_normal.name, data.front_lifting_normal.get())
-            LOG.info("%s state: %d", data.back_lifting_extended_max.name, data.back_lifting_extended_max.get())
-            if (not data.front_lifting_normal.get()):
-                  # Continue to lift the back, so stop the front lifting
-                  motor.stop_motor(STEP_FRONT)
-                  motor.set_motor(DRIVE_BACK, DRIVE_SIDE_FWD)
-            if (data.back_lifting_extended_max.get() ):
-                  # Continue to lift the back, so stop the front lifting
-                  motor.stop_motor(STEP_BACK)
-            if (not data.front_lifting_normal.get() and data.back_lifting_extended_max.get() or data.middle_ground_touch.get() or data.back_stair_touch.get()):
-                stop()
+#         # Stop lowering both when the front has reached its default position
+#         if STATES["climb"] == "lower_both" and (not data.front_lifting_normal.get() or data.back_lifting_extended_max.get()):
+#             LOG.info("%s state: %d", data.front_lifting_normal.name, data.front_lifting_normal.get())
+#             LOG.info("%s state: %d", data.back_lifting_extended_max.name, data.back_lifting_extended_max.get())
+#             if (not data.front_lifting_normal.get()):
+#                   # Continue to lift the back, so stop the front lifting
+#                   motor.stop_motor(STEP_FRONT)
+#                   motor.set_motor(DRIVE_BACK, DRIVE_SIDE_FWD)
+#             if (data.back_lifting_extended_max.get() ):
+#                   # Continue to lift the back, so stop the front lifting
+#                   motor.stop_motor(STEP_BACK)
+#             if (not data.front_lifting_normal.get() and data.back_lifting_extended_max.get() or data.middle_ground_touch.get() or data.back_stair_touch.get()):
+#                 stop()
         
-        # Stop lifting both when the middle has touched the ground
-        if STATES["climb"] == "lift_both" and data.middle_ground_touch.get():
-            stop()
+#         # Stop lifting both when the middle has touched the ground
+#         if STATES["climb"] == "lift_both" and data.middle_ground_touch.get():
+#             stop()
         
-        # Stop lifting both when the middle has touched the ground
-        if STATES["step_back"] == "lift_back" and data.back_lifting_normal.get():
-            stop()
+#         # Stop lifting both when the middle has touched the ground
+#         if STATES["step_back"] == "lift_back" and data.back_lifting_normal.get():
+#             stop()
 
-        await asyncio.sleep(0.05)
+#         await asyncio.sleep(0.05)
 
 @state("drive")
 def forward() -> None:
@@ -183,36 +184,71 @@ def climb() -> None:
         await climb.find_wall()
 
         forward()
-        while STATES["drive"] != "stop":
-            await asyncio.sleep(0.1)
+        while True:
+            if STATES["drive"] == "forward" and data.front_stair_touch.get():
+                stop()
+                break
+            await asyncio.sleep(SLEEP)
 
         lift_front()
-        while STATES["step_front"] != "stop":
-            await asyncio.sleep(0.1)
+        while True:
+            if STATES["step_front"] == "lift_front" and not data.front_stair_touch.get() and\
+                                data.front_dist_0.get() > 20 and data.front_dist_1.get() > 20:
+                stop()
+                break
+            await asyncio.sleep(SLEEP)
 
         forward()
-        while STATES["drive"] != "stop":
-            await asyncio.sleep(0.1)
+        while True:
+            if STATES["drive"] == "forward" and data.front_middle_stair_touch.get():
+                stop()
+                break
+            await asyncio.sleep(SLEEP)
 
         lower_front()
-        while STATES["step_front"] != "stop":
-            await asyncio.sleep(0.1)
+        while True:
+            if STATES["step_front"] == "lower_front()" and (data.front_ground_touch.get()\
+                                                      or data.front_lifting_normal.get()):
+                stop()
+                break
+            await asyncio.sleep(SLEEP)
 
         lower_both()
-        while STATES["climb"] != "stop":
-            await asyncio.sleep(0.1)
+        while True:
+            if STATES["climb"] == "lower_both":
+                if data.front_lifting_normal.get():
+                    motor.stop_motor(STEP_FRONT)
+                    forward()
+                if data.back_lifting_extended_max.get():
+                    motor.stop_motor(STEP_BACK)
+                    forward()
+                if data.back_lifting_extended_max.get() and data.front_lifting_normal.get() \
+                    or (data.front_middle_stair_touch.get() or data.back_stair_touch.get()):
+                    stop()
+                    break
+                await asyncio.sleep(SLEEP)
 
         forward()
-        while STATES["drive"] != "stop":
-            await asyncio.sleep(0.1)
-        
+        while True:
+            if STATES["drive"] == "forward" and (data.back_stair_touch.get() \
+                or data.middle_ground_touch.get()):
+                stop()
+                break
+            await asyncio.sleep(SLEEP)
+
         lift_both()
-        while STATES["climb"] != "stop":
-            await asyncio.sleep(0.1)
-        
+        while True:
+            if STATES["climb"] == "lift_both" and data.middle_ground_touch.get():
+                stop()
+                break
+            await asyncio.sleep(SLEEP)
+
         lift_back()
-        while STATES["step_back"] != "stop":
-            await asyncio.sleep(0.1)
+        while True:
+            if STATES["step_back"] == "lift_back" and data.back_lifting_normal.get():
+                stop()
+                break
+            await asyncio.sleep(SLEEP)
         await asyncio.sleep(2)
 
 

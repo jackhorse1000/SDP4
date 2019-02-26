@@ -4,7 +4,7 @@
 
 import threading
 
-from sensor import Distance, Touch, FakeSensor
+from sensor import Distance, Touch, FakeSensor, TouchSensorsI2c
 
 class SensorData:
     """Contains the sensor data from the robot."""
@@ -53,15 +53,16 @@ class SensorData:
 
         # Touch sensors
         SensorData.back_ground_touch = Touch("back_ground_touch", 5)
-        SensorData.back_lifting_normal = Touch("back_lifting_normal", 6)
-        SensorData.back_lifting_extended_max = Touch("back_lifting_extended_max", 7)
-        SensorData.back_stair_touch = Touch("back_stair_touch", 8)
         SensorData.front_ground_touch = Touch("front_ground_touch", 1)
         SensorData.front_stair_touch = Touch("front_stair_touch", 0)
         SensorData.front_lifting_normal = Touch("front_lifting_normal", 4)
         SensorData.front_lifting_extended_max = Touch("front_lifting_extended_max", 2)
         SensorData.front_middle_stair_touch = Touch("front_middle_stair_touch", 3)
-        SensorData.middle_ground_touch = Touch("middle_ground_touch", 9)
+
+        SensorData.middle_ground_touch = TouchSensorsI2c("middle_ground_touch")
+        SensorData.back_stair_touch = TouchSensorsI2c("back_stair_touch")
+        SensorData.back_lifting_normal = TouchSensorsI2c("back_lifting_normal")
+        SensorData.back_lifting_extended_max = TouchSensorsI2c("back_lifting_extended_max")
 
 class FakeSensorData:
     """An mock version of SensorData, containing just fake sensors."""

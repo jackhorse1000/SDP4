@@ -5,7 +5,7 @@ import smbus2
 
 class SensorsI2c(Thread):
     """ thread class for i2c sensors """
-    
+
     def __init__(self, i2c_bus_no, address):
         self.address = address
         self.bus_no = i2c_bus_no
