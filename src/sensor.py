@@ -95,7 +95,7 @@ class TouchSensorsI2c:
     def get(self)-> bool:
         """ Returns the value of the pin """
         with self.lock:
-            if current_milli_time - self.time > 100:
+            if current_milli_time() - self.time > 100:
                 data = self.value
             else:
                 data = self.prev_value
@@ -105,10 +105,11 @@ class TouchSensorsI2c:
         """ Sets the value of the sensors data """
         with self.lock:
             if self.value != value:
-                self.time = current_milli_time
+                self.time = current_milli_time()
                 self.prev_value = self.value
                 self.value = value
-        LOG.debug("%s = %s", self.name, value)
+                LOG.debug("%s = %s", self.name, value)
+
 
 class Distance:
     """A glorified wrapper over the distance sensor."""

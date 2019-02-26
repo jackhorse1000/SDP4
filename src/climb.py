@@ -33,8 +33,12 @@ class ClimbController:
                 LOG.error("front_up aborting due to too many failed reads")
                 return False
 
-            if not left.valid or not right.valid:
-                failure = failure + 1
+            if left.valid and left.value >= 10 and not right.valid:
+               control.turn_left()
+            elif right.valid and right.value >= 10 and not left.valid:
+               control.turn_right()
+            elif not left.valid or not right.valid:
+               control.forward()
             else:
                 failure = 0
                 distance = min(left.value, right.value)
@@ -42,7 +46,7 @@ class ClimbController:
                 LOG.debug("Distance=%f, delta=%f", distance, delta)
 
                 # If we're a long way away, continue to move forward
-                if distance >= 10:
+                if distance >= 25:
                     control.forward()
 
                 # Attempt to align against the wall
@@ -260,24 +264,3 @@ def climb_a_stair():
     """ Function to make Spencer climb a step """
     # TODO(anyone): Stop step climbing thread
     return
-
-
-if __name__ == "__main__":
-    def _main():
-        import log
-        log.configure()
-
-        loop = asyncio.get_event_loop()
-        loop.set_exception_handler(log.loop_exception_handler)
-
-        data = SensorData()
-
-        try:
-            with data.front_dist_0, data.front_dist_1, data.front_ground_touch:
-                controller = ClimbController(data)
-                loop.create_task(controller.work())
-                loop.run_forever()
-        finally:
-            loop.close()
-            control.stop()
-    _main()

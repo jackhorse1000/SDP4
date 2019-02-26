@@ -4,6 +4,8 @@
 import asyncio
 import functools
 import logging
+import time
+
 from typing import Callable, Dict
 
 import motor
@@ -192,8 +194,10 @@ def climb() -> None:
 
         lift_front()
         while True:
-            if STATES["step_front"] == "lift_front" and not data.front_stair_touch.get() and\
-                                data.front_dist_0.get() > 20 and data.front_dist_1.get() > 20:
+            if ((not data.front_stair_touch.get() and data.front_dist_0.get() > 20 and data.front_dist_1.get() > 20)
+                # or not data.front_lifting_extended_max.get()
+               ):
+
                 stop()
                 break
             await asyncio.sleep(SLEEP)
@@ -207,23 +211,29 @@ def climb() -> None:
 
         lower_front()
         while True:
-            if STATES["step_front"] == "lower_front()" and (data.front_ground_touch.get()\
-                                                      or data.front_lifting_normal.get()):
+            if STATES["step_front"] == "lower_front" and data.front_ground_touch.get():
+                                                      # or data.front_lifting_normal.get()):
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
+        # HACK HACK HACK
+        lower_back()
+        await asyncio.sleep(0.5)
+        stop()
+
         lower_both()
+        # start = time.time()
         while True:
             if STATES["climb"] == "lower_both":
-                if data.front_lifting_normal.get():
-                    motor.stop_motor(STEP_FRONT)
-                    forward()
+                # if not data.front_lifting_normal.get():
+                #     motor.stop_motor(STEP_FRONT)
+                #     forward()
                 if data.back_lifting_extended_max.get():
                     motor.stop_motor(STEP_BACK)
                     forward()
-                if data.back_lifting_extended_max.get() and data.front_lifting_normal.get() \
-                    or (data.front_middle_stair_touch.get() or data.back_stair_touch.get()):
+                if data.back_lifting_extended_max.get() and not data.front_lifting_normal.get() \
+                    or data.back_stair_touch.get():
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
@@ -238,7 +248,7 @@ def climb() -> None:
 
         lift_both()
         while True:
-            if STATES["climb"] == "lift_both" and data.middle_ground_touch.get():
+            if STATES["climb"] == "lift_both" and (data.middle_ground_touch.get() or data.front_lifting_extended_max.get()):
                 stop()
                 break
             await asyncio.sleep(SLEEP)

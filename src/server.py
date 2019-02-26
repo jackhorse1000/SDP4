@@ -182,6 +182,11 @@ class SpencerServerConnection(asyncio.Protocol):
         """Send a `message` to the connected client."""
         self.transport.write((message + "\n").encode())
 
+def check_sensors():
+    asyncio.sleep(2)
+    if data.front_dist_0.value is None or data.front_dist_1.value is None:
+        raise "Sensor data is still invalid after 2 seconds."
+
 def _main():
     """The main entry point of the server"""
 
@@ -207,6 +212,8 @@ def _main():
 
     # Register our tasks which run along side the server
     loop.create_task(wakeup())
+    loop.create_task(check_sensors())
+
     # loop.create_task(control.state_limiter())
     # Create the sensor thread
     thread_i2c_sensors = SensorsI2c(1, 0x27)
@@ -215,9 +222,14 @@ def _main():
     # Construct the server and run it forever
     server = None
     try:
-        with data.front_dist_0, data.front_dist_1, data.front_lifting_normal,\
-          data.front_stair_touch, data.front_ground_touch, data.front_middle_stair_touch,\
-          data.front_lifting_extended_max:
+        with data.front_dist_0, \
+             data.front_dist_1, \
+             data.front_ground_touch, \
+             data.front_stair_touch, \
+             data.front_lifting_normal, \
+             data.front_lifting_extended_max, \
+             data.front_middle_stair_touch:
+
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050
