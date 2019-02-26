@@ -166,37 +166,34 @@ def climb() -> None:
 
         # HACK HACK HACK
         lower_back()
-        await asyncio.sleep(2)
+        await asyncio.sleep(1.5)
         stop()
 
         lower_both()
         while True:
+            # If the back one has reached the stair, then we're all good
+            if data.back_stair_touch.get():
+                stop()
+                break
+
             if not data.front_lifting_normal.get():
                 motor.stop_motor(STEP_FRONT)
                 forward()
+            else:
+                motor.set_motor(STEP_FRONT, -100)
+
             if data.back_lifting_extended_max.get():
                 # TODO(anyone): Add distance sensor for back stair
                 motor.stop_motor(STEP_BACK)
                 forward()
-            if data.back_lifting_extended_max.get() and not data.front_lifting_normal.get() \
-                or data.back_stair_touch.get():
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
+            else:
+                motor.set_motor(STEP_BACK, -100)
 
-        forward()
-        while True:
-            if data.back_stair_touch.get():
-                stop()
-                break
+            # if data.back_lifting_extended_max.get() and not data.front_lifting_normal.get() \
+            #     or data.back_stair_touch.get():
+            #     stop()
+            #     break
             await asyncio.sleep(SLEEP)
-
-        # lift_both()
-        # while True:
-        #     if data.front_lifting_extended_max.get():
-        #         stop()
-        #         break
-        #     await asyncio.sleep(SLEEP)
 
         lift_back()
         while True:
