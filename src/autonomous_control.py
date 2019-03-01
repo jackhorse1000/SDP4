@@ -1,15 +1,17 @@
 """Generic motor-control module. Provides helper methods for manipulating
    each motor and pairs of motors. Same as control.py but with added safety"""
 
+# pylint: disable=R0401
+# Disable cyclic imports. It's horrible, but I don't want to refactor right now.
+
 import asyncio
 import functools
 import logging
-import time
 
 from typing import Callable, Dict
 
 import motor
-from data import SensorData as data
+from data import SensorData
 
 LOG = logging.getLogger("Control")
 
@@ -128,12 +130,11 @@ def lift_both() -> None:
     motor.set_motor(STEP_BACK, 100)
     motor.set_motor(STEP_FRONT, 100)
 
-def climb() -> None:
+def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
-    async def run():
-        import climb
-        climb = climb.ClimbController(data)
-        await climb.find_wall()
+    async def run() -> None:
+        from climb import ClimbController
+        await ClimbController(data).find_wall()
 
         forward()
         while True:
@@ -144,7 +145,7 @@ def climb() -> None:
 
         lift_front()
         while True:
-            if ((not data.front_stair_touch.get() and data.front_dist_0.get() > 20 and data.front_dist_1.get() > 20)):
+            if not data.front_stair_touch.get() and data.front_dist_0.get() > 20 and data.front_dist_1.get() > 20:
                 # or not data.front_lifting_extended_max.get()
                 stop()
                 break

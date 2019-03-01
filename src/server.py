@@ -2,18 +2,14 @@
 
 import asyncio
 import logging
+import inspect
 import sys
-
-from Phidget22.Devices.VoltageRatioInput import VoltageRatioSensorType
-from Phidget22.Phidget import ChannelSubclass
+from typing import Any, Dict
 
 import autonomous_control as control
-from threading import Thread
 import log
 import motor
-import sensor
-from data import SensorData as data
-from i2c_sensor_thread import SensorsI2c
+from data import SensorData
 
 NETWORK_LOG = logging.getLogger("Network")
 
@@ -73,14 +69,7 @@ def exception_handler(loop, context):
         loop.stop()
     loop.default_exception_handler(context)
 
-async def wakeup():
-    """A really ugly hack to ensure interrupts are thrown within the event loop.
-
-    """
-    while True:
-        await asyncio.sleep(0.1)
-
-async def motor_control(queue, manager):
+async def motor_control(queue: SingleValueQueue, manager: ConnectionManager, data: SensorData) -> None:
     """Pulls events from `queue` and executes them on the motors"""
     motor.stop_motors()
 
@@ -100,35 +89,19 @@ async def motor_control(queue, manager):
             # If we're a function defined in the control module, execute it.
             motor_log.info("Running %s", action)
             manager.send("Running " + action)
-            commands[action]()
+            command = commands[action]
+
+            # Prepare call for this command
+            params = inspect.signature(command).parameters
+            args = {} # type: Dict[str, Any]
+            if "data" in params:
+                args["data"] = data
+            if "manager" in params:
+                args["manager"] = manager
+
+            command(**args)
         else:
             manager.send("Doing goodness knows what.")
-
-
-def voltage_setup(ph):
-    """When a voltage is attached, we configure it with various properties (interval between receiving inputs,
-       minimum change required before we get an input, etc...)
-
-    """
-    ph.setDataInterval(100)
-    ph.setVoltageRatioChangeTrigger(0.0)
-    if ph.getChannelSubclass() == ChannelSubclass.PHIDCHSUBCLASS_VOLTAGERATIOINPUT_SENSOR_PORT:
-        ph.setVoltageRatioChangeTrigger(0.005)
-        ph.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_VOLTAGERATIO)
-
-def voltage_change(manager, name):
-    """The above event is processed by the Phidget API and converted into a distance."""
-    def handler(_ph, value, unit):
-        sensor.LOG.debug("Sensor %s = %s%s", name, value, unit.symbol)
-        manager.send("sensor %s = %s%s" % (name, value, unit.symbol))
-    return handler
-
-def digital_change(manager, name):
-    """The above event is processed by the Phidget API."""
-    def handler(_ph, value):
-        sensor.LOG.debug("Sensor %s = %s", name, value)
-        manager.send("sensor %s = %s" % (name, value))
-    return handler
 
 class SpencerServerConnection(asyncio.Protocol):
     """Represents a socket connection to a "spencer client". Namely, a phone running
@@ -182,7 +155,11 @@ class SpencerServerConnection(asyncio.Protocol):
         """Send a `message` to the connected client."""
         self.transport.write((message + "\n").encode())
 
-async def check_sensors():
+async def check_sensors(data: SensorData) -> None:
+    """Monitors the two distance sensors for 2 seconds, and errors if they
+       never produce any valid value
+
+    """
     asyncio.sleep(2)
     if data.front_dist_0.value is None or data.front_dist_1.value is None:
         raise "Sensor data is still invalid after 2 seconds."
@@ -204,18 +181,15 @@ def _main():
     # And we hold all currently connected computers here
     manager = ConnectionManager()
 
+    # Grab our sensor data
+    data = SensorData()
 
     if "-M" not in sys.argv:
-        loop.create_task(motor_control(motor_queue, manager))
-
-    # Grab our sensor data, or fake data if passing the -P flag.
-    data.init()
+        loop.create_task(motor_control(motor_queue, manager, data))
 
     # Register our tasks which run along side the server
-    # loop.create_task(wakeup())
-    # loop.create_task(check_sensors())
+    loop.create_task(check_sensors(data))
 
-    # loop.create_task(control.state_limiter())
     # Create the sensor thread
     # thread_i2c_sensors = SensorsI2c(1, 0x27)
     # thread_i2c_sensors.start()

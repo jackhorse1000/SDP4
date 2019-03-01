@@ -4,7 +4,7 @@ import logging
 import threading
 from typing import Optional
 import time
-current_milli_time = lambda: int(round(time.time() * 1000))
+
 
 from Phidget22.Devices.VoltageRatioInput import VoltageRatioInput, VoltageRatioSensorType
 from Phidget22.Devices.DigitalInput import DigitalInput
@@ -12,6 +12,10 @@ from Phidget22.Devices.DigitalInput import DigitalInput
 LOG = logging.getLogger("Sensors")
 
 ATTACHMENT_TIMEOUT = 1000
+
+def current_milli_time() -> int:
+    """Get the current time in milliseconds"""
+    return int(round(time.time() * 1000))
 
 def on_error(ph, code, msg):
     """We get error messages if the sensor receives values outside its operating parameters."""
@@ -83,8 +87,15 @@ class Touch:
         self.phidget.close()
 
 class TouchSensorsI2c:
+    """A touch sensor from the I2C expansion board."""
+
+    name = None # type: str
+    value = None # type: bool
+    prev_value = None # type: bool
+    time = None # type: int
+
     """ touch sensors connected to the i2c """
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         """ init for i2c bus """
         self.name = name
         self.lock = threading.Lock()
@@ -101,7 +112,7 @@ class TouchSensorsI2c:
                 data = self.prev_value
         return data
 
-    def set(self, value):
+    def set(self, value: bool) -> None:
         """ Sets the value of the sensors data """
         with self.lock:
             if self.value != value:
@@ -130,7 +141,7 @@ class Distance:
         self.phidget.setOnSensorChangeHandler(self._on_change)
         self.phidget.setOnErrorHandler(self._on_error)
 
-    def _on_change(self, _, value, unit):
+    def _on_change(self, _, value, _unit):
         "Callback for when the sensor's input is changed."""
         with self.lock:
             if not self.valid or abs(self.value - value) > 0.05:
