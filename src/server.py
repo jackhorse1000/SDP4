@@ -1,5 +1,8 @@
 """A basic server for the demo days."""
 
+# pylint: disable=W0611
+# ^ Disable unused imports as typings breaks things
+
 import asyncio
 import logging
 import inspect

@@ -10,7 +10,9 @@ from data import SensorData
 class SensorsI2c(Thread):
     """ thread class for i2c sensors """
 
-    def __init__(self, i2c_bus_no, address, data: SensorData) -> None:
+    data = None # type: SensorData
+
+    def __init__(self, i2c_bus_no: int, address: int, data: SensorData) -> None:
         self.address = address
         self.bus_no = i2c_bus_no
         self.bus = smbus2.SMBus(i2c_bus_no)

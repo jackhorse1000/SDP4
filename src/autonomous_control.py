@@ -4,6 +4,9 @@
 # pylint: disable=R0401
 # Disable cyclic imports. It's horrible, but I don't want to refactor right now.
 
+# pylint: disable=W0611
+# Disable unused imports as typings breaks things
+
 import asyncio
 import functools
 import logging
