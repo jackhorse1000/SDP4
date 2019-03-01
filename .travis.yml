@@ -9,4 +9,3 @@ install:
 script:
   - pylint src
   - mypy src
-  - pytest
