@@ -10,6 +10,7 @@ import autonomous_control as control
 import log
 import motor
 from data import SensorData
+from i2c_sensor_thread import RotaryEncoderThread
 
 NETWORK_LOG = logging.getLogger("Network")
 
@@ -191,8 +192,9 @@ def _main():
     loop.create_task(check_sensors(data))
 
     # Create the sensor thread
-    # thread_i2c_sensors = SensorsI2c(1, 0x27)
-    # thread_i2c_sensors.start()
+    thread_i2c_sensors = RotaryEncoderThread(1, 5, data)
+    thread_i2c_sensors.setDaemon(5)
+    thread_i2c_sensors.start()
 
     # Construct the server and run it forever
     server = None

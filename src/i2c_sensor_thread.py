@@ -28,3 +28,26 @@ class SensorsI2c(Thread):
             self.data.back_lifting_normal.set(not bool(state & 0x4))
             self.data.back_lifting_extended_max.set(not bool(state & 0x8))
             time.sleep(0.01)
+
+class RotaryEncoderThread(Thread):
+    def __init__(self, i2c_bus_no: int, address: int, data: SensorData) -> None:
+        self.address = address
+        self.bus = smbus2.SMBus(i2c_bus_no)
+        self.data = data
+
+        super().__init__()
+
+    def run(self):
+        while True:
+            msg = smbus2.i2c_msg.read(5, 2)
+            self.bus.i2c_rdwr(msg)
+            for i, val in enumerate(msg):
+                if val >= 128:
+                    val = -256 + val
+
+                if i == 0:
+                    self.data.front_lifting_rot.change(val)
+                elif i == 1:
+                    self.data.back_lifting_rot.change(val)
+
+            time.sleep(0.05)

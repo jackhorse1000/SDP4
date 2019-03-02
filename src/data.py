@@ -2,7 +2,7 @@
 
 # pylint: disable=R0902
 
-from sensor import Distance, Touch, FakeSensor, TouchSensorsI2c
+from sensor import Distance, Touch, FakeSensor, TouchSensorsI2c, RotaryEncoder
 
 class SensorData:
     """Contains the sensor data from the robot."""
@@ -49,6 +49,9 @@ class SensorData:
         self.back_lifting_normal = Touch("back_lifting_normal", 7)
         self.back_lifting_extended_max = Touch("back_lifting_extended_max", 0)
         self.back_ground_touch = Touch("back_ground_touch", 2) #TODO(anyone): Update channel
+
+        self.front_lifting_rot = RotaryEncoder("front_lifting_rot")
+        self.back_lifting_rot = RotaryEncoder("back_lifting_rot")
 
 class FakeSensorData:
     """An mock version of SensorData, containing just fake sensors."""

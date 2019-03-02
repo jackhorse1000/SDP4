@@ -194,6 +194,24 @@ class Distance:
         self.phidget.setOnSensorChangeHandler(None)
         self.phidget.close()
 
+class RotaryEncoder:
+    """A rotary encoder sensor"""
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+        self.value = 0
+
+    def get(self) -> int:
+        return self.value
+
+    def change(self, delta) -> None:
+        if delta != 0:
+            self.value += delta
+            LOG.debug("%s = %d", self.name, self.value)
+
+    def reset(self) -> None:
+        self.value = 0
+
 class FakeSensor:
     """ Used to fake the sensors around the robot """
 
