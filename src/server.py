@@ -1,9 +1,10 @@
 """A basic server for the demo days."""
 
 import asyncio
-import logging
 import inspect
+import logging
 import sys
+import time
 from typing import Any, Dict
 
 import autonomous_control as control
@@ -161,10 +162,14 @@ async def check_sensors(data: SensorData) -> None:
        never produce any valid value
 
     """
-    asyncio.sleep(2)
-    if data.front_dist_0.value is None or data.front_dist_1.value is None:
-        raise "Sensor data is still invalid after 2 seconds."
-    await asyncio.sleep(0.01)
+    start = time.time()
+    while time.time() - start < 2:
+        if data.front_ground_touch.valid:
+            return
+
+        await asyncio.sleep(0.1)
+
+    raise IOError("Sensor data is still invalid after 2 seconds.")
 
 def _main():
     """The main entry point of the server"""
@@ -188,9 +193,6 @@ def _main():
     if "-M" not in sys.argv:
         loop.create_task(motor_control(motor_queue, manager, data))
 
-    # Register our tasks which run along side the server
-    loop.create_task(check_sensors(data))
-
     # Create the sensor thread
     thread_i2c_sensors = RotaryEncoderThread(1, 5, data)
     thread_i2c_sensors.setDaemon(5)
@@ -208,15 +210,18 @@ def _main():
              data.back_ground_touch:
 
             # Reset the front and back to clear any residual data
-            data.front_lifting_rot.reset()
-            data.back_lifting_rot.reset()
-
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050
             ))
 
             NETWORK_LOG.info('Serving on %s', server.sockets[0].getsockname())
+
+            # Wait for 2 seconds to ensure the server is ready
+            loop.run_until_complete(check_sensors(data))
+
+            # Zero the motors
+            loop.run_until_complete(control.zero(data))
 
             loop.run_forever()
     finally:

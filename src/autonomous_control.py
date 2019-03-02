@@ -25,7 +25,7 @@ DRIVE_SIDE_BCK = 100
 STEP_BACK = 3  # 1 up, -1 down
 STEP_FRONT = 2
 
-STEP_FRONT_MIN = -1400
+STEP_FRONT_MIN = -1200 # -1400
 
 STEP_BACK_MIN = -200
 STEP_BACK_MAX = 1400
@@ -64,7 +64,7 @@ def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
 
     return decorator
 
-@state("step_front", "step_back", "drive", "climb")
+@state("step_front", "step_back", "drive")
 def stop() -> None:
 
     """Stop all motors.
@@ -113,6 +113,11 @@ def lift_front() -> None:
     """Moves the front stepper upwards, from the base position"""
     motor.set_motor(STEP_FRONT, 100)
 
+@state("step_front")
+def stop_front() -> None:
+    """Stops the front stepper"""
+    motor.stop_motor(STEP_FRONT)
+
 @state("step_back")
 def lower_back() -> None:
     """Moves the back stepper down, from the base position"""
@@ -123,17 +128,20 @@ def lift_back() -> None:
     """Moves the back stepper upwards, to the base position"""
     motor.set_motor(STEP_BACK, -100)
 
-@state("climb")
+@state("step_back")
+def stop_back() -> None:
+    """Stops the back stepper"""
+    motor.stop_motor(STEP_BACK)
+
 def lower_both() -> None:
     """Lower both the front and back motors."""
-    motor.set_motor(STEP_BACK, -100)
-    motor.set_motor(STEP_FRONT, -100)
+    lower_back()
+    lower_front()
 
-@state("climb")
 def lift_both() -> None:
     """Lift both the front and back motors."""
-    motor.set_motor(STEP_BACK, 100)
-    motor.set_motor(STEP_FRONT, 100)
+    lift_back()
+    lift_front()
 
 def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
@@ -143,12 +151,12 @@ def climb(data: SensorData) -> None:
         # We should return from find wall aligned to the step and as close as we can get before the
         # distance sensors can't read anymore
 
-        forward()  # Forward for x seconds, this needs to be determined
-        while True:
-            # TODO(anyone): Find time to go forward
-            await asyncio.sleep(2)
-            stop()
-            break
+        # forward()  # Forward for x seconds, this needs to be determined
+        # while True:
+        #     # TODO(anyone): Find time to go forward
+        #     await asyncio.sleep(2)
+        #     stop()
+        #     break
 
         lift_front()
         while True:
@@ -178,22 +186,23 @@ def climb(data: SensorData) -> None:
         stop()
 
         target_back = -data.front_lifting_rot.get()
+        LOG.info("Targeting back lifting of %d", target_back)
         lower_both()
         while True:
             # If the back one has reached the stair, then we're all good
+            # TODO(anyone): Add distance sensor for back stair
             if data.back_stair_touch.get():
+                LOG.info("Back stair touch hit, finishing climb")
                 stop()
                 break
 
-            # TODO(anyone): Reach max extension / max front rotation start going forward
-            if data.front_lifting_rot.get() >= -100:
-                motor.stop_motor(STEP_FRONT)
+            if data.front_lifting_rot.get() >= 0:
+                stop_front()
                 forward()
 
             # TODO(anyone): Reach max extension / max back rotation start going forward
-            if data.back_lifting_rot.get() >= target_back:
-                # TODO(anyone): Add distance sensor for back stair
-                motor.stop_motor(STEP_BACK)
+            if data.back_lifting_rot.get() >= target_back + 200:
+                stop_back()
                 forward()
             else:
                 lower_back()
@@ -270,3 +279,20 @@ def climb_downstairs(data: SensorData) -> None:
         await asyncio.sleep(2)
 
     asyncio.get_event_loop().create_task(run())
+
+async def zero(data: SensorData) -> None:
+    if not data.front_ground_touch.get():
+        lower_front()
+        while not data.front_ground_touch.get():
+            await asyncio.sleep(SLEEP)
+        stop()
+
+    if not data.back_ground_touch.get():
+        lower_back()
+        while not data.back_ground_touch.get():
+            await asyncio.sleep(SLEEP)
+        stop()
+
+    data.front_lifting_rot.reset()
+    data.back_lifting_rot.reset()
+    LOG.info("Zeroed lifting mechanisms")
