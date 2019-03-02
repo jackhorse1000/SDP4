@@ -45,9 +45,9 @@ class RotaryEncoderThread(Thread):
                 if val >= 128:
                     val = -256 + val
 
-                if i == 0:
+                if i == 1:
                     self.data.front_lifting_rot.change(val)
-                elif i == 1:
+                elif i == 0:
                     self.data.back_lifting_rot.change(val)
 
             time.sleep(0.05)

@@ -201,14 +201,11 @@ def _main():
     try:
         with data.front_dist_0, \
              data.front_dist_1, \
+             data.back_stair_dist, \
              data.front_ground_touch, \
-             data.front_stair_touch, \
-             data.front_lifting_normal, \
-             data.front_lifting_extended_max, \
-             data.front_middle_stair_touch, \
+             data.middle_stair_touch, \
              data.back_stair_touch, \
-             data.back_lifting_extended_max, \
-             data.back_lifting_normal:
+             data.back_ground_touch:
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050
