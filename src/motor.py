@@ -7,10 +7,10 @@ import smbus2
 BUS = smbus2.SMBus(1)
 ADDRESS = 0x04
 
-def _write_bus(value):
+def _write_bus(value: int) -> None:
     BUS.write_byte_data(ADDRESS, 0x00, value)
 
-def set_motor(motor_id, speed):
+def set_motor(motor_id: int, speed: int) -> None:
     """Sets a motor to spin. Any positive value is forwards, any negative one is
        backwards.
     """
@@ -19,7 +19,7 @@ def set_motor(motor_id, speed):
     _write_bus(byte1)
     _write_bus(byte2)
 
-def set_motor_(motor_id, speed):
+def set_motor_(motor_id: int, speed: int) -> None:
     """Sets a motor at a specific speed"""
 
     # Mode 2 is Forward.
@@ -31,14 +31,14 @@ def set_motor_(motor_id, speed):
     _write_bus(speed)
 
 
-def stop_motor(motor_id):
+def stop_motor(motor_id: int) -> None:
     """Stops the given motor"""
     # Mode 0 floats the motor.
     direction = 0
     byte1 = motor_id << 5 | 16 | direction << 1
     _write_bus(byte1)
 
-def stop_motors():
+def stop_motors() -> None:
     """Stops all motors"""
     # The motor board stops all motors if bit 0 is high.
     _write_bus(0x01)
