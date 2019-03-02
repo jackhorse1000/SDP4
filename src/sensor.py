@@ -200,17 +200,22 @@ class RotaryEncoder:
     def __init__(self, name: str) -> None:
         self.name = name
         self.value = 0
+        self.lock = threading.Lock()
 
     def get(self) -> int:
-        return self.value
+        with self.lock:
+            return self.value
 
     def change(self, delta) -> None:
         if delta != 0:
-            self.value += delta
-            LOG.debug("%s = %d", self.name, self.value)
+            with self.lock:
+              self.value += delta
+              LOG.debug("%s = %d", self.name, self.value)
 
     def reset(self) -> None:
-        self.value = 0
+        with self.lock:
+            self.value = 0
+            LOG.debug("%s = %d (reset)", self.name, self.value)
 
 class FakeSensor:
     """ Used to fake the sensors around the robot """

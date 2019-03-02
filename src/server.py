@@ -206,6 +206,11 @@ def _main():
              data.middle_stair_touch, \
              data.back_stair_touch, \
              data.back_ground_touch:
+
+            # Reset the front and back to clear any residual data
+            data.front_lifting_rot.reset()
+            data.back_lifting_rot.reset()
+
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050

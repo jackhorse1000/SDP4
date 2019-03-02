@@ -25,6 +25,11 @@ DRIVE_SIDE_BCK = 100
 STEP_BACK = 3  # 1 up, -1 down
 STEP_FRONT = 2
 
+STEP_FRONT_MIN = -1400
+
+STEP_BACK_MIN = -200
+STEP_BACK_MAX = 1400
+
 STATES = {} # type: Dict[str, str]
 SLEEP = 0.1
 
@@ -111,12 +116,12 @@ def lift_front() -> None:
 @state("step_back")
 def lower_back() -> None:
     """Moves the back stepper down, from the base position"""
-    motor.set_motor(STEP_BACK, -100)
+    motor.set_motor(STEP_BACK, 100)
 
 @state("step_back")
 def lift_back() -> None:
     """Moves the back stepper upwards, to the base position"""
-    motor.set_motor(STEP_BACK, 100)
+    motor.set_motor(STEP_BACK, -100)
 
 @state("climb")
 def lower_both() -> None:
@@ -134,7 +139,7 @@ def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
     async def run() -> None:
         from climb import ClimbController
-        await ClimbController(data).find_wall()
+        # await ClimbController(data).find_wall()
         # We should return from find wall aligned to the step and as close as we can get before the
         # distance sensors can't read anymore
 
@@ -142,38 +147,37 @@ def climb(data: SensorData) -> None:
         while True:
             # TODO(anyone): Find time to go forward
             await asyncio.sleep(2)
+            stop()
             break
 
         lift_front()
         while True:
-            if not data.front_stair_touch.get() \
-               and data.front_dist_0.get() > 20 \
-               and data.front_dist_1.get() > 20:
-                # or (TODO(anyone): find max amount of rotary rotations)
+            if data.front_lifting_rot.get() <= STEP_FRONT_MIN:
+                # TODO(anyone) Use distance sensors here too - if we can do it reliably.
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
         forward()
         while True:
-            if data.front_middle_stair_touch.get():
+            if data.middle_stair_touch.get():
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
         lower_front()
         while True:
-            if data.front_ground_touch.get():
-              # or (TODO(anyone): Find max amount of rotary rotations):
+            if data.front_ground_touch.get() or data.front_lifting_rot.get() >= 0:
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
         # HACK HACK HACK
         lower_back()
-        await asyncio.sleep(1.5)
+        await asyncio.sleep(1)
         stop()
 
+        target_back = -data.front_lifting_rot.get()
         lower_both()
         while True:
             # If the back one has reached the stair, then we're all good
@@ -182,26 +186,24 @@ def climb(data: SensorData) -> None:
                 break
 
             # TODO(anyone): Reach max extension / max front rotation start going forward
-            if not data.front_lifting_normal.get():
+            if data.front_lifting_rot.get() >= -100:
                 motor.stop_motor(STEP_FRONT)
                 forward()
-            else:
-                motor.set_motor(STEP_FRONT, -100)
 
             # TODO(anyone): Reach max extension / max back rotation start going forward
-            if data.back_lifting_extended_max.get():
+            if data.back_lifting_rot.get() >= target_back:
                 # TODO(anyone): Add distance sensor for back stair
                 motor.stop_motor(STEP_BACK)
                 forward()
             else:
-                motor.set_motor(STEP_BACK, -100)
+                lower_back()
 
             await asyncio.sleep(SLEEP)
 
         lift_back()
         while True:
             # TODO(anyone): Reach normal extension / max back rotation stop
-            if data.back_lifting_normal.get():
+            if data.back_lifting_rot.get() <= 0:
                 stop()
                 break
             await asyncio.sleep(SLEEP)
