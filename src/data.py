@@ -24,6 +24,7 @@ class SensorData:
     back_stair_touch = None # type: Touch
     back_lifting_normal = None # type: Touch
     back_lifting_extended_max = None # type: Touch
+    back_ground_touch = None # type: Touch
 
     def __init__(self) -> None:
         # TODO(anyone): Need to check these channels
@@ -47,6 +48,7 @@ class SensorData:
         self.back_stair_touch = Touch("back_stair_touch", 6)
         self.back_lifting_normal = Touch("back_lifting_normal", 7)
         self.back_lifting_extended_max = Touch("back_lifting_extended_max", 0)
+        self.back_ground_touch = Touch("back_ground_touch", 2) #TODO(anyone): Update channel
 
 class FakeSensorData:
     """An mock version of SensorData, containing just fake sensors."""
