@@ -9,30 +9,19 @@
 
     tools:context=".MainActivity">
 
-    <TextView
-
-        android:layout_width="379dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="10dp"
-        android:layout_marginTop="80px"
-        android:text="Spencer"
-        android:textAlignment="center"
-
-        android:textSize="40sp" />
-
     <Button
         android:id="@+id/connect_wifi_btn"
         android:layout_width="220dp"
         android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
-
+        android:background="@android:color/holo_green_light"
         android:text="Connect"
         android:layout_marginTop="400px"
         android:textSize="15sp" />
 
     <Button
         android:id="@+id/technical_btn"
+        android:background="@android:color/holo_green_light"
         android:layout_width="220dp"
         android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
@@ -43,6 +32,7 @@
 
     <Button
         android:id="@+id/demo_btn"
+        android:background="@android:color/holo_green_light"
         android:layout_width="220dp"
         android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
