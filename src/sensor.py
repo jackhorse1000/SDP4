@@ -146,7 +146,7 @@ class Distance:
         with self.lock:
             if not self.valid or abs(self.value - value) > 0.05:
                 # Update properties and notify observers
-                # LOG.debug("%s = %s%s", self.name, value, unit.symbol)
+                LOG.debug("%s = %s", self.name, value)
                 self.value = value
                 self.valid = True
 
