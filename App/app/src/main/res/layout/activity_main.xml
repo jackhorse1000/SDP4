@@ -1,45 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+
     tools:context=".MainActivity">
 
     <TextView
-        android:layout_width="wrap_content"
+
+        android:layout_width="379dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Spencer"
         android:layout_margin="10dp"
-        android:textSize="40sp"/>
+        android:layout_margintop="80px"
+        android:text="Spencer"
+        android:textAlignment="center"
+        android:layout_marginbottom="80px"
+        android:textSize="40sp" />
 
     <Button
         android:id="@+id/connect_wifi_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="220dp"
+        android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
-        android:padding="20dp"
+
         android:text="Connect"
-        android:textSize="15sp"/>
+        android:layout_marginTop="400px"
+        android:textSize="15sp" />
 
     <Button
         android:id="@+id/technical_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="220dp"
+        android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
-        android:padding="10dp"
-        android:textSize="15sp"
-        android:text="Technical Manual" />
+        android:layout_marginTop="100px"
+        android:text="Technical Manual"
+
+        android:textSize="15sp" />
 
     <Button
         android:id="@+id/demo_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="220dp"
+        android:layout_height="60dp"
         android:layout_gravity="center_horizontal"
-        android:padding="10dp"
-        android:textSize="15sp"
-        android:text="Demo" />
+        android:layout_margintop="40px"
+        android:layout_marginTop="100px"
+        android:text="Demo"
+        android:layout_marginbottom="80px"
+        android:textSize="15sp" />
 
 </LinearLayout>
