@@ -32,10 +32,13 @@ class ClimbController:
                 LOG.error("front_up aborting due to too many failed reads")
                 return False
 
+            # If only one is valid, rotate towards the valid sensor
             if left.valid and left.value >= 10 and not right.valid:
                 control.turn_left()
             elif right.valid and right.value >= 10 and not left.valid:
                 control.turn_right()
+
+            # If neither are valid, then drive forward.
             elif not left.valid or not right.valid:
                 control.forward()
             else:
@@ -49,11 +52,11 @@ class ClimbController:
                     control.forward()
 
                 # Attempt to align against the wall
-                elif delta > 0.5:
+                elif delta > 2:
                     control.turn_right()
-                elif delta < -0.5:
+                elif delta < -2:
                     control.turn_left()
-                elif distance <= 7:
+                elif distance <= 5:
                     control.stop()
                     return True
 

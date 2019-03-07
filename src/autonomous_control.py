@@ -146,17 +146,24 @@ def lift_both() -> None:
 def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
     async def run() -> None:
-        # from climb import ClimbController
-        # await ClimbController(data).find_wall()
+        lift_both()
+        while True:
+            front, back = False, False
+            if data.front_lifting_rot.get() <= -100:
+                stop_front()
+                front = True
+
+            if data.back_lifting_rot.get() <= -100:
+                stop_back()
+                back = True
+            if front and back:
+                break
+            await asyncio.sleep(SLEEP)
+
+        from climb import ClimbController
+        await ClimbController(data).find_wall()
         # We should return from find wall aligned to the step and as close as we can get before the
         # distance sensors can't read anymore
-
-        # forward()  # Forward for x seconds, this needs to be determined
-        # while True:
-        #     # TODO(anyone): Find time to go forward
-        #     await asyncio.sleep(2)
-        #     stop()
-        #     break
 
         lift_front()
         while True:
