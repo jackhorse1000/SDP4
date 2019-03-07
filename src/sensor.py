@@ -197,22 +197,29 @@ class Distance:
 class RotaryEncoder:
     """A rotary encoder sensor"""
 
+    name = None # type: str
+    value = None # type: int
+    lock = None # type: threading.Lock
+
     def __init__(self, name: str) -> None:
         self.name = name
         self.value = 0
         self.lock = threading.Lock()
 
     def get(self) -> int:
+        """Get the current value of this rotary encoder."""
         with self.lock:
             return self.value
 
-    def change(self, delta) -> None:
+    def change(self, delta: int) -> None:
+        """Increment the encoder's value"""
         if delta != 0:
             with self.lock:
-              self.value += delta
-              LOG.debug("%s = %d", self.name, self.value)
+                self.value += delta
+                LOG.debug("%s = %d", self.name, self.value)
 
     def reset(self) -> None:
+        """Reset  the encoder's value to 0."""
         with self.lock:
             self.value = 0
             LOG.debug("%s = %d (reset)", self.name, self.value)

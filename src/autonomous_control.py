@@ -146,7 +146,7 @@ def lift_both() -> None:
 def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
     async def run() -> None:
-        from climb import ClimbController
+        # from climb import ClimbController
         # await ClimbController(data).find_wall()
         # We should return from find wall aligned to the step and as close as we can get before the
         # distance sensors can't read anymore
@@ -281,6 +281,11 @@ def climb_downstairs(data: SensorData) -> None:
     asyncio.get_event_loop().create_task(run())
 
 async def zero(data: SensorData) -> None:
+    """Zeros out the rotation sensors. We attempt to move the front and back
+       lifting mechanisms to the bottom position, and then reset them to
+       0.
+
+    """
     if not data.front_ground_touch.get():
         lower_front()
         while not data.front_ground_touch.get():

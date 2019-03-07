@@ -2,7 +2,7 @@
 
 # pylint: disable=R0902
 
-from sensor import Distance, Touch, FakeSensor, TouchSensorsI2c, RotaryEncoder
+from sensor import Distance, Touch, FakeSensor, RotaryEncoder
 
 class SensorData:
     """Contains the sensor data from the robot."""
