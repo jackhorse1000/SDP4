@@ -206,10 +206,12 @@ def _main():
         with data.front_dist_0, \
              data.front_dist_1, \
              data.back_stair_dist, \
+             data.back_ground_dist, \
              data.front_ground_touch, \
              data.middle_stair_touch, \
              data.back_stair_touch, \
-             data.back_ground_touch:
+             data.back_ground_touch, \
+             data.middle_ground_touch:
 
             # Reset the front and back to clear any residual data
             server = loop.run_until_complete(loop.create_server(

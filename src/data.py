@@ -16,6 +16,7 @@ class SensorData:
     front_stair_touch = None # type: Touch
     back_stair_touch = None # type: Touch
     back_ground_touch = None # type: Touch
+    middle_ground_touch = None # type: Touch
 
     def __init__(self) -> None:
         # TODO(anyone): Need to check these channels
@@ -31,6 +32,7 @@ class SensorData:
         self.middle_stair_touch = Touch("middle_stair_touch", 1)
         self.back_stair_touch = Touch("back_stair_touch", 2)
         self.back_ground_touch = Touch("back_ground_touch", 3)
+        self.middle_ground_touch = Touch("middle_ground_touch", 4)
 
         self.front_lifting_rot = RotaryEncoder("front_lifting_rot")
         self.back_lifting_rot = RotaryEncoder("back_lifting_rot")
