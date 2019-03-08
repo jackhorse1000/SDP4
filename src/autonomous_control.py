@@ -148,8 +148,8 @@ def lift_both() -> None:
 def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
     async def run() -> None:
-        lift_both()
-        while True:
+        while data.get_moving():
+            lift_both()
             front, back = False, False
             if data.front_lifting_rot.get() <= -100:
                 stop_front()
@@ -167,37 +167,41 @@ def climb(data: SensorData) -> None:
         # We should return from find wall aligned to the step and as close as we can get before the
         # distance sensors can't read anymore
 
-        lift_front()
-        while True:
+        while data.get_moving():
+            lift_front()
             if data.front_lifting_rot.get() <= STEP_FRONT_MIN:
                 # TODO(anyone) Use distance sensors here too - if we can do it reliably.
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
-        forward()
-        while True:
+        while data.get_moving():
+            forward()
             if data.middle_stair_touch.get():
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
-        lower_front()
-        while True:
+        while data.get_moving():
+            lower_front()
             if data.front_ground_touch.get() or data.front_lifting_rot.get() >= 0:
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
         # HACK HACK HACK
-        lower_back()
-        await asyncio.sleep(1)
-        stop()
+        if data.get_moving():
+          lower_back()
+          await asyncio.sleep(1)
+          stop()
 
         target_back = -data.front_lifting_rot.get()
         LOG.info("Targeting back lifting of %d", target_back)
-        lower_both()
-        while True:
+        init = False
+        while data.get_moving():
+            if not init:
+                lower_both()
+                init = True
             # If the back one has reached the stair, then we're all good
             # TODO(anyone): Add distance sensor for back stair
             if data.back_stair_touch.get():
@@ -218,8 +222,8 @@ def climb(data: SensorData) -> None:
 
             await asyncio.sleep(SLEEP)
 
-        lift_back()
-        while True:
+        while data.get_moving():
+            lift_back()
             # TODO(anyone): Reach normal extension / max back rotation stop
             if data.back_lifting_rot.get() <= 0:
                 stop()
@@ -236,8 +240,8 @@ def climb_downstairs(data: SensorData) -> None:
 
         # Backwards until back ground is not touching and we have a reading
         # on the distance sensor
-        backward()
-        while True:
+        while data.get_moving():
+            backward()
             if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
                 stop()
                 # Check if back ground distance sensor is reading values then
@@ -248,25 +252,26 @@ def climb_downstairs(data: SensorData) -> None:
                     # TODO(anyone): We need to panic, check we need to handle this better
                     LOG.error("Cannot go downstairs distance to large: %f", \
                               data.back_ground_dist.get())
+                    data.set_moving(False)
             await asyncio.sleep(SLEEP)
 
-        lower_back()
-        while True:
+        while data.get_moving():
+            lower_back()
             if data.back_ground_touch.get():
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
-        backward() # Backward until back stair distance sensor reaches our set limit
-        while True:
+        while data.get_moving():
+            backward() # Backward until back stair distance sensor reaches our set limit
             if data.back_stair_dist.get() > 26.0:
                 stop()
                 break
             await asyncio.sleep(SLEEP)
 
         # Lift both until middle is on the ground
-        lift_both()
-        while True:
+        while data.get_moving():
+            lift_both()
             # Check if middle is touching,
             if data.middle_ground_touch.get():
                 stop()
@@ -274,25 +279,26 @@ def climb_downstairs(data: SensorData) -> None:
             await asyncio.sleep(SLEEP)
 
         # Lower back so it is on the step
-        lower_back()
-        while True:
+        while data.get_moving():
+            lower_back()
             if data.back_ground_touch.get():
                 # Used to reset the back rotation counter
                 data.back_lifting_rot.reset()
                 stop()
                 break
 
-        backward() #TODO(anyone): review and change
-        # while True:
-        #     if not data.back_ground_touch.get():
-        #         stop()
-        #         break
-        await asyncio.sleep(2)
-        stop()
+        if data.get_moving():
+            backward() #TODO(anyone): review and change
+            # while True:
+            #     if not data.back_ground_touch.get():
+            #         stop()
+            #         break
+            await asyncio.sleep(2)
+            stop()
 
         # Lower front until it is touching the step
-        lower_front()
-        while True:
+        while data.get_moving():
+            lower_front()
             if data.front_ground_touch.get():
                 # Used to reset the front rotation counter
                 data.front_lifting_rot.reset()

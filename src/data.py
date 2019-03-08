@@ -1,6 +1,7 @@
 """Storage classes for sensor data"""
 
 # pylint: disable=R0902
+import threading
 
 from sensor import Distance, Touch, FakeSensor, RotaryEncoder
 
@@ -17,6 +18,9 @@ class SensorData:
     back_stair_touch = None # type: Touch
     back_ground_touch = None # type: Touch
     middle_ground_touch = None # type: Touch
+
+    is_moving = False
+    is_moving_lock = threading.Lock()
 
     def __init__(self) -> None:
         # TODO(anyone): Need to check these channels
@@ -36,6 +40,19 @@ class SensorData:
 
         self.front_lifting_rot = RotaryEncoder("front_lifting_rot")
         self.back_lifting_rot = RotaryEncoder("back_lifting_rot")
+
+@staticmethod
+def set_moving(value : bool):
+    """ Set is moving value """
+    with SensorData.is_moving_lock:
+        SensorData.is_moving = value
+
+@staticmethod
+def get_moving():
+    """ get is moving """
+    with SensorData.is_moving_lock:
+        return SensorData.is_moving
+
 
 class FakeSensorData:
     """An mock version of SensorData, containing just fake sensors."""
