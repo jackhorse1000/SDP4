@@ -236,7 +236,7 @@ def _main():
         loop.close()
 
         if "-M" not in sys.argv:
-            motor.stop_motors()
+            motor.float_motors()
 
 if __name__ == "__main__":
     _main()

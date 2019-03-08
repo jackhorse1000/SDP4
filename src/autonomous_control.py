@@ -19,8 +19,10 @@ DRIVE_RIGHT = 4
 DRIVE_LEFT = 5
 DRIVE_BACK = 1
 
-DRIVE_SIDE_FWD = -100
-DRIVE_SIDE_BCK = 100
+SPEED = 255
+
+DRIVE_SIDE_FWD = -SPEED
+DRIVE_SIDE_BCK = SPEED
 
 STEP_BACK = 3  # 1 up, -1 down
 STEP_FRONT = 2
@@ -106,12 +108,12 @@ def turn_right() -> None:
 @state("step_front") # TODO Merge this into the climb stage??
 def lower_front() -> None:
     """Moves the front stepper down, to the base position"""
-    motor.set_motor(STEP_FRONT, -100)
+    motor.set_motor(STEP_FRONT, -SPEED)
 
 @state("step_front")
 def lift_front() -> None:
     """Moves the front stepper upwards, from the base position"""
-    motor.set_motor(STEP_FRONT, 100)
+    motor.set_motor(STEP_FRONT, SPEED)
 
 @state("step_front")
 def stop_front() -> None:
@@ -121,12 +123,12 @@ def stop_front() -> None:
 @state("step_back")
 def lower_back() -> None:
     """Moves the back stepper down, from the base position"""
-    motor.set_motor(STEP_BACK, 100)
+    motor.set_motor(STEP_BACK, SPEED)
 
 @state("step_back")
 def lift_back() -> None:
     """Moves the back stepper upwards, to the base position"""
-    motor.set_motor(STEP_BACK, -100)
+    motor.set_motor(STEP_BACK, -SPEED)
 
 @state("step_back")
 def stop_back() -> None:
@@ -236,7 +238,7 @@ def climb_downstairs(data: SensorData) -> None:
         # on the distance sensor
         backward()
         while True:
-            if not data.back_ground_touch.get():
+            if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
                 stop()
                 # Check if back ground distance sensor is reading values then
                 # lower back until back ground touch is true
@@ -257,7 +259,7 @@ def climb_downstairs(data: SensorData) -> None:
 
         backward() # Backward until back stair distance sensor reaches our set limit
         while True:
-            if data.back_stair_dist.get() > 20.5: # TODO(anyone): Update and check value
+            if data.back_stair_dist.get() > 26.0:
                 stop()
                 break
             await asyncio.sleep(SLEEP)
@@ -281,11 +283,12 @@ def climb_downstairs(data: SensorData) -> None:
                 break
 
         backward() #TODO(anyone): review and change
-        while True:
-            if not data.back_ground_touch.get():
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
+        # while True:
+        #     if not data.back_ground_touch.get():
+        #         stop()
+        #         break
+        await asyncio.sleep(2)
+        stop()
 
         # Lower front until it is touching the step
         lower_front()
@@ -322,3 +325,5 @@ async def zero(data: SensorData) -> None:
     data.front_lifting_rot.reset()
     data.back_lifting_rot.reset()
     LOG.info("Zeroed lifting mechanisms")
+
+stop()

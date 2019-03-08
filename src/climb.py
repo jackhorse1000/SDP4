@@ -52,9 +52,9 @@ class ClimbController:
                     control.forward()
 
                 # Attempt to align against the wall
-                elif delta > 2:
+                elif delta > 3:
                     control.turn_right()
-                elif delta < -2:
+                elif delta < -3:
                     control.turn_left()
                 elif distance <= 5:
                     control.stop()
