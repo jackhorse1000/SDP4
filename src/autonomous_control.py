@@ -248,6 +248,13 @@ def climb_downstairs(data: SensorData) -> None:
                               data.back_ground_dist.get())
             await asyncio.sleep(SLEEP)
 
+        lower_back()
+        while True:
+            if data.back_ground_touch.get():
+                stop()
+                break
+            await asyncio.sleep(SLEEP)
+
         backward() # Backward until back stair distance sensor reaches our set limit
         while True:
             if data.back_stair_dist.get() > 20.5: # TODO(anyone): Update and check value
@@ -273,7 +280,7 @@ def climb_downstairs(data: SensorData) -> None:
                 stop()
                 break
 
-        backward()
+        backward() #TODO(anyone): review and change
         while True:
             if not data.back_ground_touch.get():
                 stop()
