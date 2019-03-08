@@ -10,6 +10,7 @@ class SensorData:
     front_dist_0 = None # type: Distance
     front_dist_1 = None # type: Distance
     back_stair_dist = None # type: Distance
+    back_ground_dist = None # type: Distance
 
     front_ground_touch = None # type: Touch
     front_stair_touch = None # type: Touch
@@ -23,6 +24,7 @@ class SensorData:
         self.front_dist_0 = Distance("front_dist_0", 0)
         self.front_dist_1 = Distance("front_dist_1", 1)
         self.back_stair_dist = Distance("back_stair_dist", 2)
+        self.back_ground_dist = Distance("back_ground_dist", 3)
 
         # Touch sensors
         self.front_ground_touch = Touch("front_ground_touch", 0)

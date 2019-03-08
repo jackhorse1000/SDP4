@@ -238,8 +238,14 @@ def climb_downstairs(data: SensorData) -> None:
         while True:
             if not data.back_ground_touch.get():
                 stop()
-                # TODO(anyone: Check if back ground distance sensor is reading values
-                # then lower back until back ground touch is true
+                # Check if back ground distance sensor is reading values then
+                # lower back until back ground touch is true
+                if data.back_ground_dist.get() < 20:
+                    break
+                else:
+                    # TODO(anyone): We need to panic
+                    LOG.error("Cannot go downstairs distance to large: %f", \
+                              data.back_ground_dist.get())
             await asyncio.sleep(SLEEP)
 
         backward() # Backward until back stair distance sensor reaches our set limit
