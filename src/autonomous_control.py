@@ -1,7 +1,7 @@
 """Generic motor-control module. Provides helper methods for manipulating
    each motor and pairs of motors. Same as control.py but with added safety"""
 
-# pylint: disable=R0401
+# pylint: disable=R0401, W0611
 # Disable cyclic imports. It's horrible, but I don't want to refactor right now.
 
 import asyncio
