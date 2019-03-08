@@ -232,7 +232,7 @@ def climb_downstairs(data: SensorData) -> None:
     """Tries to climb downstairs automatically"""
     async def run() -> None:
 
-        # TODO(anyone): Backwards until back ground is not touching and we have a reading
+        # Backwards until back ground is not touching and we have a reading
         # on the distance sensor
         backward()
         while True:
@@ -243,7 +243,7 @@ def climb_downstairs(data: SensorData) -> None:
                 if data.back_ground_dist.get() < 20:
                     break
                 else:
-                    # TODO(anyone): We need to panic
+                    # TODO(anyone): We need to panic, check we need to handle this better
                     LOG.error("Cannot go downstairs distance to large: %f", \
                               data.back_ground_dist.get())
             await asyncio.sleep(SLEEP)
@@ -268,11 +268,11 @@ def climb_downstairs(data: SensorData) -> None:
         lower_back()
         while True:
             if data.back_ground_touch.get():
-                # TODO(anyone): Could be used to reset rotation counter
+                # Used to reset the back rotation counter
+                data.back_lifting_rot.reset()
                 stop()
                 break
 
-        # TODO(anyone): Backwards until back ground is not touching
         backward()
         while True:
             if not data.back_ground_touch.get():
@@ -284,7 +284,8 @@ def climb_downstairs(data: SensorData) -> None:
         lower_front()
         while True:
             if data.front_ground_touch.get():
-                # TODO(anyone): Could be used to reset rotation counter
+                # Used to reset the front rotation counter
+                data.front_lifting_rot.reset()
                 stop()
                 break
             await asyncio.sleep(SLEEP)
