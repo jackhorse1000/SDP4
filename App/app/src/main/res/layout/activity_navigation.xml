@@ -54,12 +54,16 @@
     <Button
         android:id="@+id/forward_btn"
 
-        android:layout_width="140dp"
-        android:layout_height="140dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_below="@id/communication_layout"
+        android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="151dp"
-        android:layout_marginEnd="138dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="153dp"
+        android:layout_marginTop="191dp"
+        android:layout_marginEnd="160dp"
+        android:layout_marginBottom="357dp"
         android:background="@drawable/uparrow"
         android:text="forward"
         android:textAlignment="center"
@@ -78,41 +82,36 @@
 
     <Button
         android:id="@+id/backward_btn"
-        android:layout_width="140dp"
-        android:layout_height="140dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_above="@+id/connect_spencer_btn"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="132dp"
-        android:layout_marginBottom="35dp"
+        android:layout_marginEnd="156dp"
+        android:layout_marginBottom="48dp"
         android:background="@drawable/downarrow"
         android:text="backward" />
 
     <Button
         android:id="@+id/turn_left_btn"
-        android:layout_width="140dp"
-        android:layout_height="140dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="366dp"
-        android:layout_marginEnd="271dp"
-        android:layout_marginBottom="225dp"
+        android:layout_marginEnd="269dp"
+        android:layout_marginBottom="235dp"
         android:background="@drawable/leftarrow"
         android:text="turn left" />
 
     <Button
         android:id="@+id/turn_right_btn"
-        android:layout_width="140dp"
-        android:layout_height="140dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="271dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginBottom="225dp"
+        android:layout_marginStart="267dp"
+        android:layout_marginRight="44dp"
+        android:layout_marginBottom="235dp"
         android:background="@drawable/rightarrow"
         android:text="turn right" />
 
@@ -123,9 +122,11 @@
 
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
         android:layout_marginStart="17dp"
         android:layout_marginLeft="50dp"
-        android:layout_marginTop="128dp"
+        android:layout_marginTop="78dp"
+        android:layout_marginBottom="605dp"
         android:background="@android:color/holo_green_light"
         android:text="climb" />
 
@@ -133,13 +134,14 @@
         android:id="@+id/downstairs_btn"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/connect_spencer_btn"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="200dp"
-        android:layout_marginEnd="35dp"
-        android:layout_marginRight="35dp"
-        android:layout_marginBottom="507dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="77dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="606dp"
         android:background="@android:color/holo_green_light"
         android:text="downstairs" />
 
