@@ -9,35 +9,34 @@
 
     tools:context=".MainActivity">
 
+
     <Button
         android:id="@+id/connect_wifi_btn"
-        android:layout_width="220dp"
-        android:layout_height="60dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_gravity="center_horizontal"
-        android:background="@android:color/holo_green_light"
+        android:layout_marginTop="300px"
+        android:background="@drawable/btn_circle"
         android:text="Connect"
-        android:layout_marginTop="400px"
         android:textSize="15sp" />
 
     <Button
         android:id="@+id/technical_btn"
-        android:background="@android:color/holo_green_light"
-        android:layout_width="220dp"
-        android:layout_height="60dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="100px"
+        android:background="@drawable/btn_circle"
         android:text="Technical Manual"
-
         android:textSize="15sp" />
 
     <Button
         android:id="@+id/demo_btn"
-        android:background="@android:color/holo_green_light"
-        android:layout_width="220dp"
-        android:layout_height="60dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_gravity="center_horizontal"
-
         android:layout_marginTop="100px"
+        android:background="@drawable/btn_circle"
         android:text="Demo"
 
         android:textSize="15sp" />

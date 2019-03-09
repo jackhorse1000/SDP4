@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/appletontower"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,14 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Spencer"
-            android:layout_margin="10dp"
-            android:textSize="40sp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -53,18 +46,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="Stationary"/>
+                android:text="Stationary" />
         </LinearLayout>
 
     </LinearLayout>
 
     <Button
         android:id="@+id/forward_btn"
+       
         android:layout_marginTop="50dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="forward"
         android:layout_centerHorizontal="true"
+        android:background="@android:color/holo_green_light"
         android:layout_below="@id/communication_layout"/>
 
     <Button
@@ -74,6 +69,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="stop all"
+        android:background="@android:color/holo_green_light"
         android:layout_centerHorizontal="true"/>
     <Button
         android:id="@+id/backward_btn"
@@ -82,6 +78,7 @@
         android:layout_marginTop="200dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@android:color/holo_green_light"
         android:text="backward"/>
 
     <Button
@@ -91,6 +88,7 @@
         android:layout_below="@+id/forward_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@android:color/holo_green_light"
         android:text="turn left"/>
 
     <Button
@@ -101,23 +99,33 @@
         android:layout_alignParentRight="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@android:color/holo_green_light"
         android:text="turn right" />
 
     <Button
         android:id="@+id/upstairs_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/backward_btn"
-        android:layout_marginLeft="20dp"
+        android:layout_below="@+id/turn_left_btn"
+
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="50dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="200dp"
+        android:background="@android:color/holo_green_light"
         android:text="climb" />
 
     <Button
         android:id="@+id/downstairs_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/connect_spencer_btn"
+        android:layout_below="@+id/turn_right_btn"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"
-        android:layout_alignBaseline="@id/backward_btn"
+        android:layout_marginTop="200dp"
+        android:layout_marginRight="69dp"
+        android:layout_marginBottom="136dp"
+        android:background="@android:color/holo_green_light"
         android:text="downstairs" />
 
 
@@ -127,5 +135,8 @@
         android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@android:color/holo_green_light"
         android:text="Connect to Spencer"/>
+
+
 </RelativeLayout>
