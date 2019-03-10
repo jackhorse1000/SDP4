@@ -234,7 +234,7 @@ def climb(data: SensorData) -> None:
 
     asyncio.get_event_loop().create_task(run())
 
-def climb_downstairs(data: SensorData) -> None:
+def downstairs(data: SensorData) -> None:
     """Tries to climb downstairs automatically"""
     async def run() -> None:
 
@@ -264,7 +264,7 @@ def climb_downstairs(data: SensorData) -> None:
 
         while data.get_moving():
             backward() # Backward until back stair distance sensor reaches our set limit
-            if data.back_stair_dist.get() > 26.0:
+            if data.back_stair_dist.get() > 27.0:
                 stop()
                 break
             await asyncio.sleep(SLEEP)

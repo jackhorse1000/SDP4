@@ -92,7 +92,7 @@ async def motor_control(queue: SingleValueQueue, manager: ConnectionManager, dat
             control.stop()
         elif action in commands:
             # If we're a function defined in the control module, execute it.
-            data.set_moving(False)
+            data.set_moving(True)
             motor_log.info("Running %s", action)
             manager.send("Running " + action)
             command = commands[action]

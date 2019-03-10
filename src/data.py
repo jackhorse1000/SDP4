@@ -41,17 +41,17 @@ class SensorData:
         self.front_lifting_rot = RotaryEncoder("front_lifting_rot")
         self.back_lifting_rot = RotaryEncoder("back_lifting_rot")
 
-@staticmethod
-def set_moving(value : bool):
-    """ Set is moving value """
-    with SensorData.is_moving_lock:
-        SensorData.is_moving = value
+    @staticmethod
+    def set_moving(value : bool):
+        """ Set is moving value """
+        with SensorData.is_moving_lock:
+            SensorData.is_moving = value
 
-@staticmethod
-def get_moving():
-    """ get is moving """
-    with SensorData.is_moving_lock:
-        return SensorData.is_moving
+    @staticmethod
+    def get_moving():
+        """ get is moving """
+        with SensorData.is_moving_lock:
+            return SensorData.is_moving
 
 
 class FakeSensorData:
