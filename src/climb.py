@@ -56,7 +56,7 @@ class ClimbController:
                     control.turn_right()
                 elif delta < -3:
                     control.turn_left()
-                elif distance <= 5:
+                elif distance <= 6:
                     control.stop()
                     return True
 

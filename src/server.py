@@ -5,6 +5,7 @@
 import asyncio
 import inspect
 import logging
+import signal
 import sys
 import time
 from typing import Any, Dict
@@ -68,8 +69,8 @@ def exception_handler(loop, context):
        the default handler
 
     """
-    logging.error("Terminating loop due to error")
     if loop.is_running():
+        logging.error("Terminating loop due to error")
         loop.stop()
     loop.default_exception_handler(context)
 
@@ -175,14 +176,22 @@ async def check_sensors(data: SensorData) -> None:
 
     raise IOError("Sensor data is still invalid after 2 seconds.")
 
+def cleanup() -> None:
+    """Close all tasks currently running"""
+    for task in asyncio.Task.all_tasks():
+        task.cancel()
+
 def _main():
     """The main entry point of the server"""
 
     log.configure()
 
+    control.stop()
+
     # Create an event loop. This effectively allows us to run multiple functions
     # at once (namely, the motor controller and server).
     loop = asyncio.get_event_loop()
+    loop.add_signal_handler(signal.SIGINT, cleanup)
     loop.set_exception_handler(exception_handler)
 
     # Motor control statements are pushed into this queue
@@ -207,7 +216,7 @@ def _main():
     try:
         with data.front_dist_0, \
              data.front_dist_1, \
-             data.back_stair_dist, \
+             data.front_ground_dist, \
              data.back_ground_dist, \
              data.front_ground_touch, \
              data.middle_stair_touch, \
@@ -227,7 +236,7 @@ def _main():
             loop.run_until_complete(check_sensors(data))
 
             # Zero the motors
-            loop.run_until_complete(control.zero(data))
+            # loop.run_until_complete(control.zero(data))
 
             loop.run_forever()
     finally:
@@ -235,6 +244,7 @@ def _main():
             server.close()
             loop.run_until_complete(server.wait_closed())
 
+        loop.run_until_complete(loop.shutdown_asyncgens())
         loop.close()
 
         if "-M" not in sys.argv:

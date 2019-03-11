@@ -79,7 +79,7 @@ class Touch:
 
         """
         self.phidget.openWaitForAttachment(ATTACHMENT_TIMEOUT)
-        LOG.debug("Attached %s", self.name)
+        LOG.info("Attached %s", self.name)
 
     def __exit__(self, _a, _b, _c):
         self.phidget.setOnErrorHandler(None)
@@ -146,7 +146,7 @@ class Distance:
         with self.lock:
             if not self.valid or abs(self.value - value) > 0.05:
                 # Update properties and notify observers
-                # LOG.debug("%s = %s%s", self.name, value, _unit.symbol)
+                LOG.debug("%s = %s%s", self.name, value, _unit.symbol)
                 self.value = value
                 self.valid = True
 
@@ -185,7 +185,7 @@ class Distance:
         self.phidget.openWaitForAttachment(ATTACHMENT_TIMEOUT)
         self.phidget.setDataInterval(50)
         self.phidget.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
-        LOG.debug("Attached %s", self.name)
+        LOG.info("Attached %s", self.name)
 
         return self
 
@@ -222,7 +222,7 @@ class RotaryEncoder:
         """Reset  the encoder's value to 0."""
         with self.lock:
             self.value = 0
-            LOG.debug("%s = %d (reset)", self.name, self.value)
+            LOG.info("%s = %d (reset)", self.name, self.value)
 
 class FakeSensor:
     """ Used to fake the sensors around the robot """

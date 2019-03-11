@@ -28,7 +28,7 @@ class SensorData:
         # Distance sensors
         self.front_dist_0 = Distance("front_dist_0", 0)
         self.front_dist_1 = Distance("front_dist_1", 1)
-        self.back_stair_dist = Distance("back_stair_dist", 2)
+        self.front_ground_dist = Distance("front_ground_dist", 2)
         self.back_ground_dist = Distance("back_ground_dist", 3)
 
         # Touch sensors
