@@ -147,6 +147,7 @@ def lift_both() -> None:
 
 def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
+    from climb import ClimbController
     async def run() -> None:
         while data.get_moving():
             lift_both()
@@ -162,74 +163,75 @@ def climb(data: SensorData) -> None:
                 break
             await asyncio.sleep(SLEEP)
 
-        from climb import ClimbController
-        await ClimbController(data).find_wall()
-        # We should return from find wall aligned to the step and as close as we can get before the
-        # distance sensors can't read anymore
+        for i in range(2):
+            LOG.info("Climbing step %d", i+1)
+            await ClimbController(data).find_wall()
+            # We should return from find wall aligned to the step and as close 
+            # as we can get before the distance sensors can't read anymore
 
-        while data.get_moving():
-            lift_front()
-            if data.front_lifting_rot.get() <= STEP_FRONT_MIN:
-                # TODO(anyone) Use distance sensors here too - if we can do it reliably.
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
+            while data.get_moving():
+                lift_front()
+                if data.front_lifting_rot.get() <= STEP_FRONT_MIN:
+                    # TODO(anyone) Use distance sensors here too - if we can do it reliably.
+                    stop()
+                    break
+                await asyncio.sleep(SLEEP)
 
-        while data.get_moving():
-            forward()
-            if data.middle_stair_touch.get():
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
-
-        while data.get_moving():
-            lower_front()
-            if data.front_ground_touch.get() or data.front_lifting_rot.get() >= 0:
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
-
-        # HACK HACK HACK
-        if data.get_moving():
-          lower_back()
-          await asyncio.sleep(1)
-          stop()
-
-        target_back = -data.front_lifting_rot.get()
-        LOG.info("Targeting back lifting of %d", target_back)
-        init = False
-        while data.get_moving():
-            if not init:
-                lower_both()
-                init = True
-            # If the back one has reached the stair, then we're all good
-            # TODO(anyone): Add distance sensor for back stair
-            if data.back_stair_touch.get():
-                LOG.info("Back stair touch hit, finishing climb")
-                stop()
-                break
-
-            if data.front_lifting_rot.get() >= 0:
-                stop_front()
+            while data.get_moving():
                 forward()
+                if data.middle_stair_touch.get():
+                    stop()
+                    break
+                await asyncio.sleep(SLEEP)
 
-            # TODO(anyone): Reach max extension / max back rotation start going forward
-            if data.back_lifting_rot.get() >= target_back + 200:
-                stop_back()
-                forward()
-            else:
-                lower_back()
+            while data.get_moving():
+                lower_front()
+                if data.front_ground_touch.get() or data.front_lifting_rot.get() >= 0:
+                    stop()
+                    break
+                await asyncio.sleep(SLEEP)
 
-            await asyncio.sleep(SLEEP)
+            # HACK HACK HACK
+            if data.get_moving():
+              lower_back()
+              await asyncio.sleep(1)
+              stop()
 
-        while data.get_moving():
-            lift_back()
-            # TODO(anyone): Reach normal extension / max back rotation stop
-            if data.back_lifting_rot.get() <= 0:
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
-        await asyncio.sleep(2)
+            target_back = -data.front_lifting_rot.get()
+            LOG.info("Targeting back lifting of %d", target_back)
+            init = False
+            while data.get_moving():
+                if not init:
+                    lower_both()
+                    init = True
+                # If the back one has reached the stair, then we're all good
+                # TODO(anyone): Add distance sensor for back stair
+                if data.back_stair_touch.get():
+                    LOG.info("Back stair touch hit, finishing climb")
+                    stop()
+                    break
+
+                if data.front_lifting_rot.get() >= 0:
+                    stop_front()
+                    forward()
+
+                # TODO(anyone): Reach max extension / max back rotation start going forward
+                if data.back_lifting_rot.get() >= target_back + 200:
+                    stop_back()
+                    forward()
+                else:
+                    lower_back()
+
+                await asyncio.sleep(SLEEP)
+
+            while data.get_moving():
+                lift_back()
+                # TODO(anyone): Reach normal extension / max back rotation stop
+                if data.back_lifting_rot.get() <= 0:
+                    stop()
+                    break
+                await asyncio.sleep(SLEEP)
+            await asyncio.sleep(2)
 
 
     asyncio.get_event_loop().create_task(run())
