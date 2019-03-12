@@ -239,74 +239,77 @@ def climb(data: SensorData) -> None:
 def downstairs(data: SensorData) -> None:
     """Tries to climb downstairs automatically"""
     async def run() -> None:
+        for i in range(2):
+            # Backwards until back ground is not touching and we have a reading
+            # on the distance sensor
+            while data.get_moving():
+                backward()
+                if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
+                    stop()
+                    # Check if back ground distance sensor is reading values then
+                    # lower back until back ground touch is true
+                    if data.back_ground_dist.get() < 20:
+                        break
+                    else:
+                        # TODO(anyone): We need to panic, check we need to handle this better
+                        LOG.error("Cannot go downstairs distance to large: %f", \
+                                  data.back_ground_dist.get())
+                        data.set_moving(False)
+                await asyncio.sleep(SLEEP)
 
-        # Backwards until back ground is not touching and we have a reading
-        # on the distance sensor
-        while data.get_moving():
-            backward()
-            if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
-                stop()
-                # Check if back ground distance sensor is reading values then
-                # lower back until back ground touch is true
-                if data.back_ground_dist.get() < 20:
+            while data.get_moving():
+                lower_back()
+                if data.back_ground_touch.get():
+                    stop()
                     break
-                else:
-                    # TODO(anyone): We need to panic, check we need to handle this better
-                    LOG.error("Cannot go downstairs distance to large: %f", \
-                              data.back_ground_dist.get())
-                    data.set_moving(False)
-            await asyncio.sleep(SLEEP)
+                await asyncio.sleep(SLEEP)
 
-        while data.get_moving():
-            lower_back()
-            if data.back_ground_touch.get():
+            while data.get_moving():
+                backward() # Backward until back stair distance sensor reaches our set limit
+                if data.back_stair_dist.get() > 27.0:
+                    stop()
+                    break
+                await asyncio.sleep(SLEEP)
+
+            # Lift both until middle is on the ground
+            while data.get_moving():
+                lift_both()
+                # Check if middle is touching,
+                if data.middle_ground_touch.get():
+                    stop()
+                    break
+                await asyncio.sleep(SLEEP)
+
+            # Lower back so it is on the step
+            while data.get_moving():
+                lower_back()
+                if data.back_ground_touch.get():
+                    # Used to reset the back rotation counter
+                    data.back_lifting_rot.reset()
+                    stop()
+                    break
+
+            if data.get_moving():
+                backward() #TODO(anyone): review and change
+                while True:
+                    if not data.back_ground_touch.get():
+                        stop()
+                        break
+                    # Used for last step
+                    # TODO: Will need changed
+                    if i == 1:
+                      await asyncio.sleep(2)
                 stop()
-                break
-            await asyncio.sleep(SLEEP)
 
-        while data.get_moving():
-            backward() # Backward until back stair distance sensor reaches our set limit
-            if data.back_stair_dist.get() > 27.0:
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
-
-        # Lift both until middle is on the ground
-        while data.get_moving():
-            lift_both()
-            # Check if middle is touching,
-            if data.middle_ground_touch.get():
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
-
-        # Lower back so it is on the step
-        while data.get_moving():
-            lower_back()
-            if data.back_ground_touch.get():
-                # Used to reset the back rotation counter
-                data.back_lifting_rot.reset()
-                stop()
-                break
-
-        if data.get_moving():
-            backward() #TODO(anyone): review and change
-            # while True:
-            #     if not data.back_ground_touch.get():
-            #         stop()
-            #         break
-            await asyncio.sleep(2)
-            stop()
-
-        # Lower front until it is touching the step
-        while data.get_moving():
-            lower_front()
-            if data.front_ground_touch.get():
-                # Used to reset the front rotation counter
-                data.front_lifting_rot.reset()
-                stop()
-                break
-            await asyncio.sleep(SLEEP)
+            # Lower front until it is touching the step
+            while data.get_moving():
+                lower_front()
+                if data.front_ground_touch.get():
+                    # Used to reset the front rotation counter
+                    data.front_lifting_rot.reset()
+                    stop()
+                    break
+                await asyncio.sleep(SLEEP)
 
         await asyncio.sleep(2)
 
