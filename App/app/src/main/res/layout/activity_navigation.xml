@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/appletontower"
+    android:background="@drawable/spencer"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,6 +9,7 @@
 
     <LinearLayout
         android:id="@+id/communication_layout"
+        android:background="@android:color/holo_green_light"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -18,17 +19,17 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:text="Connection:"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:text="Connection:" />
 
             <TextView
                 android:id="@+id/connection_status_txt"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:text="Not connected"/>
+                android:text="Not connected" />
         </LinearLayout>
 
         <LinearLayout
@@ -36,14 +37,14 @@
             android:layout_height="wrap_content">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:text="Status:"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:text="Status:" />
 
             <TextView
                 android:id="@+id/status_txt"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:text="Stationary" />
@@ -52,108 +53,109 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/forward_btn"
-
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_below="@id/communication_layout"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="153dp"
-        android:layout_marginTop="191dp"
-        android:layout_marginEnd="160dp"
-        android:layout_marginBottom="357dp"
-        android:background="@drawable/uparrow"
-        android:text="forward"
-        android:textAlignment="center"
-        android:textSize="14sp" />
-
-    <Button
-        android:id="@+id/stop_all_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/connect_spencer_btn"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="165dp"
-        android:layout_marginBottom="172dp"
-        android:background="@android:color/holo_green_light"
-        android:text="stop all" />
-
-    <Button
-        android:id="@+id/backward_btn"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_above="@+id/connect_spencer_btn"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="156dp"
-        android:layout_marginBottom="48dp"
-        android:background="@drawable/downarrow"
-        android:text="backward" />
-
-    <Button
-        android:id="@+id/turn_left_btn"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="269dp"
-        android:layout_marginBottom="235dp"
-        android:background="@drawable/leftarrow"
-        android:text="turn left" />
-
-    <Button
-        android:id="@+id/turn_right_btn"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="267dp"
-        android:layout_marginRight="44dp"
-        android:layout_marginBottom="235dp"
-        android:background="@drawable/rightarrow"
-        android:text="turn right" />
-
-    <Button
         android:id="@+id/upstairs_btn"
-        android:layout_width="150dp"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
-
+        android:layout_below="@+id/communication_layout"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginStart="17dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginTop="78dp"
-        android:layout_marginBottom="605dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="79dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="102dp"
+        android:layout_marginBottom="393dp"
         android:background="@android:color/holo_green_light"
         android:text="climb" />
 
     <Button
         android:id="@+id/downstairs_btn"
-        android:layout_width="150dp"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_above="@+id/forward_btn"
+        android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="77dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="606dp"
+        android:layout_marginStart="79dp"
+        android:layout_marginTop="348dp"
+        android:layout_marginEnd="102dp"
+        android:layout_marginBottom="36dp"
         android:background="@android:color/holo_green_light"
         android:text="downstairs" />
 
+    <Button
+        android:id="@+id/forward_btn"
+
+        android:layout_width="137dp"
+        android:layout_height="85dp"
+        android:layout_above="@+id/connect_spencer_btn"
+        android:layout_alignParentEnd="true"
+
+        android:layout_marginBottom="179dp"
+        android:background="@drawable/uparrow"
+        android:text="forward"
+        android:layout_marginStart="136dp"
+        android:layout_marginEnd="138dp"
+        android:textAlignment="center"
+        android:textSize="14sp" />
+
+
+
+    <Button
+        android:id="@+id/backward_btn"
+        android:layout_width="137dp"
+        android:layout_height="85dp"
+        android:layout_above="@+id/connect_spencer_btn"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="136dp"
+        android:layout_marginEnd="138dp"
+        android:layout_marginBottom="11dp"
+        android:background="@drawable/downarrow"
+        android:text="backward" />
+
+    <Button
+        android:id="@+id/turn_left_btn"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="60dp"
+        android:layout_marginEnd="275dp"
+        android:layout_marginBottom="140dp"
+        android:background="@drawable/leftarrow"
+        android:text="turn left" />
+
+    <Button
+        android:id="@+id/turn_right_btn"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="270dp"
+        android:layout_marginRight="61dp"
+        android:layout_marginBottom="140dp"
+        android:background="@drawable/rightarrow"
+        android:text="turn right" />
+
+    <Button
+        android:id="@+id/stop_all_btn"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="0dp"
+        android:background="@color/colorAccent"
+        android:text="stop all" />
 
     <Button
         android:id="@+id/connect_spencer_btn"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_marginEnd="0dp"
+        android:layout_marginBottom="0dp"
         android:background="@android:color/holo_green_light"
-        android:text="Connect to Spencer"/>
+        android:text="Connect to Spencer" />
 
 
 </RelativeLayout>
