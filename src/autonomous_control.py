@@ -27,10 +27,11 @@ DRIVE_SIDE_BCK = SPEED
 STEP_BACK = 3  # 1 up, -1 down
 STEP_FRONT = 2
 
-STEP_FRONT_MIN = -1200 # -1400
+STEP_FRONT_MIN = -1200 # 1400 Full Extension
+STEP_FRONT_MAX = 0 # Normal
 
-STEP_BACK_MIN = 0
-STEP_BACK_MAX = 1200
+STEP_BACK_MIN = 0 # Normal
+STEP_BACK_MAX = 1200 # Full Extension
 
 STATES = {} # type: Dict[str, str]
 SLEEP = 0.1
@@ -105,7 +106,7 @@ def turn_right() -> None:
     motor.set_motor(DRIVE_LEFT, DRIVE_SIDE_FWD)
     motor.set_motor(DRIVE_RIGHT, DRIVE_SIDE_BCK)
 
-@state("step_front") # TODO Merge this into the climb stage??
+@state("step_front")
 def lower_front() -> None:
     """Moves the front stepper down, to the base position"""
     motor.set_motor(STEP_FRONT, -SPEED)
@@ -149,6 +150,8 @@ def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
     from climb import ClimbController
     async def run() -> None:
+        # Attempt to normalise the lifting mechanisms to a point so they're no
+        # longer touching the ground.
         while data.get_moving():
             lift_both()
             front, back = False, False
@@ -156,7 +159,7 @@ def climb(data: SensorData) -> None:
                 stop_front()
                 front = True
 
-            if data.back_lifting_rot.get() <= -100:
+            if data.back_lifting_rot.get() <= -30:
                 stop_back()
                 back = True
             if front and back:
@@ -166,9 +169,10 @@ def climb(data: SensorData) -> None:
         for i in range(2):
             LOG.info("Climbing step %d", i+1)
             await ClimbController(data).find_wall()
-            # We should return from find wall aligned to the step and as close 
+            # We should return from find wall aligned to the step and as close
             # as we can get before the distance sensors can't read anymore
 
+            # Lift the front mechanism to its upper point
             while data.get_moving():
                 lift_front()
                 if data.front_lifting_rot.get() <= STEP_FRONT_MIN:
@@ -184,18 +188,20 @@ def climb(data: SensorData) -> None:
                     break
                 await asyncio.sleep(SLEEP)
 
+            # Lower the front mechanism until touching the stair.
             while data.get_moving():
                 lower_front()
-                if data.front_ground_touch.get() or data.front_lifting_rot.get() >= 0:
+                if data.front_ground_touch.get() or data.front_lifting_rot.get() >= STEP_FRONT_MAX:
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
 
-            # HACK HACK HACK
+            # HACK HACK HACK: Ensure the back has a head-start on the front, as it
+            #  lifts a little slower.
             if data.get_moving():
-              lower_back()
-              await asyncio.sleep(1)
-              stop()
+                lower_back()
+                await asyncio.sleep(0.5)
+                stop()
 
             target_back = -data.front_lifting_rot.get()
             LOG.info("Targeting back lifting of %d", target_back)
@@ -216,7 +222,7 @@ def climb(data: SensorData) -> None:
                     forward()
 
                 # TODO(anyone): Reach max extension / max back rotation start going forward
-                if data.back_lifting_rot.get() >= target_back + 200:
+                if (data.back_lifting_rot.get() >= target_back + 100) or data.back_lifting_rot.get() >= STEP_BACK_MAX:
                     stop_back()
                     forward()
                 else:
@@ -227,11 +233,11 @@ def climb(data: SensorData) -> None:
             while data.get_moving():
                 lift_back()
                 # TODO(anyone): Reach normal extension / max back rotation stop
-                if data.back_lifting_rot.get() <= 0:
+                if data.back_lifting_rot.get() <= STEP_FRONT_MAX:
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
-            await asyncio.sleep(2)
+            await asyncio.sleep(SLEEP)
 
 
     asyncio.get_event_loop().create_task(run())
@@ -259,14 +265,21 @@ def downstairs(data: SensorData) -> None:
 
             while data.get_moving():
                 lower_back()
-                if data.back_ground_touch.get():
+                if data.back_ground_touch.get() or data.back_lifting_rot.get() >= STEP_BACK_MAX:
                     stop()
+                    if data.back_lifting_rot.get() >= STEP_BACK_MAX:
+                        # We should throw an error because this should not happen
+                        LOG.error("Cannot go downstairs. Back is at full extension \
+                                    and can't touch step. rot = %f", \
+                                    data.back_lifting_rot.get())
+                        data.set_moving(False)
                     break
                 await asyncio.sleep(SLEEP)
 
             while data.get_moving():
                 backward() # Backward until back stair distance sensor reaches our set limit
-                if data.back_stair_dist.get() > 27.0:
+                # TODO: We need to make sure this is correct. Made it lower than it was.
+                if data.back_stair_dist.get() > 26.0:
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
@@ -275,6 +288,22 @@ def downstairs(data: SensorData) -> None:
             while data.get_moving():
                 lift_both()
                 # Check if middle is touching,
+                if data.back_lifting_rot.get() <= STEP_BACK_MIN:
+                    stop()
+                    LOG.error("Cannot go downstairs. Back is at normal \
+                                    and middle is not touching step. rot = %f", \
+                                    data.back_lifting_rot.get())
+                    data.set_moving(False)
+                    break
+
+                if data.front_lifting_rot.get() >= STEP_FRONT_MAX:
+                    stop()
+                    LOG.error("Cannot go downstairs. Front is at normal \
+                                    and middle is not touching step. rot = %f", \
+                                    data.front_lifting_rot.get())
+                    data.set_moving(False)
+                    break
+
                 if data.middle_ground_touch.get():
                     stop()
                     break
@@ -283,6 +312,13 @@ def downstairs(data: SensorData) -> None:
             # Lower back so it is on the step
             while data.get_moving():
                 lower_back()
+                if data.back_lifting_rot.get() >= STEP_BACK_MAX:
+                    stop()
+                    LOG.error("Trying to reset back rot, but rot is max = %f", \
+                                    data.back_lifting_rot.get())
+                    data.set_moving(False)
+                    break
+
                 if data.back_ground_touch.get():
                     # Used to reset the back rotation counter
                     data.back_lifting_rot.reset()
@@ -298,12 +334,22 @@ def downstairs(data: SensorData) -> None:
                     # Used for last step
                     # TODO: Will need changed
                     if i == 1:
-                      await asyncio.sleep(2)
-                stop()
+                        await asyncio.sleep(2)
+                        stop()
+                        break
+                    await asyncio.sleep(SLEEP)
 
             # Lower front until it is touching the step
             while data.get_moving():
                 lower_front()
+
+                if data.front_lifting_rot.get() >= STEP_FRONT_MAX:
+                    stop()
+                    LOG.error("Trying to reset front rot, but rot is max = %f", \
+                                    data.front_lifting_rot.get())
+                    data.set_moving(False)
+                    break
+
                 if data.front_ground_touch.get():
                     # Used to reset the front rotation counter
                     data.front_lifting_rot.reset()
@@ -311,7 +357,7 @@ def downstairs(data: SensorData) -> None:
                     break
                 await asyncio.sleep(SLEEP)
 
-        await asyncio.sleep(2)
+        await asyncio.sleep(SLEEP)
 
     asyncio.get_event_loop().create_task(run())
 
