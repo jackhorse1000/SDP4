@@ -92,37 +92,37 @@ public class NavigationActivity extends AppCompatActivity {
         forwardBtn = findViewById(R.id.forward_btn);
         forwardBtn.setOnClickListener(v -> {
             String sendText = forwardBtn.getText().toString();
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("forward"));
         });
 
         backwardBtn = findViewById(R.id.backward_btn);
         backwardBtn.setOnClickListener(v -> {
             String sendText = backwardBtn.getText().toString();
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("backward"));
         });
 
         leftBtn = findViewById(R.id.turn_left_btn);
         leftBtn.setOnClickListener(v -> {
             String sendText = leftBtn.getText().toString();
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("turn_left"));
         });
 
         rightBtn = findViewById(R.id.turn_right_btn);
         rightBtn.setOnClickListener(v -> {
             String sendText = rightBtn.getText().toString();
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("turn_right"));
         });
 
         upstairsBtn = findViewById(R.id.upstairs_btn);
         upstairsBtn.setOnClickListener(v -> {
             String sendText = upstairsBtn.getText().toString();
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("climb"));
         });
 
         downStairsBtn = findViewById(R.id.downstairs_btn);
         downStairsBtn.setOnClickListener(v -> {
             String sendText = downStairsBtn.getText().toString();
-            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage(sendText));
+            TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("downstairs"));
         });
     }
 }
