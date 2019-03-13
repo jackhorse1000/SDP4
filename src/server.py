@@ -191,7 +191,6 @@ def _main():
     # Create an event loop. This effectively allows us to run multiple functions
     # at once (namely, the motor controller and server).
     loop = asyncio.get_event_loop()
-    loop.add_signal_handler(signal.SIGINT, cleanup)
     loop.set_exception_handler(exception_handler)
 
     # Motor control statements are pushed into this queue
@@ -236,7 +235,7 @@ def _main():
             loop.run_until_complete(check_sensors(data))
 
             # Zero the motors
-            # loop.run_until_complete(control.zero(data))
+            loop.run_until_complete(control.zero(data))
 
             loop.run_forever()
     finally:

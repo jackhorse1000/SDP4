@@ -27,7 +27,8 @@ class ClimbController:
            we're within 5 blocks of a wall, or False otherwise."""
         left, right = self.sensors.front_dist_0, self.sensors.front_dist_1
         failure = 0
-        while True:
+        LOG.info("Attempting to align against a wall. This is gonna go badly.")
+        while self.sensors.get_moving():
             if failure > 10:
                 LOG.error("front_up aborting due to too many failed reads")
                 return False
@@ -65,3 +66,6 @@ class ClimbController:
                     control.forward()
 
             await asyncio.sleep(SLEEP)
+
+        LOG.error("Stopping due to no longer moving.")
+        return False
