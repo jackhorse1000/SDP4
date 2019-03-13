@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class DemoActivity extends AppCompatActivity {
 
     private Button liftFrontBtn, liftBackBtn, lowerBackBtn, lowerFrontBtn,
-        forwardBtn, backBtn, leftBtn, rightBtn, stopAllBtn, lowerBothBtn, liftBothBtn,sensorListButton;
+        forwardBtn, backBtn, leftBtn, rightBtn, stopAllBtn, lowerBothBtn, liftBothBtn;
 
     private TextView statusTxt, connectionTxt;
 
@@ -32,13 +32,9 @@ public class DemoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_demo);
-        Log.v("35","meg");
+
         setListeners();
 
-//        arrayAdapter = new ArrayAdapter<>(this, R.layout.sensor_list_item, sensorDataArray);
-
-//        ListView listView = findViewById(R.id.sensor_list_view);
-//        listView.setAdapter(arrayAdapter);
 
         Handler mainHandler = new Handler(getMainLooper());
 
@@ -62,16 +58,13 @@ public class DemoActivity extends AppCompatActivity {
             }
         });
         System.out.println("64 sensorlist activity starts");
-        Log.v("64","meg");
-        sensorListButton= (Button)findViewById(R.id.transfer_button);
-        Log.v("68","meg");
-        sensorListButton.setOnClickListener(v -> goToNsensorActivity());
+
+
+
+
     }
 
-    private void goToNsensorActivity() {
-        Intent sensorIntent = new Intent(DemoActivity.this, SensorListActivity.class);
-        startActivity(sensorIntent);
-    }
+
     private void updateArray(String str) {
 
         if (sensorInputCount + 1 <= sensorDataArray.length) {
