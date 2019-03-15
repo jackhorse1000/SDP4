@@ -300,17 +300,26 @@ def downstairs(data: SensorData) -> None:
                         data.set_moving(False)
                 await asyncio.sleep(SLEEP)
 
+            # Lower both the front and the back
             while data.get_moving():
-                lower_back()
+                lower_both()
+
                 if data.back_ground_touch.get() or data.back_lifting_rot.get() >= STEP_BACK_MAX:
-                    stop()
+                    stop_back()
                     if data.back_lifting_rot.get() >= STEP_BACK_MAX:
                         # We should throw an error because this should not happen
                         LOG.error("Cannot go downstairs. Back is at full extension" \
                                    "and can't touch step. rot = %f",\
                                   data.back_lifting_rot.get())
                         # data.set_moving(False)
+
+                if data.front_ground_touch.get():
+                    stop_front()
+
+                if data.front_ground_touch.get() and data.back_ground_touch.get():
+                    stop()
                     break
+
                 await asyncio.sleep(SLEEP)
 
             while data.get_moving():
@@ -361,67 +370,6 @@ def downstairs(data: SensorData) -> None:
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
-
-            # Move back so you can fit front on step
-            while data.get_moving():
-                lower_front()
-                if data.front_ground_touch.get():
-                    stop()
-                    lift_front()
-                    await asyncio.sleep(0.25)
-                    stop()
-                    data.front_lifting_rot.reset()
-                    break
-                await asyncio.sleep(SLEEP)
-
-            # # Lower back so it is on the step
-            # while data.get_moving():
-            #     lower_back()
-            #     if data.back_lifting_rot.get() >= STEP_BACK_MAX:
-            #         stop()
-            #         LOG.error("Trying to reset back rot, but rot is max = %f", \
-            #                         data.back_lifting_rot.get())
-            #         data.set_moving(False)
-            #         break
-
-            #     if data.back_ground_touch.get():
-            #         # Used to reset the back rotation counter
-            #         data.back_lifting_rot.reset()
-            #         stop()
-            #         break
-            #     await asyncio.sleep(SLEEP)
-
-            # if data.get_moving():
-            #     backward() #TODO(anyone): review and change
-            #     while True:
-            #         if not data.back_ground_touch.get():
-            #             stop()
-            #             break
-            #         # Used for last step
-            #         # TODO: Will need changed
-            #         if i == 1:
-            #             await asyncio.sleep(2)
-            #             stop()
-            #             break
-            #         await asyncio.sleep(SLEEP)
-
-            # # Lower front until it is touching the step
-            # while data.get_moving():
-            #     lower_front()
-
-            #     if data.front_lifting_rot.get() >= STEP_FRONT_MAX:
-            #         stop()
-            #         LOG.error("Trying to reset front rot, but rot is max = %f", \
-            #                         data.front_lifting_rot.get())
-            #         data.set_moving(False)
-            #         break
-
-            #     if data.front_ground_touch.get():
-            #         # Used to reset the front rotation counter
-            #         data.front_lifting_rot.reset()
-            #         stop()
-            #         break
-            #     await asyncio.sleep(SLEEP)
 
         await asyncio.sleep(SLEEP)
 
