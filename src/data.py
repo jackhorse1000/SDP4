@@ -42,13 +42,13 @@ class SensorData:
         self.back_lifting_rot = RotaryEncoder("back_lifting_rot")
 
     @staticmethod
-    def set_moving(value : bool):
+    def set_moving(value: bool) -> None:
         """ Set is moving value """
         with SensorData.is_moving_lock:
             SensorData.is_moving = value
 
     @staticmethod
-    def get_moving():
+    def get_moving() -> bool:
         """ get is moving """
         with SensorData.is_moving_lock:
             return SensorData.is_moving

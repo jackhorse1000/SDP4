@@ -169,7 +169,7 @@ def climb(data: SensorData) -> None:
             if front and back:
                 break
             await asyncio.sleep(SLEEP)
-        
+
         # await ClimbController(data).find_wall()
         for i in range(3):
             LOG.info("Climbing step %d", i+1)
@@ -230,7 +230,7 @@ def climb(data: SensorData) -> None:
                     forward()
 
                 # TODO(anyone): Reach max extension / max back rotation start going forward
-                if data.back_lifting_rot.get() >= (target_back ) or data.back_lifting_rot.get() >= STEP_BACK_MAX:
+                if data.back_lifting_rot.get() >= target_back or data.back_lifting_rot.get() >= STEP_BACK_MAX:
                     stop_back()
                     forward()
                     if data.middle_ground_touch.get():
@@ -249,7 +249,7 @@ def climb(data: SensorData) -> None:
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
-            
+
             await asyncio.sleep(SLEEP)
 
         forward()
@@ -274,7 +274,7 @@ def downstairs(data: SensorData) -> None:
                         break
                     else:
                         # TODO(anyone): We need to panic, check we need to handle this better
-                        LOG.error("Cannot go downstairs distance to large: %f",
+                        LOG.error("Cannot go downstairs distance to large: %f", \
                                   data.back_ground_dist.get())
                         data.set_moving(False)
                 await asyncio.sleep(SLEEP)
@@ -285,8 +285,8 @@ def downstairs(data: SensorData) -> None:
                     stop()
                     if data.back_lifting_rot.get() >= STEP_BACK_MAX:
                         # We should throw an error because this should not happen
-                        LOG.error("Cannot go downstairs. Back is at full extension"
-                                   "and can't touch step. rot = %f",
+                        LOG.error("Cannot go downstairs. Back is at full extension" \
+                                   "and can't touch step. rot = %f",\
                                   data.back_lifting_rot.get())
                         # data.set_moving(False)
                     break
@@ -309,8 +309,8 @@ def downstairs(data: SensorData) -> None:
                 # Check if middle is touching,
                 if data.back_lifting_rot.get() <= STEP_BACK_MIN+100:
                     stop()
-                    LOG.error("Cannot go downstairs. Back is at normal"
-                              "and middle is not touching step. rot = %f",
+                    LOG.error("Cannot go downstairs. Back is at normal" \
+                              "and middle is not touching step. rot = %f", \
                               data.back_lifting_rot.get())
                     # data.set_moving(False)
                     break
@@ -336,7 +336,7 @@ def downstairs(data: SensorData) -> None:
                     stop()
                     break
                 if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
-                    await asyncio.sleep(0.15) # HACK: 
+                    await asyncio.sleep(0.15) # HACK
                     stop()
                     break
                 await asyncio.sleep(SLEEP)

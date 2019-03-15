@@ -62,7 +62,8 @@ def configure() -> None:
 
     logger.addHandler(handler)
 
-    # Register a custom formatter, which prints things coloured with the time, level and coponent name.
+    # Register a custom formatter, which prints things 
+    # coloured with the time, level and coponent name.
     if HIDE_DEBUG:
         formatter = logging.Formatter(FORMAT, None, '%')
         formatter.default_msec_format = "%s.%03d"
