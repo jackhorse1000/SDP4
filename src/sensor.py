@@ -146,7 +146,8 @@ class Distance:
         with self.lock:
             if not self.valid or abs(self.value - value) > 0.05:
                 # Update properties and notify observers
-                LOG.debug("%s = %s%s", self.name, value, _unit.symbol)
+                if self.name == "front_ground_dist":
+                    LOG.debug("%s = %s%s", self.name, value, _unit.symbol)
                 self.value = value
                 self.valid = True
 

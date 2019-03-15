@@ -18,7 +18,7 @@ LOG = logging.getLogger("Control")
 DRIVE_RIGHT = 4
 DRIVE_LEFT = 5
 DRIVE_BACK = 1
-
+DRIVE_FWD = 0
 SPEED = 255
 
 DRIVE_SIDE_FWD = -SPEED
@@ -86,6 +86,7 @@ def forward() -> None:
     motor.set_motor(DRIVE_LEFT, DRIVE_SIDE_FWD)
     motor.set_motor(DRIVE_RIGHT, DRIVE_SIDE_BCK)
     motor.set_motor(DRIVE_BACK, DRIVE_SIDE_FWD)
+    motor.set_motor(DRIVE_FWD, DRIVE_SIDE_FWD)
 
 @state("drive")
 def backward() -> None:
@@ -93,6 +94,7 @@ def backward() -> None:
     motor.set_motor(DRIVE_LEFT, DRIVE_SIDE_BCK)
     motor.set_motor(DRIVE_RIGHT, DRIVE_SIDE_FWD)
     motor.set_motor(DRIVE_BACK, DRIVE_SIDE_BCK)
+    motor.set_motor(DRIVE_FWD, DRIVE_SIDE_BCK)
 
 @state("drive")
 def turn_left() -> None:
@@ -109,12 +111,12 @@ def turn_right() -> None:
 @state("step_front")
 def lower_front() -> None:
     """Moves the front stepper down, to the base position"""
-    motor.set_motor(STEP_FRONT, -SPEED)
+    motor.set_motor(STEP_FRONT, SPEED)
 
 @state("step_front")
 def lift_front() -> None:
     """Moves the front stepper upwards, from the base position"""
-    motor.set_motor(STEP_FRONT, SPEED)
+    motor.set_motor(STEP_FRONT, -SPEED)
 
 @state("step_front")
 def stop_front() -> None:
@@ -152,7 +154,9 @@ def climb(data: SensorData) -> None:
     async def run() -> None:
         # Attempt to normalise the lifting mechanisms to a point so they're no
         # longer touching the ground.
-        lift_both() # Keep this outside the loop! Otherwise it's impossible to read the logs as we spam up and down for ever more. Yes, it's ugly as hell, but so is everything else on this God-forsaken robot.
+        lift_both() # Keep this outside the loop! Otherwise it's impossible to read the logs as we
+                    # spam up and down for ever more. Yes, it's ugly as hell, but so is everything
+                    # else on this God-forsaken robot.
         while data.get_moving():
             front, back = False, False
             if data.front_lifting_rot.get() <= -100:
@@ -165,10 +169,10 @@ def climb(data: SensorData) -> None:
             if front and back:
                 break
             await asyncio.sleep(SLEEP)
-
-        for i in range(2):
+        
+        # await ClimbController(data).find_wall()
+        for i in range(3):
             LOG.info("Climbing step %d", i+1)
-            await ClimbController(data).find_wall()
             # We should return from find wall aligned to the step and as close
             # as we can get before the distance sensors can't read anymore
 
@@ -180,7 +184,6 @@ def climb(data: SensorData) -> None:
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
-
             while data.get_moving():
                 forward()
                 if data.middle_stair_touch.get():
@@ -212,19 +215,28 @@ def climb(data: SensorData) -> None:
                     init = True
                 # If the back one has reached the stair, then we're all good
                 # TODO(anyone): Add distance sensor for back stair
-                if data.back_stair_touch.get():
-                    LOG.info("Back stair touch hit, finishing climb")
-                    stop()
-                    break
+                # was using data.back_stair_touch.get()
+                # if data.middle_ground_touch.get():
+                #     LOG.info("Back stair touch hit, finishing climb")
+                #     stop()
+                #     break
 
                 if data.front_lifting_rot.get() >= 0:
+                    if data.middle_ground_touch.get():
+                        LOG.info("Back stair touch hit, finishing climb")
+                        stop()
+                        break
                     stop_front()
                     forward()
 
                 # TODO(anyone): Reach max extension / max back rotation start going forward
-                if data.back_lifting_rot.get() >= (target_back + 150) or data.back_lifting_rot.get() >= STEP_BACK_MAX:
+                if data.back_lifting_rot.get() >= (target_back ) or data.back_lifting_rot.get() >= STEP_BACK_MAX:
                     stop_back()
                     forward()
+                    if data.middle_ground_touch.get():
+                        LOG.info("Back stair touch hit, finishing climb")
+                        stop()
+                        break
                 else:
                     lower_back()
 
@@ -237,15 +249,19 @@ def climb(data: SensorData) -> None:
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
+            
             await asyncio.sleep(SLEEP)
 
+        forward()
+        await asyncio.sleep(1)
+        stop()
 
     asyncio.get_event_loop().create_task(run())
 
 def downstairs(data: SensorData) -> None:
     """Tries to climb downstairs automatically"""
     async def run() -> None:
-        for i in range(2):
+        for i in range(3):
             # Backwards until back ground is not touching and we have a reading
             # on the distance sensor
             while data.get_moving():
@@ -254,7 +270,7 @@ def downstairs(data: SensorData) -> None:
                     stop()
                     # Check if back ground distance sensor is reading values then
                     # lower back until back ground touch is true
-                    if data.back_ground_dist.get() < 20:
+                    if data.back_ground_dist.get() < 25:
                         break
                     else:
                         # TODO(anyone): We need to panic, check we need to handle this better
@@ -272,7 +288,7 @@ def downstairs(data: SensorData) -> None:
                         LOG.error("Cannot go downstairs. Back is at full extension"
                                    "and can't touch step. rot = %f",
                                   data.back_lifting_rot.get())
-                        data.set_moving(False)
+                        # data.set_moving(False)
                     break
                 await asyncio.sleep(SLEEP)
 
@@ -282,7 +298,7 @@ def downstairs(data: SensorData) -> None:
                 if data.front_ground_dist.valid and data.front_ground_dist.get() > 9:
                     # HACK: There's probably better solutions, but it's the day before the demo and
                     # the only thing stopping me killing Spencer is lack of a credible alibi.
-                    await asyncio.sleep(0.35)
+                    await asyncio.sleep(0.50)
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
@@ -315,12 +331,12 @@ def downstairs(data: SensorData) -> None:
             # Move back so you can fit front on step
             while data.get_moving():
                 backward()
-                if i == 1:
-                    await asyncio.sleep(1)
+                if i == 2:
+                    await asyncio.sleep(1.5)
                     stop()
                     break
                 if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
-                    # await asyncio.sleep(0.1) # HACK: 
+                    await asyncio.sleep(0.15) # HACK: 
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
