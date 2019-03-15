@@ -178,11 +178,19 @@ def climb(data: SensorData) -> None:
 
             # Lift the front mechanism to its upper point
             while data.get_moving():
-                lift_front()
+                lift_both()
                 if data.front_lifting_rot.get() <= STEP_FRONT_MIN:
                     # TODO(anyone) Use distance sensors here too - if we can do it reliably.
+                    stop_front()
+
+                if data.back_lifting_rot.get() <= STEP_BACK_MIN:
+                    stop_back()
+
+                if data.back_lifting_rot.get() <= STEP_BACK_MIN and \
+                   data.front_lifting_rot.get() <= STEP_FRONT_MIN:
                     stop()
                     break
+                
                 await asyncio.sleep(SLEEP)
 
             while data.get_moving():
@@ -196,15 +204,6 @@ def climb(data: SensorData) -> None:
             while data.get_moving():
                 lower_front()
                 if data.front_ground_touch.get() or data.front_lifting_rot.get() >= STEP_FRONT_MAX:
-                    stop()
-                    break
-                await asyncio.sleep(SLEEP)
-
-            # Used to reset back lifting mechanism
-            while data.get_moving():
-                lower_back()
-                if data.back_ground_touch.get():
-                    data.back_lifting_rot.reset()
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
@@ -238,9 +237,11 @@ def climb(data: SensorData) -> None:
                         break
                     stop_front()
                     forward()
+                else:
+                    lower_front()
 
                 # TODO(anyone): Reach max extension / max back rotation start going forward
-                if data.back_lifting_rot.get() >= target_back or data.back_lifting_rot.get() >= STEP_BACK_MAX:
+                if data.back_lifting_rot.get() >= (target_back + 10) or data.back_lifting_rot.get() >= STEP_BACK_MAX:
                     stop_back()
                     forward()
                     if data.middle_ground_touch.get():
@@ -252,26 +253,14 @@ def climb(data: SensorData) -> None:
 
                 await asyncio.sleep(SLEEP)
 
-            while data.get_moving():
-                lift_back()
-                # TODO(anyone): Reach normal extension / max back rotation stop
-                if data.back_lifting_rot.get() <= STEP_BACK_MIN:
-                    stop()
-                    break
-                await asyncio.sleep(SLEEP)
-
-            # Used to reset the front lifting mechanism
-            while data.get_moving():
-                lower_front()
-                # TODO(anyone): Reach normal extension / max back rotation stop
-                if data.front_ground_touch.get():
-                    data.front_lifting_rot.reset()
-                    stop()
-                    break
-                await asyncio.sleep(SLEEP)
-
-
             await asyncio.sleep(SLEEP)
+
+        while data.get_moving():
+              lift_back()
+              if data.back_lifting_rot.get() <= STEP_BACK_MIN:
+                  stop()
+                  break
+              await asyncio.sleep(SLEEP)
 
         forward()
         await asyncio.sleep(1)
@@ -370,6 +359,8 @@ def downstairs(data: SensorData) -> None:
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
+
+        await zero(data)
 
         await asyncio.sleep(SLEEP)
 
