@@ -25,7 +25,7 @@ class ClimbController:
     async def find_wall(self) -> bool:
         """Attempt to find a wall and align itself against it. Returns True if
            we're within 5 blocks of a wall, or False otherwise."""
-        left, right = self.sensors.front_dist_0, self.sensors.front_dist_1
+        left, right = self.sensors.front_dist_1, self.sensors.front_dist_0
         failure = 0
         LOG.info("Attempting to align against a wall. This is gonna go badly.")
         while self.sensors.get_moving():
@@ -53,10 +53,10 @@ class ClimbController:
                     control.forward()
 
                 # Attempt to align against the wall
-                elif delta > 3:
-                    control.turn_right()
-                elif delta < -3:
-                    control.turn_left()
+                elif delta > 0.75:
+                    control.turn_right(0.6 if not (delta > 5) else 1)
+                elif delta < -0.75:
+                    control.turn_left(0.6 if not (delta < -5) else 1)
                 elif distance <= 6:
                     control.stop()
                     return True
