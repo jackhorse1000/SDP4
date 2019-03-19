@@ -73,7 +73,7 @@ class ClimbController:
     async def downstairs_find_wall(self) -> bool:
         """Attempt to find a wall and align itself against it.
           Returns when we are reasonable aligned to the step in front."""
-        left, right = self.sensors.front_dist_0, self.sensors.front_dist_1
+        left, right = self.sensors.front_dist_1, self.sensors.front_dist_0
         failure = 0
         LOG.info("Attempting to align against a wall. This is gonna go badly.")
         while self.sensors.get_moving():
