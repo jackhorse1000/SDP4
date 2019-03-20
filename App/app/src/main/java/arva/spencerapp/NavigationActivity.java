@@ -1,5 +1,7 @@
 package arva.spencerapp;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,7 +11,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
 public class NavigationActivity extends AppCompatActivity {
     private final String TAG = "NavActivity";
@@ -21,12 +25,38 @@ public class NavigationActivity extends AppCompatActivity {
 
     private TextView statusTxt, connectionTxt;
 
+    AlertDialog alert11;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
 
         setListeners();
+
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setMessage("Spencer has been disconnected");
+        builder1.setCancelable(true);
+
+        builder1.setPositiveButton(
+            "Reconnect",
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    connectToSpencer();
+                    dialog.cancel();
+                }
+            });
+
+        builder1.setNegativeButton(
+            "go back",
+            new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    kickOut();
+                    dialog.cancel();
+                }
+            });
+
+        alert11 = builder1.create();
+
 
         connectToSpencer();
     }
@@ -41,7 +71,7 @@ public class NavigationActivity extends AppCompatActivity {
                 String connection_state = state.toString();
                 if (connection_state.equals("CLOSED")){
                     Log.d(TAG, "43 messaged received: " + connection_state);
-                    mainHandler.post(() -> kickOut());
+                    mainHandler.post(() -> alert11.show());
                 } else{
                     Log.d(TAG, "46 messaged received: " + connection_state);
                     // kickOut();
@@ -61,7 +91,7 @@ public class NavigationActivity extends AppCompatActivity {
                         if(  message.equals(TCPClient.ConnectionState.CLOSED) ){
                             Log.d(TAG, "62 messaged received: " + message);
 
-                            kickOut();
+                            alert11.show();
                         }
                     }
                 });
@@ -125,4 +155,6 @@ public class NavigationActivity extends AppCompatActivity {
             TCPClient.EXECUTOR.submit(() -> tcpClient.sendMessage("downstairs"));
         });
     }
+
+
 }

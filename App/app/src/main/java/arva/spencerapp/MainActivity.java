@@ -14,13 +14,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
 public class MainActivity extends AppCompatActivity {
 
     private final static int REQUEST_ENABLE_BT = 1;
     private Button connectBluetoothRobotBtn;
     private Button connectWifiRobotBtn;
-    private Button demoBtn;
+    private Button technicalMenu;
 
     private TCPClient tcpClient;
     private TextView statusTxt, connectionTxt;
@@ -55,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void createListeners() {
+        technicalMenu = findViewById(R.id.technical_btn);
+        technicalMenu.setOnClickListener(v -> {
+            goTotechnicalMenuActivity();
+        });
         Handler mainHandler = new Handler(getMainLooper());
         connectWifiRobotBtn = findViewById(R.id.connect_wifi_btn);
         connectWifiRobotBtn.setOnClickListener(v -> {
@@ -92,8 +97,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "72 messaged received: " );
         });
 
-      //  demoBtn = findViewById(R.id.demo_btn);
-      //  demoBtn.setOnClickListener(v -> goToDemoActivity());
+
+    }
+
+    private void goTotechnicalMenuActivity() {
+        Intent navigationIntent = new Intent(MainActivity.this, technicalMenu.class);
+        startActivity(navigationIntent);
     }
 
     private void goToNavigationActivity() {
