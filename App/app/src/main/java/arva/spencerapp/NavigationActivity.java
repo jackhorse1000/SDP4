@@ -35,7 +35,7 @@ public class NavigationActivity extends AppCompatActivity {
 
         AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
         builder1.setMessage("Spencer has been disconnected");
-        builder1.setCancelable(true);
+        builder1.setCancelable(false);
 
         builder1.setPositiveButton(
             "Reconnect",
@@ -55,8 +55,10 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             });
 
+
         alert11 = builder1.create();
 
+        alert11.setCanceledOnTouchOutside(false);
 
         connectToSpencer();
     }
