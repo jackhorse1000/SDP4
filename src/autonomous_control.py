@@ -7,7 +7,7 @@
 import asyncio
 import functools
 import logging
-
+import time
 from typing import Callable, Dict
 
 import motor
@@ -148,6 +148,13 @@ def lift_both() -> None:
     lift_back()
     lift_front()
 
+def at_top_of_stairs():
+    """ Check to see if the robot is at the top of the stairs """
+    if (SensorData.front_dist_0.get() > 20 or SensorData.front_dist_0.get_valid()) and \
+       (SensorData.front_dist_1.get() > 20 or SensorData.front_dist_1.get_valid()):
+        return True
+    return False
+
 def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
     from climb import ClimbController
@@ -170,12 +177,10 @@ def climb(data: SensorData) -> None:
                 break
             await asyncio.sleep(SLEEP)
 
-        for i in range(3):
+        while not at_top_of_stairs():
             LOG.info("Climbing step %d", i+1)
             # We should return from find wall aligned to the step and as close
             # as we can get before the distance sensors can't read anymore
-
-            await ClimbController(data).find_wall()
 
             # Lift the front mechanism to its upper point
             while data.get_moving():
@@ -259,7 +264,7 @@ def climb(data: SensorData) -> None:
                 stop()
                 break
             await asyncio.sleep(SLEEP)
-
+        
         forward()
         await asyncio.sleep(1)
         stop()
@@ -270,7 +275,8 @@ def downstairs(data: SensorData) -> None:
     """Tries to climb downstairs automatically"""
     from climb import ClimbController
     async def run() -> None:
-        for i in range(3):
+        is_at_bottom_of_stairs = False
+        while not is_at_bottom_of_stairs:
             # Backwards until back ground is not touching and we have a reading
             # on the distance sensor
             while data.get_moving():
@@ -367,17 +373,18 @@ def downstairs(data: SensorData) -> None:
             # Move back so you can fit front on step
             while data.get_moving():
                 backward()
-                if i == 2:
-                    await asyncio.sleep(1.5)
+                # To determine if Spencer is at the bottom of the stairs
+                start_time = time.time()
+                if ((time.time() - start_time) % 60) > 3:
+                    is_at_bottom_of_stairs = True
                     stop()
                     break
+
                 if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
                     await asyncio.sleep(0.15) # HACK
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
-
-        await zero(data)
 
         await asyncio.sleep(SLEEP)
 
