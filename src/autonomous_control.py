@@ -195,6 +195,7 @@ def climb(data: SensorData) -> None:
 
             while data.get_moving():
                 forward()
+                # TODO: Should check if object is blocking us here
                 if data.middle_stair_touch.get():
                     stop()
                     break
@@ -219,6 +220,7 @@ def climb(data: SensorData) -> None:
             LOG.info("Targeting back lifting of %d", target_back)
             init = False
             while data.get_moving():
+                # TODO: Should check if object is blocking us in this loop
                 if not init:
                     lower_both()
                     init = True
@@ -266,7 +268,7 @@ def climb(data: SensorData) -> None:
                 stop()
                 break
             await asyncio.sleep(SLEEP)
-        
+
         forward()
         await asyncio.sleep(1)
         stop()
