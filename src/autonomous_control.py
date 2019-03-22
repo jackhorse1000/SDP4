@@ -148,10 +148,10 @@ def lift_both() -> None:
     lift_back()
     lift_front()
 
-def at_top_of_stairs():
+def at_top_of_stairs(data: SensorData):
     """ Check to see if the robot is at the top of the stairs """
-    if (SensorData.front_dist_0.get() > 20 or SensorData.front_dist_0.get_valid()) and \
-       (SensorData.front_dist_1.get() > 20 or SensorData.front_dist_1.get_valid()):
+    if (data.front_dist_0.value > 20 or not data.front_dist_0.valid) and \
+       (data.front_dist_1.value > 20 or not data.front_dist_1.valid):
         return True
     return False
 
@@ -159,6 +159,7 @@ def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
     from climb import ClimbController
     async def run() -> None:
+        step_count = 0
         # Attempt to normalise the lifting mechanisms to a point so they're no
         # longer touching the ground.
         lift_both() # Keep this outside the loop! Otherwise it's impossible to read the logs as we
@@ -177,8 +178,9 @@ def climb(data: SensorData) -> None:
                 break
             await asyncio.sleep(SLEEP)
 
-        while not at_top_of_stairs():
-            LOG.info("Climbing step %d", i+1)
+        while not at_top_of_stairs(data):
+            step_count += 1
+            LOG.info("Climbing step %d", step_count)
             # We should return from find wall aligned to the step and as close
             # as we can get before the distance sensors can't read anymore
 
@@ -371,21 +373,21 @@ def downstairs(data: SensorData) -> None:
                 await asyncio.sleep(SLEEP)
 
             # Move back so you can fit front on step
+            start_time = time.time()
             while data.get_moving():
                 backward()
                 # To determine if Spencer is at the bottom of the stairs
-                start_time = time.time()
                 if ((time.time() - start_time) % 60) > 3:
                     is_at_bottom_of_stairs = True
                     stop()
                     break
-
+                print("time: %d", (time.time() - start_time))
                 if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
                     await asyncio.sleep(0.15) # HACK
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
-
+        await zero(data)
         await asyncio.sleep(SLEEP)
 
     asyncio.get_event_loop().create_task(run())
