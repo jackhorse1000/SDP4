@@ -1,14 +1,14 @@
 """Generic motor-control module. Provides helper methods for manipulating
    each motor and pairs of motors. Same as control.py but with added safety"""
 
-# pylint: disable=R0401, W0611
+# pylint: disable=R0401, W0611, too-many-branches
 # Disable cyclic imports. It's horrible, but I don't want to refactor right now.
 
 import asyncio
 import functools
 import logging
 import time
-from typing import Callable, Dict
+from typing import Callable, Dict, TypeVar, cast
 
 import motor
 from data import SensorData
@@ -36,7 +36,9 @@ STEP_BACK_MAX = 1300 # Full Extension
 STATES = {} # type: Dict[str, str]
 SLEEP = 0.1
 
-def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
+F = TypeVar('F', bound=Callable[..., None])
+
+def state(*machines: str) -> Callable[[F], F]:
     """A decorator, which only applies the underlying function if the given machines
        are not already in this state.
 
@@ -46,11 +48,11 @@ def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
         if machine not in STATES:
             STATES[machine] = "_"
 
-    def decorator(func: Callable[[], None]) -> Callable[[], None]:
+    def decorator(func: F) -> F:
         new_state = func.__name__
 
         @functools.wraps(func)
-        def worker(*args, **kwargs) -> None:
+        def worker(*args, **kwargs):
             changed = False
             # Update the state machine
             for machine in machines:
@@ -63,7 +65,7 @@ def state(*machines: str) -> Callable[[Callable[[], None]], Callable[[], None]]:
                 LOG.debug("Running %s", new_state)
                 func(*args, **kwargs)
 
-        return worker
+        return cast(F, worker)
 
     return decorator
 
@@ -97,13 +99,13 @@ def backward() -> None:
     motor.set_motor(DRIVE_FWD, DRIVE_SIDE_BCK)
 
 @state("drive")
-def turn_left(speed = 1.0) -> None:
+def turn_left(speed:float=1.0) -> None:
     """Attempt to turn Spencer left. It's a sight for sore eyes."""
     motor.set_motor(DRIVE_LEFT, int(DRIVE_SIDE_FWD * speed)) # TODO: Fix this so it's actually bloody correct.
     motor.set_motor(DRIVE_RIGHT, int(DRIVE_SIDE_FWD * speed))
 
 @state("drive")
-def turn_right(speed = 1.0) -> None:
+def turn_right(speed:float=1.0) -> None:
     """Attempt to turn Spencer right. It's not very effective."""
     motor.set_motor(DRIVE_LEFT, int(DRIVE_SIDE_BCK * speed))
     motor.set_motor(DRIVE_RIGHT, int(DRIVE_SIDE_BCK * speed))
@@ -148,12 +150,10 @@ def lift_both() -> None:
     lift_back()
     lift_front()
 
-def at_top_of_stairs(data: SensorData):
+def at_top_of_stairs(data: SensorData) -> bool:
     """ Check to see if the robot is at the top of the stairs """
-    if (data.front_dist_0.value > 20 or not data.front_dist_0.valid) and \
-       (data.front_dist_1.value > 20 or not data.front_dist_1.valid):
-        return True
-    return False
+    return ((data.front_dist_0.value > 20 or not data.front_dist_0.valid) and
+            (data.front_dist_1.value > 20 or not data.front_dist_1.valid))
 
 def climb(data: SensorData) -> None:
     """Tries to climb automatically"""

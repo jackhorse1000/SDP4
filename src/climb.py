@@ -100,8 +100,9 @@ class ClimbController:
                 if distance >= 25:
                     # return True too far away to align
                     return True
+
                 # Attempt to align against the wall
-                elif delta > 0.75:
+                if delta > 0.75:
                     control.turn_right(0.6 if not (delta > 5) else 1)
                 elif delta < -0.75:
                     control.turn_left(0.6 if not (delta < -5) else 1)

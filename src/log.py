@@ -53,23 +53,23 @@ def configure() -> None:
     logger.setLevel(logging.DEBUG)
 
     # Register a custom formatter, which prints things coloured with the time, level and coponent name.
-    formatter = ColourFormatter(FORMAT, None, '%')
-    formatter.default_msec_format = "%s.%03d"
+    col_formatter = ColourFormatter(FORMAT, None, '%')
+    col_formatter.default_msec_format = "%s.%03d"
 
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    handler.setLevel(logging.INFO if HIDE_DEBUG else logging.DEBUG)
+    str_handler = logging.StreamHandler()
+    str_handler.setFormatter(col_formatter)
+    str_handler.setLevel(logging.INFO if HIDE_DEBUG else logging.DEBUG)
 
-    logger.addHandler(handler)
+    logger.addHandler(str_handler)
 
-    # Register a custom formatter, which prints things 
+    # Register a custom formatter, which prints things
     # coloured with the time, level and coponent name.
     if HIDE_DEBUG:
         formatter = logging.Formatter(FORMAT, None, '%')
         formatter.default_msec_format = "%s.%03d"
 
-        handler = logging.FileHandler("log.txt", mode="w")
-        handler.setFormatter(formatter)
-        handler.setLevel(logging.DEBUG)
+        file_handler = logging.FileHandler("log.txt", mode="w")
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.DEBUG)
 
-        logger.addHandler(handler)
+        logger.addHandler(file_handler)
