@@ -36,9 +36,9 @@ STEP_BACK_MAX = 1300 # Full Extension
 STATES = {} # type: Dict[str, str]
 SLEEP = 0.1
 
-F = TypeVar('F', bound=Callable[..., None])
+StateF = TypeVar('StateF', bound=Callable[..., None])
 
-def state(*machines: str) -> Callable[[F], F]:
+def state(*machines: str) -> Callable[[StateF], StateF]:
     """A decorator, which only applies the underlying function if the given machines
        are not already in this state.
 
@@ -48,7 +48,7 @@ def state(*machines: str) -> Callable[[F], F]:
         if machine not in STATES:
             STATES[machine] = "_"
 
-    def decorator(func: F) -> F:
+    def decorator(func: StateF) -> StateF:
         new_state = func.__name__
 
         @functools.wraps(func)
@@ -65,7 +65,7 @@ def state(*machines: str) -> Callable[[F], F]:
                 LOG.debug("Running %s", new_state)
                 func(*args, **kwargs)
 
-        return cast(F, worker)
+        return cast(StateF, worker)
 
     return decorator
 
@@ -99,13 +99,13 @@ def backward() -> None:
     motor.set_motor(DRIVE_FWD, DRIVE_SIDE_BCK)
 
 @state("drive")
-def turn_left(speed:float=1.0) -> None:
+def turn_left(speed: float = 1.0) -> None:
     """Attempt to turn Spencer left. It's a sight for sore eyes."""
     motor.set_motor(DRIVE_LEFT, int(DRIVE_SIDE_FWD * speed)) # TODO: Fix this so it's actually bloody correct.
     motor.set_motor(DRIVE_RIGHT, int(DRIVE_SIDE_FWD * speed))
 
 @state("drive")
-def turn_right(speed:float=1.0) -> None:
+def turn_right(speed: float = 1.0) -> None:
     """Attempt to turn Spencer right. It's not very effective."""
     motor.set_motor(DRIVE_LEFT, int(DRIVE_SIDE_BCK * speed))
     motor.set_motor(DRIVE_RIGHT, int(DRIVE_SIDE_BCK * speed))

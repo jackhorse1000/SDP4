@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """A basic server for the demo days."""
 
 # pylint: disable=W0611
