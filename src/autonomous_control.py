@@ -176,8 +176,7 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
             LOG.info("Obstacle in front of Spencer, dist_0 = %f, dist_1=%f", \
                       data.front_dist_0.value, data.front_dist_1.value)
             return True
-        else:
-            return False
+        return False
 
     from climb import ClimbController
     async def run() -> None:
