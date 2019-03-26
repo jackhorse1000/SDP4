@@ -90,6 +90,13 @@ def forward() -> None:
     motor.set_motor(DRIVE_BACK, DRIVE_SIDE_FWD)
     motor.set_motor(DRIVE_FWD, DRIVE_SIDE_FWD)
 
+def stop_forward() -> None:
+    """Stop Spencer moving forwards."""
+    motor.stop_motor(DRIVE_LEFT)
+    motor.stop_motor(DRIVE_RIGHT)
+    motor.stop_motor(DRIVE_BACK)
+    motor.stop_motor(DRIVE_FWD)
+
 @state("drive")
 def backward() -> None:
     """Move Spencer backwards."""
@@ -157,6 +164,15 @@ def at_top_of_stairs(data: SensorData) -> bool:
 
 def climb(data: SensorData) -> None:
     """Tries to climb automatically"""
+
+    def obstacle_infront() -> bool:
+        """ Detects if there is an obstacle in front of the robot """
+        if not data.front_dist_1.valid or not data.front_dist_0.valid:
+            return False
+        if abs(data.front_dist_0.value - data.front_dist_1.value) > 3:
+            return True
+        return False
+
     from climb import ClimbController
     async def run() -> None:
         step_count = 0
@@ -195,7 +211,11 @@ def climb(data: SensorData) -> None:
 
             while data.get_moving():
                 forward()
-                # TODO: Should check if object is blocking us here
+                # TODO: Test obstacle blocking
+                if obstacle_infront():
+                    stop_forward()
+                else:
+                    forward()
                 if data.middle_stair_touch.get():
                     stop()
                     break
@@ -220,7 +240,13 @@ def climb(data: SensorData) -> None:
             LOG.info("Targeting back lifting of %d", target_back)
             init = False
             while data.get_moving():
-                # TODO: Should check if object is blocking us in this loop
+                # TODO: Test obstacle blocking
+                # Detect if obstacle is in front and stop
+                if obstacle_infront():
+                    stop_forward()
+                else:
+                    forward()
+                
                 if not init:
                     lower_both()
                     init = True
