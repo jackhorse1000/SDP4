@@ -1,5 +1,5 @@
 language: python
-python: "3.7-dev"
+python: "3.5-dev"
 
 install:
   - pip install pipenv
@@ -9,4 +9,3 @@ install:
 script:
   - pylint src
   - mypy src
-  - pytest
