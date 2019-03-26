@@ -246,7 +246,7 @@ def climb(data: SensorData) -> None:
                     stop_forward()
                 else:
                     forward()
-                
+
                 if not init:
                     lower_both()
                     init = True
