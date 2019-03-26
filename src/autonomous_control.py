@@ -93,7 +93,7 @@ def forward() -> None:
     motor.set_motor(DRIVE_FWD, DRIVE_SIDE_FWD)
 
 @state("drive")
-def stop_drive() -> None:
+def stop_forward() -> None:
     """Stop Spencer moving forwards."""
     motor.stop_motor(DRIVE_LEFT)
     motor.stop_motor(DRIVE_RIGHT)
@@ -172,9 +172,12 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
         """ Detects if there is an obstacle in front of the robot """
         if not data.front_dist_1.valid or not data.front_dist_0.valid:
             return False
-        if abs(data.front_dist_0.value - data.front_dist_1.value) > 3:
+        if abs(data.front_dist_0.value - data.front_dist_1.value) > 5:
+            LOG.info("Obstacle in front of Spencer, dist_0 = %f, dist_1=%f", \
+                      data.front_dist_0.value, data.front_dist_1.value)
             return True
-        return False
+        else:
+            return False
 
     from climb import ClimbController
     async def run() -> None:
@@ -220,9 +223,8 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
                 forward()
                 # TODO: Test obstacle blocking
                 if obstacle_infront():
-                    stop_drive()
-                else:
-                    forward()
+                    stop_forward()
+                    await asyncio.sleep(0.5)
                 if data.middle_stair_touch.get():
                     stop()
                     break
@@ -250,13 +252,6 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
             LOG.info("Targeting back lifting of %d", target_back)
             init = False
             while data.get_moving():
-                # TODO: Test obstacle blocking
-                # Detect if obstacle is in front and stop
-                if obstacle_infront():
-                    stop_drive()
-                else:
-                    forward()
-
                 if not init:
                     lower_both()
                     init = True
@@ -274,7 +269,6 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
                         stop()
                         break
                     stop_front()
-                    forward()
                 else:
                     lower_front()
 
@@ -282,6 +276,12 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
                 if data.back_lifting_rot.get() >= target_back or data.back_lifting_rot.get() >= STEP_BACK_MAX:
                     stop_back()
                     forward()
+                    # TODO: Test obstacle blocking
+                    # Detect if obstacle is in front and stop
+                    if obstacle_infront():
+                        stop_forward()
+                        await asyncio.sleep(0.25)
+
                     if data.middle_ground_touch.get():
                         LOG.info("Back stair touch hit, finishing climb")
                         stop()
@@ -321,6 +321,7 @@ def downstairs(data: SensorData, callback: ProgressCallback) -> None:
     async def run() -> None:
         is_at_bottom_of_stairs = False
         step_count = 0
+        await ClimbController(data).downstairs_find_wall()
         while not is_at_bottom_of_stairs:
             step_count += 1
             LOG.info("Descending step %d", step_count)

@@ -104,8 +104,8 @@ async def motor_control(queue: SingleValueQueue, manager: ConnectionManager, dat
             args = {} # type: Dict[str, Any]
             if "data" in params:
                 args["data"] = data
-            if "progress" in params:
-                args["progress"] = manager.send
+            if "callback" in params:
+                args["callback"] = manager.send
 
             command(**args)
         else:
