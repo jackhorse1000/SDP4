@@ -104,8 +104,8 @@ async def motor_control(queue: SingleValueQueue, manager: ConnectionManager, dat
             args = {} # type: Dict[str, Any]
             if "data" in params:
                 args["data"] = data
-            if "manager" in params:
-                args["manager"] = manager
+            if "progress" in params:
+                args["progress"] = manager.send
 
             command(**args)
         else:
@@ -236,7 +236,7 @@ def _main():
             loop.run_until_complete(check_sensors(data))
 
             # Zero the motors
-            loop.run_until_complete(control.zero(data))
+            loop.run_until_complete(control.zero(data, manager.send))
 
             loop.run_forever()
     finally:
