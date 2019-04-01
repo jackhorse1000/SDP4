@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goTotechnicalMenuActivity() {
-        Intent navigationIntent = new Intent(MainActivity.this, technicalMenu.class);
+        Intent navigationIntent = new Intent(MainActivity.this, UserGuideActivity.class);
         startActivity(navigationIntent);
     }
 
