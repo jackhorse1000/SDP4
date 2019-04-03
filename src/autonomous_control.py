@@ -8,7 +8,7 @@ import asyncio
 import functools
 import logging
 import time
-from typing import Callable, Dict, TypeVar, cast
+from typing import Any, Callable, Coroutine, Dict, TypeVar, cast
 
 import motor
 from data import SensorData
@@ -27,7 +27,7 @@ DRIVE_SIDE_BCK = SPEED
 STEP_BACK = 3  # 1 up, -1 down
 STEP_FRONT = 2
 
-STEP_FRONT_MIN = -1200 # 1400 Full Extension
+STEP_FRONT_MIN = -1300 # 1400 Full Extension # FIXME: Was 1200 before. Make sure this doesn't screw the pooch.
 STEP_FRONT_MAX = -50 # Normal
 
 STEP_BACK_MIN = -100 # Normal
@@ -165,44 +165,44 @@ def at_top_of_stairs(data: SensorData) -> bool:
     return ((data.front_dist_0.value > 20 or not data.front_dist_0.valid) and
             (data.front_dist_1.value > 20 or not data.front_dist_1.valid))
 
-def climb(data: SensorData, callback: ProgressCallback) -> None:
-    """Tries to climb automatically"""
+def climb_(data: SensorData, callback: ProgressCallback) -> Callable[[], Coroutine[Any, Any, None]]:
+    """Returns a worker which will climb upstairs."""
 
     def obstacle_infront() -> bool:
         """ Detects if there is an obstacle in front of the robot """
-        if not data.front_dist_1.valid or not data.front_dist_0.valid:
+        if not data.front_dist_1.valid and not data.front_dist_0.valid:
             return False
-        if abs(data.front_dist_0.value - data.front_dist_1.value) > 5:
-            LOG.info("Obstacle in front of Spencer, dist_0 = %f, dist_1=%f", \
-                      data.front_dist_0.value, data.front_dist_1.value)
+        if (abs(data.front_dist_0.value - data.front_dist_1.value) > 5
+                and min(data.front_dist_0.value, data.front_dist_1.value) <= 20):
+            LOG.info("Obstacle in front of Spencer, dist_0 = %f, dist_1=%f",
+                     data.front_dist_0.value, data.front_dist_1.value)
             return True
         return False
 
     from climb import ClimbController
     async def run() -> None:
         step_count = 0
-        # Attempt to normalise the lifting mechanisms to a point so they're no
-        # longer touching the ground.
-        lift_both() # Keep this outside the loop! Otherwise it's impossible to read the logs as we
-                    # spam up and down for ever more. Yes, it's ugly as hell, but so is everything
-                    # else on this God-forsaken robot.
-        while data.get_moving():
-            front, back = False, False
-            if data.front_lifting_rot.get() <= -100:
-                stop_front()
-                front = True
+        if at_top_of_stairs(data):
+            LOG.error("At the top of the stairs on the initial climb. This is as useful as a chocolate teapot.")
 
-            if data.back_lifting_rot.get() <= -30:
-                stop_back()
-                back = True
-            if front and back:
-                break
-            await asyncio.sleep(SLEEP)
-
-        while not at_top_of_stairs(data):
+        while not at_top_of_stairs(data) and data.get_moving():
             step_count += 1
             LOG.info("Climbing step %d", step_count)
             callback("Climbing step %d (finding stair)" % step_count)
+
+            lift_both()
+            while data.get_moving():
+                front, back = False, False
+                if data.front_lifting_rot.get() <= -100:
+                    stop_front()
+                    front = True
+
+                if data.back_lifting_rot.get() <= -30:
+                    stop_back()
+                    back = True
+                if front and back:
+                    break
+                await asyncio.sleep(SLEEP)
 
             # We should return from find wall aligned to the step and as close
             # as we can get before the distance sensors can't read anymore
@@ -213,17 +213,17 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
             while data.get_moving():
                 lift_front()
                 if data.front_lifting_rot.get() <= STEP_FRONT_MIN:
-                    # TODO(anyone) Use distance sensors here too - if we can do it reliably.
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
 
             while data.get_moving():
                 forward()
-                # TODO: Test obstacle blocking
                 if obstacle_infront():
                     stop_forward()
                     await asyncio.sleep(0.5)
+                else:
+                    forward()
                 if data.middle_stair_touch.get():
                     stop()
                     break
@@ -247,7 +247,7 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
                 await asyncio.sleep(0.5)
                 stop()
 
-            target_back = -data.front_lifting_rot.get()
+            target_back = -data.front_lifting_rot.get() + 50
             LOG.info("Targeting back lifting of %d", target_back)
             init = False
             while data.get_moving():
@@ -275,7 +275,6 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
                 if data.back_lifting_rot.get() >= target_back or data.back_lifting_rot.get() >= STEP_BACK_MAX:
                     stop_back()
                     forward()
-                    # TODO: Test obstacle blocking
                     # Detect if obstacle is in front and stop
                     if obstacle_infront():
                         stop_forward()
@@ -312,16 +311,15 @@ def climb(data: SensorData, callback: ProgressCallback) -> None:
 
         callback("Idle")
 
-    asyncio.get_event_loop().create_task(run())
+    return run
 
-def downstairs(data: SensorData, callback: ProgressCallback) -> None:
-    """Tries to climb downstairs automatically"""
+def downstairs_(data: SensorData, callback: ProgressCallback) -> Callable[[], Coroutine[Any, Any, None]]:
+    """Returns a worker which will climb downstairs"""
     from climb import ClimbController
     async def run() -> None:
         is_at_bottom_of_stairs = False
         step_count = 0
-        await ClimbController(data).downstairs_find_wall()
-        while not is_at_bottom_of_stairs:
+        while not is_at_bottom_of_stairs and data.get_moving():
             step_count += 1
             LOG.info("Descending step %d", step_count)
             callback("Descending step %d (finding stair)" % step_count)
@@ -332,15 +330,7 @@ def downstairs(data: SensorData, callback: ProgressCallback) -> None:
                 backward()
                 if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
                     stop()
-                    # Check if back ground distance sensor is reading values then
-                    # lower back until back ground touch is true
-                    if data.back_ground_dist.get() < 25:
-                        break
-                    else:
-                        # TODO(anyone): We need to panic, check we need to handle this better
-                        LOG.error("Cannot go downstairs distance to large: %f", \
-                                  data.back_ground_dist.get())
-                        data.set_moving(False)
+                    break
                 await asyncio.sleep(SLEEP)
 
             while data.get_moving:
@@ -351,7 +341,8 @@ def downstairs(data: SensorData, callback: ProgressCallback) -> None:
                 await asyncio.sleep(SLEEP)
 
             # Try and align with stairs if off
-            await ClimbController(data).downstairs_find_wall()
+            if step_count != 1:
+                await ClimbController(data).downstairs_find_wall()
 
             callback("Descending step %d (lowering back)" % step_count)
             while data.get_moving:
@@ -367,17 +358,31 @@ def downstairs(data: SensorData, callback: ProgressCallback) -> None:
                 if data.front_ground_dist.valid and data.front_ground_dist.get() > 9:
                     # HACK: There's probably better solutions, but it's the day before the demo and
                     # the only thing stopping me killing Spencer is lack of a credible alibi.
-                    await asyncio.sleep(0.5)
+                    await asyncio.sleep(0.7)
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
+
+            # HACK HACK HACK: Ensure the front has a head-start on the back, as it
+            #  moves a little slower.
+            if data.get_moving():
+                lift_front()
+                await asyncio.sleep(0.5)
+                stop()
 
             # Lift both until middle is on the ground
             callback("Descending step %d (lowering)" % step_count)
             while data.get_moving():
                 lift_both()
+
+                if data.middle_ground_touch.get():
+                    # The robot is at an angle when it lower's downstairs, I added a wait to make it less so
+                    await asyncio.sleep(0.35)
+                    stop()
+                    break
+
                 # Check if middle is touching,
-                if data.back_lifting_rot.get() <= STEP_BACK_MIN+100:
+                if data.back_lifting_rot.get() <= STEP_BACK_MIN + 100:
                     stop()
                     LOG.error("Cannot go downstairs. Back is at normal" \
                               "and middle is not touching step. rot = %f", \
@@ -387,17 +392,12 @@ def downstairs(data: SensorData, callback: ProgressCallback) -> None:
 
                 if data.front_lifting_rot.get() <= STEP_FRONT_MIN:
                     stop()
-                    LOG.error("Cannot go downstairs. Front is at max extension"
+                    LOG.error("Cannot go downstairs. Front is at max extension "
                               "and middle is not touching step. rot = %f",
                               data.front_lifting_rot.get())
                     data.set_moving(False)
                     break
 
-                if data.middle_ground_touch.get():
-                    # The robot is at an angle when it lower's downstairs, I added a wait to make it less so
-                    await asyncio.sleep(0.4)
-                    stop()
-                    break
                 await asyncio.sleep(SLEEP)
 
             # Move back so you can fit front on step
@@ -406,11 +406,12 @@ def downstairs(data: SensorData, callback: ProgressCallback) -> None:
             while data.get_moving():
                 backward()
                 # To determine if Spencer is at the bottom of the stairs
-                if ((time.time() - start_time) % 60) > 3:
+                if time.time() - start_time > 3:
                     is_at_bottom_of_stairs = True
+                    data.set_moving(False)
                     stop()
                     break
-                print("time: %d", (time.time() - start_time))
+                LOG.debug("Backwards %ds", time.time() - start_time)
                 if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
                     await asyncio.sleep(0.15) # HACK
                     stop()
@@ -420,7 +421,15 @@ def downstairs(data: SensorData, callback: ProgressCallback) -> None:
         await asyncio.sleep(SLEEP)
         callback("Idle")
 
-    asyncio.get_event_loop().create_task(run())
+    return run
+
+def climb(data: SensorData, callback: ProgressCallback) -> None:
+    """Tries to climb upstairs automatically"""
+    asyncio.get_event_loop().create_task(climb_(data, callback)())
+
+def downstairs(data: SensorData, callback: ProgressCallback) -> None:
+    """Tries to climb downstairs automatically"""
+    asyncio.get_event_loop().create_task(downstairs_(data, callback)())
 
 async def zero(data: SensorData, callback: ProgressCallback) -> None:
     """Zeros out the rotation sensors. We attempt to move the front and back
@@ -447,3 +456,31 @@ async def zero(data: SensorData, callback: ProgressCallback) -> None:
     LOG.info("Zeroed lifting mechanisms")
 
     callback("Idle")
+
+def timed(data: SensorData, callback: ProgressCallback) -> None:
+    """Goes upstairs and downstairs, then prints out the times"""
+    async def run() -> None:
+        start = time.time()
+        await climb_(data, callback)()
+        LOG.info("upstairs %f", time.time() - start)
+
+        await asyncio.sleep(3)
+
+        start = time.time()
+        await downstairs_(data, callback)()
+        LOG.info("down %f", time.time() - start)
+
+    asyncio.get_event_loop().create_task(run())
+
+def hello(data: SensorData) -> None:
+    """Makes Spencer say hello!"""
+    async def run() -> None:
+        turn_left()
+        await asyncio.sleep(1.0)
+        while data.get_moving():
+            turn_right()
+            await asyncio.sleep(2.0)
+            turn_left()
+            await asyncio.sleep(2.0)
+
+    asyncio.get_event_loop().create_task(run())

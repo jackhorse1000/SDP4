@@ -54,9 +54,9 @@ class ClimbController:
 
                 # Attempt to align against the wall
                 elif delta > 0.75:
-                    control.turn_right(0.6 if not (delta > 5) else 1)
+                    control.turn_right(0.4 if not (delta > 5) else 1)
                 elif delta < -0.75:
-                    control.turn_left(0.6 if not (delta < -5) else 1)
+                    control.turn_left(0.4 if not (delta < -5) else 1)
                 elif distance <= 6:
                     control.stop()
                     return True
@@ -77,7 +77,7 @@ class ClimbController:
         failure = 0
         LOG.info("Attempting to align against a wall. This is gonna go badly.")
         while self.sensors.get_moving():
-            if failure > 10:
+            if failure > 3:
                 LOG.error("aborting align wall due to too many failed reads")
                 return True
 
