@@ -1,18 +1,21 @@
+#!/usr/bin/env python3
 """A basic server for the demo days."""
 
 # pylint: disable=W0611
-# ^ Disable unused imports as typings breaks things
 
 import asyncio
-import logging
 import inspect
+import logging
+import signal
 import sys
+import time
 from typing import Any, Dict
 
 import autonomous_control as control
 import log
 import motor
 from data import SensorData
+from i2c_sensor_thread import RotaryEncoderThread
 
 NETWORK_LOG = logging.getLogger("Network")
 
@@ -67,8 +70,8 @@ def exception_handler(loop, context):
        the default handler
 
     """
-    logging.error("Terminating loop due to error")
     if loop.is_running():
+        logging.error("Terminating loop due to error")
         loop.stop()
     loop.default_exception_handler(context)
 
@@ -87,9 +90,11 @@ async def motor_control(queue: SingleValueQueue, manager: ConnectionManager, dat
             # Stop commands are executed as-is
             motor_log.info("Stopping")
             manager.send("Idle")
+            data.set_moving(False)
             control.stop()
         elif action in commands:
             # If we're a function defined in the control module, execute it.
+            data.set_moving(True)
             motor_log.info("Running %s", action)
             manager.send("Running " + action)
             command = commands[action]
@@ -99,8 +104,8 @@ async def motor_control(queue: SingleValueQueue, manager: ConnectionManager, dat
             args = {} # type: Dict[str, Any]
             if "data" in params:
                 args["data"] = data
-            if "manager" in params:
-                args["manager"] = manager
+            if "callback" in params:
+                args["callback"] = manager.send
 
             command(**args)
         else:
@@ -163,15 +168,26 @@ async def check_sensors(data: SensorData) -> None:
        never produce any valid value
 
     """
-    asyncio.sleep(2)
-    if data.front_dist_0.value is None or data.front_dist_1.value is None:
-        raise "Sensor data is still invalid after 2 seconds."
-    await asyncio.sleep(0.01)
+    start = time.time()
+    while time.time() - start < 2:
+        if data.front_ground_touch.valid:
+            return
+
+        await asyncio.sleep(0.1)
+
+    raise IOError("Sensor data is still invalid after 2 seconds.")
+
+def cleanup() -> None:
+    """Close all tasks currently running"""
+    for task in asyncio.Task.all_tasks():
+        task.cancel()
 
 def _main():
     """The main entry point of the server"""
 
     log.configure()
+
+    control.stop()
 
     # Create an event loop. This effectively allows us to run multiple functions
     # at once (namely, the motor controller and server).
@@ -190,26 +206,25 @@ def _main():
     if "-M" not in sys.argv:
         loop.create_task(motor_control(motor_queue, manager, data))
 
-    # Register our tasks which run along side the server
-    loop.create_task(check_sensors(data))
-
     # Create the sensor thread
-    # thread_i2c_sensors = SensorsI2c(1, 0x27)
-    # thread_i2c_sensors.start()
+    thread_i2c_sensors = RotaryEncoderThread(1, 5, data)
+    thread_i2c_sensors.setDaemon(5)
+    thread_i2c_sensors.start()
 
     # Construct the server and run it forever
     server = None
     try:
         with data.front_dist_0, \
              data.front_dist_1, \
+             data.front_ground_dist, \
+             data.back_ground_dist, \
              data.front_ground_touch, \
-             data.front_stair_touch, \
-             data.front_lifting_normal, \
-             data.front_lifting_extended_max, \
-             data.front_middle_stair_touch, \
+             data.middle_stair_touch, \
              data.back_stair_touch, \
-             data.back_lifting_extended_max, \
-             data.back_lifting_normal:
+             data.back_ground_touch, \
+             data.middle_ground_touch:
+
+            # Reset the front and back to clear any residual data
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050
@@ -217,16 +232,23 @@ def _main():
 
             NETWORK_LOG.info('Serving on %s', server.sockets[0].getsockname())
 
+            # Wait for 2 seconds to ensure the server is ready
+            loop.run_until_complete(check_sensors(data))
+
+            # Zero the motors
+            loop.run_until_complete(control.zero(data, manager.send))
+
             loop.run_forever()
     finally:
         if server is not None:
             server.close()
             loop.run_until_complete(server.wait_closed())
 
+        loop.run_until_complete(loop.shutdown_asyncgens())
         loop.close()
 
         if "-M" not in sys.argv:
-            motor.stop_motors()
+            motor.float_motors()
 
 if __name__ == "__main__":
     _main()

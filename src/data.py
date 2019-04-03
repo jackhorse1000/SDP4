@@ -1,8 +1,9 @@
 """Storage classes for sensor data"""
 
 # pylint: disable=R0902
+import threading
 
-from sensor import Distance, Touch, FakeSensor, TouchSensorsI2c
+from sensor import Distance, Touch, FakeSensor, RotaryEncoder
 
 class SensorData:
     """Contains the sensor data from the robot."""
@@ -11,42 +12,47 @@ class SensorData:
     front_dist_1 = None # type: Distance
     back_stair_dist = None # type: Distance
     back_ground_dist = None # type: Distance
-    middle_ground_dist = None # type: Distance
 
-    # back_ground_touch = None # type: Touch
     front_ground_touch = None # type: Touch
     front_stair_touch = None # type: Touch
-    front_lifting_normal = None # type: Touch
-    front_lifting_extended_max = None # type: Touch
-    front_middle_stair_touch = None # type: Touch
-
-    middle_ground_touch = None # type: TouchSensorsI2c
     back_stair_touch = None # type: Touch
-    back_lifting_normal = None # type: Touch
-    back_lifting_extended_max = None # type: Touch
+    back_ground_touch = None # type: Touch
+    middle_ground_touch = None # type: Touch
+
+    is_moving = False
+    is_moving_lock = threading.Lock()
 
     def __init__(self) -> None:
         # TODO(anyone): Need to check these channels
 
         # Distance sensors
-        self.front_dist_0 = Distance("front_distance_0", 0)
-        self.front_dist_1 = Distance("front_distance_1", 1)
-        self.back_stair_dist = Distance("back_stair_touch", 2)
+        self.front_dist_0 = Distance("front_dist_0", 0)
+        self.front_dist_1 = Distance("front_dist_1", 1)
+        self.front_ground_dist = Distance("front_ground_dist", 2)
         self.back_ground_dist = Distance("back_ground_dist", 3)
-        self.middle_ground_dist = Distance("back_ground_dist", 4)
 
         # Touch sensors
-        # self.back_ground_touch = Touch("back_ground_touch", 5)
-        self.front_ground_touch = Touch("front_ground_touch", 5)
-        self.front_stair_touch = Touch("front_stair_touch", 4)
-        self.front_lifting_normal = Touch("front_lifting_normal", 1)
-        self.front_lifting_extended_max = Touch("front_lifting_extended_max", 2)
-        self.front_middle_stair_touch = Touch("front_middle_stair_touch", 3)
+        self.front_ground_touch = Touch("front_ground_touch", 0)
+        self.middle_stair_touch = Touch("middle_stair_touch", 1)
+        self.back_stair_touch = Touch("back_stair_touch", 2)
+        self.back_ground_touch = Touch("back_ground_touch", 3)
+        self.middle_ground_touch = Touch("middle_ground_touch", 4)
 
-        self.middle_ground_touch = TouchSensorsI2c("middle_ground_touch")
-        self.back_stair_touch = Touch("back_stair_touch", 6)
-        self.back_lifting_normal = Touch("back_lifting_normal", 7)
-        self.back_lifting_extended_max = Touch("back_lifting_extended_max", 0)
+        self.front_lifting_rot = RotaryEncoder("front_lifting_rot")
+        self.back_lifting_rot = RotaryEncoder("back_lifting_rot")
+
+    @staticmethod
+    def set_moving(value: bool) -> None:
+        """ Set is moving value """
+        with SensorData.is_moving_lock:
+            SensorData.is_moving = value
+
+    @staticmethod
+    def get_moving() -> bool:
+        """ get is moving """
+        with SensorData.is_moving_lock:
+            return SensorData.is_moving
+
 
 class FakeSensorData:
     """An mock version of SensorData, containing just fake sensors."""
