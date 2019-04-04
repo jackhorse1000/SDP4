@@ -36,6 +36,9 @@ class ColourFormatter(logging.Formatter):
             msg = "\033[1;3%dm%s\033[0m" % (COLOURS[record.levelname], msg)
         return msg
 
+FORMAT = "[%(asctime)s] [%(levelname)s/%(name)s] %(message)s"
+
+HIDE_DEBUG = False
 
 def configure() -> None:
     """Configure the root logger. This should be called once when the program is
@@ -47,16 +50,26 @@ def configure() -> None:
     warnings.simplefilter('default')
 
     logger = logging.getLogger()
-
-    # Register a custom formatter, which prints things coloured with the time, level and coponent name.
-    formatter = ColourFormatter("[%(asctime)s] [%(levelname)s/%(name)s] %(message)s", None, '%')
-    formatter.default_msec_format = "%s.%03d"
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-
-    logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
 
-    # Make a couple of logs less verbose
-    # logging.getLogger("Sensors").setLevel(logging.INFO)
+    # Register a custom formatter, which prints things coloured with the time, level and coponent name.
+    col_formatter = ColourFormatter(FORMAT, None, '%')
+    col_formatter.default_msec_format = "%s.%03d"
+
+    str_handler = logging.StreamHandler()
+    str_handler.setFormatter(col_formatter)
+    str_handler.setLevel(logging.INFO if HIDE_DEBUG else logging.DEBUG)
+
+    logger.addHandler(str_handler)
+
+    # Register a custom formatter, which prints things
+    # coloured with the time, level and coponent name.
+    if HIDE_DEBUG:
+        formatter = logging.Formatter(FORMAT, None, '%')
+        formatter.default_msec_format = "%s.%03d"
+
+        file_handler = logging.FileHandler("log.txt", mode="w")
+        file_handler.setFormatter(formatter)
+        file_handler.setLevel(logging.DEBUG)
+
+        logger.addHandler(file_handler)

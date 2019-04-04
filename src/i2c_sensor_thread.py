@@ -7,26 +7,26 @@ import smbus2
 
 from data import SensorData
 
-class SensorsI2c(Thread):
-    """ thread class for i2c sensors """
-
-    data = None # type: SensorData
-
+class RotaryEncoderThread(Thread):
+    """Polls the rotary encoder and updates the relevant sensors."""
     def __init__(self, i2c_bus_no: int, address: int, data: SensorData) -> None:
         self.address = address
-        self.bus_no = i2c_bus_no
         self.bus = smbus2.SMBus(i2c_bus_no)
-        self.bus.write_byte(address, 255)
         self.data = data
 
         super().__init__()
 
     def run(self):
         while True:
-            state = self.bus.read_byte(self.address)
-            #TODO(anyone) Add touch sensors below call by using on change and passing the state
-            self.data.middle_ground_touch.set(not bool(state & 0x1))
-            self.data.back_stair_touch.set(not bool(state & 0x2))
-            self.data.back_lifting_normal.set(not bool(state & 0x4))
-            self.data.back_lifting_extended_max.set(not bool(state & 0x8))
-            time.sleep(0.01)
+            msg = smbus2.i2c_msg.read(5, 2)
+            self.bus.i2c_rdwr(msg)
+            for i, val in enumerate(msg):
+                if val >= 128:
+                    val = -256 + val
+
+                if i == 1:
+                    self.data.front_lifting_rot.change(val)
+                elif i == 0:
+                    self.data.back_lifting_rot.change(val)
+
+            time.sleep(0.05)

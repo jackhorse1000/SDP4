@@ -79,7 +79,7 @@ class Touch:
 
         """
         self.phidget.openWaitForAttachment(ATTACHMENT_TIMEOUT)
-        LOG.debug("Attached %s", self.name)
+        LOG.info("Attached %s", self.name)
 
     def __exit__(self, _a, _b, _c):
         self.phidget.setOnErrorHandler(None)
@@ -146,7 +146,12 @@ class Distance:
         with self.lock:
             if not self.valid or abs(self.value - value) > 0.05:
                 # Update properties and notify observers
+<<<<<<< HEAD
                 LOG.debug("%s = %s", self.name, value)
+=======
+                if self.name == "front_dist_0" or self.name == "front_dist_1":
+                    LOG.debug("%s = %s%s", self.name, value, _unit.symbol)
+>>>>>>> develop
                 self.value = value
                 self.valid = True
 
@@ -185,7 +190,7 @@ class Distance:
         self.phidget.openWaitForAttachment(ATTACHMENT_TIMEOUT)
         self.phidget.setDataInterval(50)
         self.phidget.setSensorType(VoltageRatioSensorType.SENSOR_TYPE_1101_SHARP_2D120X)
-        LOG.debug("Attached %s", self.name)
+        LOG.info("Attached %s", self.name)
 
         return self
 
@@ -193,6 +198,36 @@ class Distance:
         self.phidget.setOnErrorHandler(None)
         self.phidget.setOnSensorChangeHandler(None)
         self.phidget.close()
+
+class RotaryEncoder:
+    """A rotary encoder sensor"""
+
+    name = None # type: str
+    value = None # type: int
+    lock = None # type: threading.Lock
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+        self.value = 0
+        self.lock = threading.Lock()
+
+    def get(self) -> int:
+        """Get the current value of this rotary encoder."""
+        with self.lock:
+            return self.value
+
+    def change(self, delta: int) -> None:
+        """Increment the encoder's value"""
+        if delta != 0:
+            with self.lock:
+                self.value += delta
+                LOG.debug("%s = %d", self.name, self.value)
+
+    def reset(self) -> None:
+        """Reset  the encoder's value to 0."""
+        with self.lock:
+            self.value = 0
+            LOG.info("%s = %d (reset)", self.name, self.value)
 
 class FakeSensor:
     """ Used to fake the sensors around the robot """
