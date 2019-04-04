@@ -25,17 +25,10 @@ class SensorData:
     def __init__(self) -> None:
         # TODO(anyone): Need to check these channels
 
-<<<<<<< HEAD
-        # Distance sensor
-        self.front_dist_0 = Distance("front_distance_0", 0)
-        self.front_dist_1 = Distance("front_distance_1", 1)
-        self.back_stair_dist = Distance("back_stair_dist", 2)
-=======
         # Distance sensors
         self.front_dist_0 = Distance("front_dist_0", 0)
         self.front_dist_1 = Distance("front_dist_1", 1)
         self.front_ground_dist = Distance("front_ground_dist", 2)
->>>>>>> develop
         self.back_ground_dist = Distance("back_ground_dist", 3)
 
         # Touch sensors

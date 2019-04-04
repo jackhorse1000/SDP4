@@ -181,21 +181,6 @@ def climb_(data: SensorData, callback: ProgressCallback) -> Callable[[], Corouti
 
     from climb import ClimbController
     async def run() -> None:
-<<<<<<< HEAD
-        # from climb import ClimbController
-        # await ClimbController(data).find_wall()
-
-        while True:
-            forward()
-            while True:
-                if data.back_lifting_extended_max.get():
-                    motor.stop_motor(STEP_BACK)
-                    forward()
-                else:
-                    motor.set_motor(STEP_BACK, -100)
-
-                if not data.back_stair_dist.valid or data.back_stair_dist.get() < 4.5:
-=======
         step_count = 0
         if at_top_of_stairs(data):
             LOG.error("At the top of the stairs on the initial climb. This is as useful as a chocolate teapot.")
@@ -307,16 +292,10 @@ def climb_(data: SensorData, callback: ProgressCallback) -> Callable[[], Corouti
             while data.get_moving():
                 lift_back()
                 if data.back_lifting_rot.get() <= STEP_BACK_MIN:
->>>>>>> develop
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
 
-<<<<<<< HEAD
-            backward()
-            while True:
-                if data.back_stair_dist.valid and data.back_stair_dist.get() > 22.0:
-=======
             await asyncio.sleep(SLEEP)
 
         while data.get_moving():
@@ -350,80 +329,10 @@ def downstairs_(data: SensorData, callback: ProgressCallback) -> Callable[[], Co
             while data.get_moving():
                 backward()
                 if not data.back_ground_touch.get() and not data.middle_ground_touch.get():
->>>>>>> develop
                     stop()
                     break
                 await asyncio.sleep(SLEEP)
 
-<<<<<<< HEAD
-        # forward()
-        # while True:
-        #     if data.front_stair_touch.get():
-        #         stop()
-        #         break
-        #     await asyncio.sleep(SLEEP)
-
-        # lift_front()
-        # while True:
-        #     if not data.front_stair_touch.get() and data.front_dist_0.get() > 20 and data.front_dist_1.get() > 20:
-        #         # or not data.front_lifting_extended_max.get()
-        #         stop()
-        #         break
-        #     await asyncio.sleep(SLEEP)
-
-        # forward()
-        # while True:
-        #     if data.front_middle_stair_touch.get():
-        #         stop()
-        #         break
-        #     await asyncio.sleep(SLEEP)
-
-        # lower_front()
-        # while True:
-        #     if data.front_ground_touch.get(): # or data.front_lifting_normal.get()):
-        #         stop()
-        #         break
-        #     await asyncio.sleep(SLEEP)
-
-        # # HACK HACK HACK
-        # lower_back()
-        # await asyncio.sleep(1.5)
-        # stop()
-
-        # lower_both()
-        # while True:
-        #     # If the back one has reached the stair, then we're all good
-        #     if data.back_stair_touch.get():
-        #         stop()
-        #         break
-
-        #     if not data.front_lifting_normal.get():
-        #         motor.stop_motor(STEP_FRONT)
-        #         forward()
-        #     else:
-        #         motor.set_motor(STEP_FRONT, -100)
-
-        #     if data.back_lifting_extended_max.get():
-        #         # TODO(anyone): Add distance sensor for back stair
-        #         motor.stop_motor(STEP_BACK)
-        #         forward()
-        #     else:
-        #         motor.set_motor(STEP_BACK, -100)
-
-        #     # if data.back_lifting_extended_max.get() and not data.front_lifting_normal.get() \
-        #     #     or data.back_stair_touch.get():
-        #     #     stop()
-        #     #     break
-        #     await asyncio.sleep(SLEEP)
-
-        # lift_back()
-        # while True:
-        #     if data.back_lifting_normal.get():
-        #         stop()
-        #         break
-        #     await asyncio.sleep(SLEEP)
-        # await asyncio.sleep(2)
-=======
             while data.get_moving:
                 lower_front()
                 if data.front_ground_touch.get():
@@ -560,7 +469,6 @@ def timed(data: SensorData, callback: ProgressCallback) -> None:
         start = time.time()
         await downstairs_(data, callback)()
         LOG.info("down %f", time.time() - start)
->>>>>>> develop
 
     asyncio.get_event_loop().create_task(run())
 

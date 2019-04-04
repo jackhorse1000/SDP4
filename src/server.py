@@ -168,12 +168,6 @@ async def check_sensors(data: SensorData) -> None:
        never produce any valid value
 
     """
-<<<<<<< HEAD
-    await asyncio.sleep(5)
-    if data.front_dist_0.value == 0 or data.front_dist_1.value == 0:
-        logging.error("Sensor data is still invalid after 5 seconds.")
-    await asyncio.sleep(0.01)
-=======
     start = time.time()
     while time.time() - start < 2:
         if data.front_ground_touch.valid:
@@ -187,7 +181,6 @@ def cleanup() -> None:
     """Close all tasks currently running"""
     for task in asyncio.Task.all_tasks():
         task.cancel()
->>>>>>> develop
 
 def _main():
     """The main entry point of the server"""
@@ -213,12 +206,6 @@ def _main():
     if "-M" not in sys.argv:
         loop.create_task(motor_control(motor_queue, manager, data))
 
-<<<<<<< HEAD
-    # Register our tasks which run along side the server
-    # loop.create_task(check_sensors(data))
-
-=======
->>>>>>> develop
     # Create the sensor thread
     thread_i2c_sensors = RotaryEncoderThread(1, 5, data)
     thread_i2c_sensors.setDaemon(5)
@@ -227,21 +214,8 @@ def _main():
     # Construct the server and run it forever
     server = None
     try:
-        with data.back_stair_dist, \
-             data.front_dist_0, \
+        with data.front_dist_0, \
              data.front_dist_1, \
-<<<<<<< HEAD
-             data.back_lifting_extended_max:
-            #   \
-            #  data.front_ground_touch, \
-            #  data.front_stair_touch, \
-            #  data.front_lifting_normal, \
-            #  data.front_lifting_extended_max, \
-            #  data.front_middle_stair_touch, \
-            #  data.back_stair_touch, \
-            #   \
-            #  data.back_lifting_normal:
-=======
              data.front_ground_dist, \
              data.back_ground_dist, \
              data.front_ground_touch, \
@@ -251,7 +225,6 @@ def _main():
              data.middle_ground_touch:
 
             # Reset the front and back to clear any residual data
->>>>>>> develop
             server = loop.run_until_complete(loop.create_server(
                 lambda: SpencerServerConnection(motor_queue, manager),
                 '0.0.0.0', 1050
