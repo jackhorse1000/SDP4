@@ -1,5 +1,6 @@
 package arva.spencerapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -34,10 +35,6 @@ public class DemoActivity extends AppCompatActivity {
 
         setListeners();
 
-        arrayAdapter = new ArrayAdapter<>(this, R.layout.sensor_list_item, sensorDataArray);
-
-        ListView listView = findViewById(R.id.sensor_list_view);
-        listView.setAdapter(arrayAdapter);
 
         Handler mainHandler = new Handler(getMainLooper());
 
@@ -60,9 +57,13 @@ public class DemoActivity extends AppCompatActivity {
                 Log.d(TAG, "messaged received: " + message);
             }
         });
+        System.out.println("64 sensorlist activity starts");
 
-        TCPClient.EXECUTOR.submit(tcpClient::run);
+
+
+
     }
+
 
     private void updateArray(String str) {
 

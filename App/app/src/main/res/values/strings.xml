@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SpencerApp</string>
+    <string name="title_activity_sensor_list">sensor_list</string>
+    <string name="dialog_fire_missiles">We are disconnected from Android, Reconnect?</string>
+    <string name="reconnect">Reconnect</string>
+    <string name="exit">Exit</string>
 </resources>

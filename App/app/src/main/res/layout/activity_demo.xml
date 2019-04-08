@@ -1,178 +1,216 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/RelativeLayout1"
+    android:background="@drawable/appletontower"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".DemoActivity">
+    android:layout_height="match_parent" >
 
-
-    <LinearLayout
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/RelativeLayout2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="97dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@android:color/holo_green_light">
+
+            <TextView
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:padding="5dp"
+                android:text="Connection:" />
+
+            <TextView
+                android:id="@+id/connection_status_txt"
+                android:layout_width="149dp"
+                android:layout_height="100dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="197dp"
+                android:layout_marginBottom="702dp"
+                android:padding="5dp"
+                android:text="Not connected" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Connection:"
-            android:padding="5dp"/>
 
-        <TextView
-            android:id="@+id/connection_status_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:text="Not connected"/>
-    </LinearLayout>
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="33dp"
+            android:layout_marginEnd="0dp"
+            android:layout_marginBottom="32dp"
+            android:background="@android:color/holo_green_light">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Status:"
-            android:padding="5dp"/>
+            <TextView
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:padding="5dp"
+                android:text="Status:" />
 
-        <TextView
-            android:id="@+id/status_txt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:text="Stationary"/>
-    </LinearLayout>
+            <TextView
+                android:id="@+id/status_txt"
+                android:layout_width="150dp"
+                android:layout_height="100dp"
+                android:padding="5dp"
+                android:text="Stationary" />
+        </LinearLayout>
+    </RelativeLayout>
+    <Button
+        android:id="@+id/forward_btn"
 
-    <LinearLayout
+        android:layout_width="137dp"
+        android:layout_height="85dp"
+        android:layout_alignParentEnd="true"
+
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="136dp"
+        android:layout_marginEnd="140dp"
+        android:layout_marginBottom="404dp"
+        android:background="@drawable/uparrow"
+        android:text="forward"
+        android:textAlignment="center"
+        android:textSize="14sp" />
+
+
+    <Button
+        android:id="@+id/backward_btn"
+        android:layout_width="137dp"
+        android:layout_height="85dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="139dp"
+        android:layout_marginEnd="133dp"
+        android:layout_marginBottom="279dp"
+        android:background="@drawable/downarrow"
+        android:text="backward" />
+
+    <Button
+        android:id="@+id/left_btn"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="60dp"
+        android:layout_marginEnd="276dp"
+        android:layout_marginBottom="350dp"
+        android:background="@drawable/leftarrow"
+        android:text="turn left" />
+
+    <Button
+        android:id="@+id/right_btn"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="268dp"
+        android:layout_marginRight="63dp"
+        android:layout_marginBottom="351dp"
+        android:background="@drawable/rightarrow"
+        android:text="turn right" />
+
+    <Button
+        android:id="@+id/lower_back_btn"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="210dp"
+        android:layout_weight="1"
+        android:text="lower back" />
+
+    <Button
+        android:id="@+id/lift_front_btn"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="160dp"
+        android:layout_weight="1"
+        android:text="lift front" />
+
+    <Button
+        android:id="@+id/lift_back_btn"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="210dp"
+        android:layout_weight="1"
+        android:text="lift back" />
+
+    <Button
+        android:id="@+id/lower_front_btn"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="160dp"
+        android:layout_weight="1"
+        android:text="lower front" />
+
+    <Button
+        android:id="@+id/transfer_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="5dp">
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/forward_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="forward"/>
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/backward_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="backward"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="5dp">
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/left_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="turn left"/>
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/right_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="turn right"/>
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="5dp">
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/lift_back_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="lift back"/>
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/lift_front_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="lift front"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="5dp">
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/lower_back_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="lower back"/>
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/lower_front_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="lower front"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="5dp">
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/lower_both_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="lower both"/>
-
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/lift_both_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="lift both"/>
-
-    </LinearLayout>
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="10dp"
+        android:text="see sensor output" />
 
     <Button
         android:id="@+id/stop_all_btn"
-        android:layout_margin="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="stop all"/>
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="63dp"
+        android:text="stop all" />
 
-    <TextView
-        android:layout_width="wrap_content"
+
+    <Button
+        android:id="@+id/lower_both_btn"
+        android:layout_width="170dp"
         android:layout_height="wrap_content"
-        android:text="Sensor Output"
-        android:textSize="20sp"/>
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="110dp"
+        android:layout_weight="1"
+        android:text="lower both" />
 
-    <ListView
-        android:id="@+id/sensor_list_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <Button
+        android:id="@+id/lift_both_btn"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="110dp"
+        android:layout_weight="1"
+        android:text="lift both" />
 
-    </ListView>
+</RelativeLayout>
 
-</LinearLayout>
